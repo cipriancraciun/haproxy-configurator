@@ -72,6 +72,8 @@ class HaProxy (HaBase) :
 		
 		self._credentials = dict ()
 		self._credentials_ordered = list ()
+		
+		self.http_backends = self.http_backend_builder ()
 	
 	
 	def frontends (self) :
@@ -179,8 +181,8 @@ class HaProxy (HaBase) :
 		return self.backend_create (_identifier, _type = HaHttpBackend, backend_mode = "http", **_overrides)
 	
 	
-	def backend_builder (self) :
-		return default_builders.HaBackendBuilder (self, self._parameters)
+	def http_backend_builder (self) :
+		return default_builders.HaHttpBackendBuilder (self, self._parameters)
 	
 	
 	def output_stdout (self) :
@@ -454,8 +456,8 @@ class HaWorker (HaSection) :
 		self._acl.append (_acl)
 		return _acl
 	
-	def acl_builder (self) :
-		return default_builders.HaAclBuilder (self, self._parameters)
+	def http_acl_builder (self) :
+		return default_builders.HaHttpAclBuilder (self, self._parameters)
 	
 	
 	def sample_1 (self, _method, _arguments) :
@@ -466,8 +468,8 @@ class HaWorker (HaSection) :
 		self._samples.append (_sample)
 		return _sample
 	
-	def sample_builder (self) :
-		return default_builders.HaSampleBuilder (self, self._parameters)
+	def http_sample_builder (self) :
+		return default_builders.HaHttpSampleBuilder (self, self._parameters)
 	
 	
 	def declare_http_request_rule_if (self, _action, _acl, order = None) :
@@ -549,11 +551,11 @@ class HaFrontend (HaWorker) :
 		self._response_captures_count = 0
 	
 	
-	def declare_bind (self, _endpoint, _name = None, _options = "$frontend_bind_options", order = None) :
+	def declare_bind (self, _endpoint = "$frontend_bind_endpoint", _name = None, _options = "$frontend_bind_options", order = None, overrides = None) :
 		_name = statement_choose_if (_name, ("name", statement_quote ("\'", _name)))
-		self._bind_statements.declare (("bind", statement_quote ("\'", _endpoint), _name, _options), order = order)
+		self._bind_statements.declare (("bind", statement_quote ("\'", _endpoint), _name, _options), order = order, overrides = overrides)
 	
-	def declare_bind_tls (self, _endpoint, _name = None, _certificate = "$\'frontend_bind_tls_certificate", _certificate_rules = "$\'frontend_bind_tls_certificate_rules", _options = "$frontend_bind_tls_options", order = None, overrides = None) :
+	def declare_bind_tls (self, _endpoint = "$frontend_bind_tls_endpoint", _name = None, _certificate = "$\'frontend_bind_tls_certificate", _certificate_rules = "$\'frontend_bind_tls_certificate_rules", _options = "$frontend_bind_tls_options", order = None, overrides = None) :
 		_tls_options = ["ssl"]
 		if _certificate is not None :
 			_tls_options.append (("crt", _certificate))
@@ -572,8 +574,8 @@ class HaFrontend (HaWorker) :
 		_condition = ("unless", _acl, "TRUE")
 		self._route_statements.declare (("use_backend", _backend, _condition), order = order)
 	
-	def route_builder (self, **_overrides) :
-		return default_builders.HaRouteBuilder (self, self._parameters, **_overrides)
+	def http_route_builder (self, **_overrides) :
+		return default_builders.HaHttpRouteBuilder (self, self._parameters, **_overrides)
 	
 	
 	def _declare_request_capture (self, _length = "$+frontend_capture_length") :
@@ -668,7 +670,16 @@ class HaTcpBackend (HaBackend) :
 class HaHttpFrontend (HaFrontend) :
 	
 	def __init__ (self, _identifier, _parameters, **_options) :
+		_parameters = _parameters._fork (
+				frontend_bind_endpoint = "$frontend_http_bind_endpoint",
+				frontend_bind_tls_endpoint = "$frontend_http_bind_endpoint_tls",
+			)
 		HaFrontend.__init__ (self, _identifier, _parameters, **_options)
+		self.acls = self.http_acl_builder ()
+		self.samples = self.http_sample_builder ()
+		self.requests = self.http_request_rule_builder ()
+		self.responses = self.http_response_rule_builder ()
+		self.routes = self.http_route_builder ()
 	
 	def _declare_implicit (self, **_options) :
 		default_declares.declare_http_frontend (self, **_options)
@@ -678,6 +689,10 @@ class HaHttpBackend (HaBackend) :
 	
 	def __init__ (self, _identifier, _parameters, **_options) :
 		HaBackend.__init__ (self, _identifier, _parameters, **_options)
+		self.acls = self.http_acl_builder ()
+		self.samples = self.http_sample_builder ()
+		self.requests = self.http_request_rule_builder ()
+		self.responses = self.http_response_rule_builder ()
 	
 	def _declare_implicit (self, **_options) :
 		default_declares.declare_http_backend (self, **_options)

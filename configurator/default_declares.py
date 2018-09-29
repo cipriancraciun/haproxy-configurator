@@ -96,6 +96,11 @@ def declare_globals_network (_configuration) :
 			"Advanced configuration",
 			("tune.bufsize", 128 * 1024),
 			("tune.maxrewrite", 16 * 1024),
+			("tune.rcvbuf.client", 16 * 1024),
+			("tune.sndbuf.client", 16 * 1024),
+			("tune.rcvbuf.server", 16 * 1024),
+			("tune.sndbuf.server", 16 * 1024),
+			("tune.pipesize", 16 * 1024),
 	)
 
 
@@ -182,8 +187,8 @@ def declare_defaults_servers (_configuration) :
 			("default-server", "inter", statement_seconds ("$+defaults_server_check_interval_normal")),
 			("default-server", "fastinter", statement_seconds ("$+defaults_server_check_interval_rising")),
 			("default-server", "downinter", statement_seconds ("$+defaults_server_check_interval_failed")),
-			("default-server", "rise", "8"),
-			("default-server", "fall", "4"),
+			("default-server", "rise", "$+defaults_server_check_count_rising"),
+			("default-server", "fall", "$+defaults_server_check_count_failed"),
 			("default-server", "on-error", "fail-check"),
 			("default-server", "error-limit", "128"),
 	)

@@ -56,11 +56,15 @@ class HaBuilder (object) :
 
 
 
-class HaAclBuilder (HaBuilder) :
+class HaHttpAclBuilder (HaBuilder) :
 	
 	def __init__ (self, _context, _parameters) :
 		HaBuilder.__init__ (self, _context, _parameters)
-		self._samples = HaSampleBuilder (_context, _parameters)
+		self._samples = HaHttpSampleBuilder (_context, _parameters)
+	
+	
+	def client_ip (self, _ip) :
+		return self._context.acl_0 (None, self._samples.client_ip (), "ip", None, None, _ip)
 	
 	
 	def host (self, _host) :
@@ -75,6 +79,9 @@ class HaAclBuilder (HaBuilder) :
 	
 	def subpath (self, _path) :
 		return self._context.acl_0 (None, self._samples.path (), "dir", None, None, _path)
+	
+	def path_regex (self, _path_regex) :
+		return self._context.acl_0 (None, self._samples.path (), "reg", None, None, _path_regex)
 	
 	
 	def query (self, _query) :
@@ -134,14 +141,25 @@ class HaAclBuilder (HaBuilder) :
 	
 	def backend_active (self, _backend, _expected = True) :
 		return self._context.acl_0 (None, self._samples.backend_active (_backend, _expected), "bool", None, None, None)
+	
+	
+	def geoip_country_extracted (self, _country, _expected = True) :
+		return self._context.acl_0 (None, self._samples.geoip_country_extracted (), "str", None, "eq", _country)
+	
+	def geoip_country_captured (self, _country, _expected = True) :
+		return self._context.acl_0 (None, self._samples.geoip_country_captured (), "str", None, "eq", _country)
 
 
 
 
-class HaSampleBuilder (HaBuilder) :
+class HaHttpSampleBuilder (HaBuilder) :
 	
 	def __init__ (self, _context, _parameters) :
 		HaBuilder.__init__ (self, _context, _parameters)
+	
+	
+	def client_ip (self, _transforms = None) :
+		return self._context.sample_0 ("src", None, _transforms)
 	
 	
 	def host (self, _transforms = None) :
@@ -161,11 +179,15 @@ class HaSampleBuilder (HaBuilder) :
 		return self._context.sample_0 ("status", None, _transforms)
 	
 	
-	def request_header (self, _header, _transforms = None) :
-		return self._context.sample_0 ("req.fhdr", (_header, -1), _transforms)
+	def request_header (self, _header, _transforms = None, _index = None) :
+		if _index is None :
+			_index = -1
+		return self._context.sample_0 ("req.fhdr", (_header, _index), _transforms)
 	
-	def response_header (self, _header, _transforms = None) :
-		return self._context.sample_0 ("res.fhdr", (_header, -1), _transforms)
+	def response_header (self, _header, _transforms = None, _index = None) :
+		if _index is None :
+			_index = -1
+		return self._context.sample_0 ("res.fhdr", (_header, _index), _transforms)
 	
 	
 	def request_cookie (self, _cookie, _transforms = None) :
@@ -209,6 +231,15 @@ class HaSampleBuilder (HaBuilder) :
 	
 	def backend_active (self, _backend, _expected = True) :
 		return self._context.sample_0 ("nbsrv", (_backend,), ("bool" if _expected else ("bool", "not")))
+	
+	
+	def geoip_country_extracted (self) :
+		# FIXME:  Refactor this!
+		# return self._context.sample_0 ("src", None, (("map_ip", "$'geoip_map"),))
+		return self._context.sample_0 ("req.fhdr", ("X-Forwarded-For", -1), (("map_ip", "$geoip_map"),))
+	
+	def geoip_country_captured (self) :
+		return self.variable ("$logging_geoip_country_variable")
 
 
 
@@ -217,8 +248,8 @@ class HaHttpRuleBuilder (HaBuilder) :
 	
 	def __init__ (self, _context, _parameters) :
 		HaBuilder.__init__ (self, _context, _parameters)
-		self._acl = HaAclBuilder (_context, _parameters)
-		self._samples = HaSampleBuilder (_context, _parameters)
+		self._acl = HaHttpAclBuilder (_context, _parameters)
+		self._samples = HaHttpSampleBuilder (_context, _parameters)
 	
 	def _declare_http_rule_0 (self, _rule, _condition, **_overrides) :
 		if isinstance (self, HaHttpRequestRuleBuilder) :
@@ -255,6 +286,10 @@ class HaHttpRuleBuilder (HaBuilder) :
 		_deny_rule = ("deny", statement_choose_if_non_null (_code, ("deny_status", statement_enforce_int (_code))))
 		self._declare_http_rule_0 (_deny_rule, _rule_condition, **_overrides)
 	
+	def deny_host (self, _host, _acl = None, _code = None, _mark = None, **_overrides) :
+		_acl_host = self._acl.host (_host)
+		self.deny ((_acl, _acl_host), _code, _mark, **_overrides)
+	
 	def deny_path (self, _path, _acl = None, _code = None, _mark = None, **_overrides) :
 		_acl_path = self._acl.path (_path)
 		self.deny ((_acl, _acl_path), _code, _mark, **_overrides)
@@ -266,6 +301,12 @@ class HaHttpRuleBuilder (HaBuilder) :
 	def deny_subpath (self, _path, _acl = None, _code = None, _mark = None, **_overrides) :
 		_acl_path = self._acl.subpath (_path)
 		self.deny ((_acl, _acl_path), _code, _mark, **_overrides)
+	
+	def deny_geoip_country (self, _country, _negated = False, _acl = None, _code = None, _mark = None, **_overrides) :
+		_acl_country = self._acl.geoip_country_captured (_country)
+		if _negated :
+			_acl_country = _acl_country.negate ()
+		self.deny ((_acl, _acl_country), _code, _mark, **_overrides)
 	
 	
 	def set_header (self, _header, _value, _ignore_if_exists = False, _acl = None) :
@@ -357,6 +398,11 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		_rule = ("set-path", statement_quote ("\"", _path))
 		self._declare_http_rule_0 (_rule, _rule_condition)
 	
+	def set_path_prefix (self, _path_prefix, _acl = None) :
+		_rule_condition = ("if", _acl, "TRUE")
+		_rule = ("set-path", statement_quote ("\"", statement_format ("%s%%[%s]", _path_prefix, self._samples.path ())))
+		self._declare_http_rule_0 (_rule, _rule_condition)
+	
 	def set_query (self, _query, _acl = None) :
 		_rule_condition = ("if", _acl, "TRUE")
 		_rule = ("set-query", statement_quote ("\"", _query))
@@ -416,7 +462,7 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 			self._declare_http_rule_0 (_rule_non_tls, _rule_non_tls_condition)
 			self._declare_http_rule_0 (_rule_tls, _rule_tls_condition)
 	
-	def redirect_domain (self, _source, _target, _force_tls = False, _acl = None) :
+	def redirect_domain (self, _source, _target, _force_tls = False, _redirect_code = 307, _acl = None) :
 		_redirect_tls = statement_quote ("\"", statement_format ("https://%s", _target))
 		_redirect_non_tls = statement_quote ("\"", statement_format ("http://%s", _target)) if not _force_tls else _redirect_tls
 		_acl_host = self._acl.host (_source)
@@ -424,13 +470,13 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		_acl_tls = self._acl.via_tls (True)
 		_rule_non_tls_condition = ("if", _acl, _acl_host, _acl_non_tls)
 		_rule_tls_condition = ("if", _acl, _acl_host, _acl_tls)
-		_rule_non_tls = ("redirect", "prefix", _redirect_non_tls, "code", 307)
-		_rule_tls = ("redirect", "prefix", _redirect_tls, "code", 307)
+		_rule_non_tls = ("redirect", "prefix", _redirect_non_tls, "code", _redirect_code)
+		_rule_tls = ("redirect", "prefix", _redirect_tls, "code", _redirect_code)
 		self._declare_http_rule_0 (_rule_non_tls, _rule_non_tls_condition)
 		self._declare_http_rule_0 (_rule_tls, _rule_tls_condition)
 	
-	def redirect_domain_and_path (self, _source, _target, _force_tls = False, _acl = None) :
-		_source_domain, _source_order, _source_path, _source_path_exact, _negate = _source
+	def redirect_domain_and_path (self, _source, _target, _force_tls = False, _redirect_code = 307, _acl = None) :
+		_source_domain, _source_path, _source_path_exact, _negate = _source
 		_target_domain, _target_path, _target_path_exact = _target
 		if _target_path is None :
 			_target_path = ""
@@ -444,9 +490,18 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 				_redirect_method = "prefix"
 			else :
 				raise_error ("925d9f3b", _source, _target)
-		_redirect_tls = statement_quote ("\"", statement_format ("https://%s%s", _target_domain, _target_path))
-		_redirect_non_tls = statement_quote ("\"", statement_format ("http://%s%s", _target_domain, _target_path)) if not _force_tls else _redirect_tls
-		_acl_host = self._acl.host (_source_domain)
+		if _target_domain is not None :
+			_redirect_tls = statement_quote ("\"", statement_format ("https://%s%s", _target_domain, _target_path))
+			_redirect_non_tls = statement_quote ("\"", statement_format ("http://%s%s", _target_domain, _target_path)) if not _force_tls else _redirect_tls
+		else :
+			if _force_tls :
+				raise_error ("923c4768", _source, _target)
+			_redirect_non_tls = statement_quote ("\"", _target_path)
+			_redirect_tls = None
+		if _source_domain is not None :
+			_acl_host = self._acl.host (_source_domain)
+		else :
+			_acl_host = None
 		if _source_path is not None :
 			if _source_path_exact is True :
 				_acl_path = self._acl.path (_source_path)
@@ -460,13 +515,14 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		else :
 			_acl_path = None
 		_acl_non_tls = self._acl.via_tls (False)
-		_acl_tls = self._acl.via_tls (True)
 		_rule_non_tls_condition = ("if", _acl, _acl_host, _acl_path, _acl_non_tls)
-		_rule_tls_condition = ("if", _acl, _acl_host, _acl_path, _acl_tls)
-		_rule_non_tls = ("redirect", _redirect_method, _redirect_non_tls, "code", 307)
-		_rule_tls = ("redirect", _redirect_method, _redirect_tls, "code", 307)
+		_rule_non_tls = ("redirect", _redirect_method, _redirect_non_tls, "code", _redirect_code)
 		self._declare_http_rule_0 (_rule_non_tls, _rule_non_tls_condition)
-		self._declare_http_rule_0 (_rule_tls, _rule_tls_condition)
+		if _redirect_tls is not None :
+			_acl_tls = self._acl.via_tls (True)
+			_rule_tls_condition = ("if", _acl, _acl_host, _acl_path, _acl_tls)
+			_rule_tls = ("redirect", _redirect_method, _redirect_tls, "code", _redirect_code)
+			self._declare_http_rule_0 (_rule_tls, _rule_tls_condition)
 	
 	def redirect_domains (self, _map, _force_tls = False, _acl = None) :
 		for _source, _target in sorted (_map.iteritems ()) :
@@ -546,6 +602,7 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		self.set_header ("X-Forwarded-Port", 443, _ignore_if_exists, (_acl_with_tls, _acl))
 		self.set_header ("X-Forwarded-Server-Ip", "%fi", _ignore_if_exists, _acl)
 		self.set_header ("X-Forwarded-Server-Port", "%fp", _ignore_if_exists, _acl)
+		self.set_geoip_headers (_ignore_if_exists, _acl)
 	
 	def drop_forwarded_headers (self, _acl = None) :
 		self.delete_header ("X-Forwarded-Host", _acl)
@@ -554,6 +611,12 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		self.delete_header ("X-Forwarded-Port", _acl)
 		self.delete_header ("X-Forwarded-Server-Ip", _acl)
 		self.delete_header ("X-Forwarded-Server-Port", _acl)
+	
+	
+	def set_geoip_headers (self, _ignore_if_exists = False, _acl = None) :
+		_geoip_enabled = self._parameters._get_and_expand ("geoip_enabled")
+		if _geoip_enabled :
+			self.set_header ("X-Country", statement_format ("%%[%s]", self._samples.geoip_country_extracted ()), _ignore_if_exists, _acl)
 	
 	
 	def track (self, _acl = None, _force = False) :
@@ -622,24 +685,37 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		self._declare_http_rule_0 (_rule, _rule_condition)
 		return _index
 	
-	def capture_header (self, _header, _transforms = None, _acl = None) :
-		_sample = self._samples.request_header (_header, _transforms)
+	def capture_header (self, _header, _transforms = None, _acl = None, _index = None) :
+		_sample = self._samples.request_header (_header, _transforms, _index)
 		return self.capture (_sample, _acl)
 	
 	def capture_defaults (self, _acl = None) :
 		self.capture_header ("Host", "base64", _acl)
 		self.capture_header ("User-Agent", "base64", _acl)
 		self.capture_header ("Referer", "base64", _acl)
+		self.capture_header ("Cookie", "base64", _acl, 1)
+		self.capture_header ("Cookie", "base64", _acl, 2)
+		self.capture_header ("Cookie", "base64", _acl, 3)
+		self.capture_header ("Cookie", "base64", _acl, 4)
 		self.capture_header ("$http_tracking_session_header", "base64", _acl)
+		self.capture_header ("X-Forwarded-Host", "base64", _acl)
+		self.capture_header ("X-Forwarded-For", None, _acl)
+		_geoip_enabled = self._parameters._get_and_expand ("geoip_enabled")
+		if _geoip_enabled :
+			self.capture_header ("X-Country", None, _acl)
 	
 	
 	def capture_logging (self, _acl = None) :
 		self.set_variable ("$logging_http_variable_host", self._samples.host (), _acl)
+		self.set_variable ("$logging_http_variable_client", self._samples.request_header ("$backend_http_header_forwarded_for"), _acl)
 		self.set_variable ("$logging_http_variable_agent", self._samples.request_header ("User-Agent"), _acl)
 		self.set_variable ("$logging_http_variable_referrer", self._samples.request_header ("Referer"), _acl)
 		self.set_variable ("$logging_http_variable_session", self._samples.request_header ("$logging_http_header_session"), _acl)
 		self.set_header ("$logging_http_header_action", statement_format ("%%[%s]://%%[%s]%%[%s]?%%[%s]", self._samples.request_method (), self._samples.host (), self._samples.path (), self._samples.query ()), False, _acl)
 		self.set_variable ("$logging_http_variable_action", self._samples.request_header ("$logging_http_header_action"), _acl)
+		_geoip_enabled = self._parameters._get_and_expand ("geoip_enabled")
+		if _geoip_enabled :
+			self.set_variable ("$logging_geoip_country_variable", self._samples.request_header ("X-Country"), _acl)
 	
 	
 	def authenticate (self, _credentials, _realm = None, _acl = None, **_overrides) :
@@ -757,19 +833,21 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		self.delete_header ("X-Powered-By", (_acl, _acl_enabled, _acl_handled))
 	
 	def harden_redirects (self, _acl = None, _force = False) :
-		_status_acl = self._acl.response_status ((301, 302, 303, 307, 308))
+		# _status_acl = self._acl.response_status ((301, 302, 303, 307, 308))
+		_status_acl = self._acl.response_status ((303, 307, 308))
 		_acl_handled = self._acl.response_header_exists ("$http_hardened_header", False) if not _force else None
 		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
 		# FIXME:  Perhaps make configurable the redirect status code!
-		self.set_status (303, (_acl, _status_acl, _acl_enabled, _acl_handled))
+		self.set_status (307, (_acl, _status_acl, _acl_enabled, _acl_handled))
 	
 	def harden_tls (self, _acl = None, _force = False) :
-		# FIXME:  Re-enable!
-		# _acl_handled = self._acl.response_header_exists ("$http_hardened_header", False) if not _force else None
-		# _acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
-		# _acl_tls = self._acl.via_tls ()
-		# self.set_header ("Strict-Transport-Security", "$http_harden_hsts_descriptor", False, (_acl, _acl_enabled, _acl_handled, _acl_tls))
-		pass
+		_acl_handled = self._acl.response_header_exists ("$http_hardened_header", False) if not _force else None
+		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
+		_acl_tls = self._acl.via_tls ()
+		_hsts_enabled = self._parameters._get_and_expand ("http_harden_hsts_enabled")
+		# FIXME:  Make this deferable!
+		if _hsts_enabled :
+			self.set_header ("Strict-Transport-Security", "$http_harden_hsts_descriptor", False, (_acl, _acl_enabled, _acl_handled, _acl_tls))
 	
 	def harden_all (self, _acl = None, _force = False, _mark_allowed = None, _mark_denied = None) :
 		_mark_allowed = self._value_or_parameters_get_and_expand (_mark_denied, "http_harden_netfilter_mark_allowed")
@@ -780,7 +858,9 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		# FIXME:  Make this deferable!
 		_acl_handled = self._acl.response_header_exists ("$http_hardened_header", False) if not _force else None
 		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
-		self.set_header ("$http_hardened_header", "true", True, (_acl_enabled, _acl_handled, _acl))
+		# FIXME:  Make this configurable!
+		if False :
+			self.set_header ("$http_hardened_header", "true", True, (_acl_enabled, _acl_handled, _acl))
 		# FIXME:  Make this deferable!
 		if _mark_allowed is not None and _mark_allowed != 0 :
 			self.set_mark (_mark_allowed, (_acl_enabled, _acl_handled, _acl))
@@ -801,8 +881,11 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		_acl_enabled = self._acl.variable_bool ("$http_force_caching_enabled_variable", True) if not _force else None
 		self.force_caching_control (_max_age, _public, _must_revalidate, _immutable, _acl, _force)
 		self.set_header ("ETag", "\"%[rand(4294967295)].%[rand(4294967295)].%[rand(4294967295)].%[rand(4294967295)]\"", False, (_acl, _acl_enabled))
-		self.set_header ("Vary", "Authorization", False, (_acl, _acl_enabled))
-		# self.set_header ("Vary", "Cookie", False, (_acl, _acl_enabled))
+		if not _public :
+			self.set_header ("Vary", "Authorization", False, (_acl, _acl_enabled))
+			self.set_header ("Vary", "Cookie", False, (_acl, _acl_enabled))
+		else :
+			self.delete_header ("Set-Cookie", (_acl, _acl_enabled))
 	
 	def force_caching_control (self, _max_age = 3600, _public = True, _must_revalidate = False, _immutable = None, _acl = None, _force = False) :
 		_private = not _public
@@ -834,8 +917,8 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		self._declare_http_rule_0 (_rule, _rule_condition)
 		return _index
 	
-	def capture_header (self, _header, _transforms = None, _acl = None) :
-		_sample = self._samples.response_header (_header, _transforms)
+	def capture_header (self, _header, _transforms = None, _acl = None, _index = None) :
+		_sample = self._samples.response_header (_header, _transforms, _index)
 		return self.capture (_sample, _acl)
 	
 	def capture_defaults (self, _acl = None) :
@@ -844,6 +927,10 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		self.capture_header ("Content-Encoding", "base64", _acl)
 		self.capture_header ("Content-Length", "base64", _acl)
 		self.capture_header ("Cache-Control", "base64", _acl)
+		self.capture_header ("Set-Cookie", "base64", _acl, 1)
+		self.capture_header ("Set-Cookie", "base64", _acl, 2)
+		self.capture_header ("Set-Cookie", "base64", _acl, 3)
+		self.capture_header ("Set-Cookie", "base64", _acl, 4)
 	
 	
 	def capture_logging (self, _acl = None) :
@@ -852,14 +939,16 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		self.set_variable ("$logging_http_variable_content_encoding", self._samples.response_header ("Content-Encoding"), _acl)
 		self.set_variable ("$logging_http_variable_content_length", self._samples.response_header ("Content-Length"), _acl)
 		self.set_variable ("$logging_http_variable_cache_control", self._samples.response_header ("Cache-Control"), _acl)
-		self.set_header ("$logging_http_header_action", statement_format ("%%[%s]", self._samples.variable ("$logging_http_variable_action")), False, _acl)
+		# self.set_header ("$logging_http_header_action", statement_format ("%%[%s]", self._samples.variable ("$logging_http_variable_action")), False, _acl)
 	
 	
 	def authenticate_trigger (self, _credentials, _acl = None) :
 		_acl_authenticated = self._acl.variable_exists ("$http_authenticated_variable")
 		self.delete_header ("$http_authenticated_header", _acl)
-		self.set_header ("$http_authenticated_header", statement_format ("%%[%s]", self._samples.variable ("$http_authenticated_variable")), False, (_acl, _acl_authenticated))
 		self.set_cookie ("$http_authenticated_cookie", statement_format ("%%[%s]", self._samples.variable ("$http_authenticated_variable")), "/", "$http_authenticated_cookie_max_age", (_acl, _acl_authenticated))
+		# FIXME:  Make this configurable!
+		if False :
+			self.set_header ("$http_authenticated_header", statement_format ("%%[%s]", self._samples.variable ("$http_authenticated_variable")), False, (_acl, _acl_authenticated))
 	
 	
 	def set_debug_headers (self, _acl = None) :
@@ -870,12 +959,12 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 
 
 
-class HaBackendBuilder (HaBuilder) :
+class HaHttpBackendBuilder (HaBuilder) :
 	
 	def __init__ (self, _context, _parameters) :
 		HaBuilder.__init__ (self, _context, _parameters)
-		self._acl = HaAclBuilder (_context, _parameters)
-		self._samples = HaSampleBuilder (_context, _parameters)
+		self._acl = HaHttpAclBuilder (_context, _parameters)
+		self._samples = HaHttpSampleBuilder (_context, _parameters)
 	
 	
 	def basic (self, _identifier, _endpoint, frontend = None, acl = None, route_order = None, **_parameters) :
@@ -1008,12 +1097,12 @@ class HaBackendBuilder (HaBuilder) :
 
 
 
-class HaRouteBuilder (HaBuilder) :
+class HaHttpRouteBuilder (HaBuilder) :
 	
 	def __init__ (self, _context, _parameters) :
 		HaBuilder.__init__ (self, _context, _parameters)
-		self._acl = HaAclBuilder (_context, _parameters)
-		self._samples = HaSampleBuilder (_context, _parameters)
+		self._acl = HaHttpAclBuilder (_context, _parameters)
+		self._samples = HaHttpSampleBuilder (_context, _parameters)
 	
 	def _declare_route_if_0 (self, _backend, _acl, **_overrides) :
 		self._context.declare_route_if_0 (_backend, _acl, **_overrides)

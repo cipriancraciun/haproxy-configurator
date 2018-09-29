@@ -300,6 +300,9 @@ parameters = {
 		"frontend_enabled" : True,
 		"frontend_minimal" : False,
 		
+		"frontend_http_bind_endpoint" : parameters_get ("defaults_frontend_http_bind_endpoint"),
+		"frontend_http_bind_endpoint_tls" : parameters_get ("defaults_frontend_http_bind_endpoint_tls"),
+		
 		"frontend_max_connections_active_count" : parameters_get ("defaults_frontend_max_connections_active_count"),
 		"frontend_max_connections_backlog_count" : parameters_get ("defaults_frontend_max_connections_backlog_count"),
 		
@@ -315,13 +318,17 @@ parameters = {
 				parameters_choose_if (
 						parameters_get ("frontend_accept_proxy_enabled"),
 						"accept-proxy"),
+				parameters_choose_if_non_null (
+						parameters_get ("frontend_bind_interface"),
+						("interface", parameters_get ("frontend_bind_interface"))),
 			),
-		"frontend_bind_tls_certificate" : "/etc/haproxy/tls/default.pem",
-		"frontend_bind_tls_certificate_rules" : "/etc/haproxy/tls/default.conf",
+		"frontend_bind_tls_certificate" : parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/default.pem"),
+		"frontend_bind_tls_certificate_rules" : parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/default.conf"),
 		"frontend_bind_tls_options" : (
 				parameters_get ("frontend_bind_options"),
 				parameters_get ("frontend_bind_tls_options_actual"),
 			),
+		"frontend_bind_interface" : None,
 		
 		# FIXME:  Rename this!
 		"frontend_bind_tls_options_actual" : (
@@ -379,16 +386,19 @@ parameters = {
 		"backend_enabled" : True,
 		"backend_check_enabled" : True,
 		
+		"backend_http_host" : None,
+		
 		"backend_http_check_enabled" : parameters_get ("backend_check_enabled"),
 		"backend_http_check_request_method" : "GET",
 		"backend_http_check_request_uri" : parameters_get ("heartbeat_server_path"),
 		"backend_http_check_request_version" : "HTTP/1.1",
-		"backend_http_check_request_host" : None,
+		"backend_http_check_request_host" : parameters_get ("backend_http_host"),
 		"backend_http_check_request_extra" : parameters_join (
 				"\r\n",
 				(
 						parameters_get ("backend_http_check_request_version"),
 						parameters_choose_if_non_null (parameters_get ("backend_http_check_request_host"), parameters_format ("Host: %s", parameters_get ("backend_http_check_request_host"))),
+						"Connection: close",
 				)
 			),
 		"backend_http_check_expect_matcher" : "status",
@@ -506,6 +516,9 @@ parameters = {
 		
 		
 		
+		"defaults_frontend_http_bind_endpoint" : "ipv4@0.0.0.0:80",
+		"defaults_frontend_http_bind_endpoint_tls" : "ipv4@0.0.0.0:443",
+		
 		"defaults_frontend_max_connections_active_count" : parameters_math ("//", parameters_get ("global_max_connections_count"), 2),
 		"defaults_frontend_max_connections_backlog_count" : parameters_math ("//", parameters_get ("defaults_frontend_max_connections_active_count"), 4),
 		"defaults_frontend_max_sessions_rate" : parameters_math ("*", parameters_get ("defaults_frontend_max_connections_active_count"), 4),
@@ -516,6 +529,8 @@ parameters = {
 		"defaults_server_check_interval_normal" : 60,
 		"defaults_server_check_interval_rising" : parameters_math ("//", parameters_get ("defaults_server_check_interval_normal"), 30),
 		"defaults_server_check_interval_failed" : parameters_math ("//", parameters_get ("defaults_server_check_interval_normal"), 3),
+		"defaults_server_check_count_rising" : 8,
+		"defaults_server_check_count_failed" : 4,
 		
 		"defaults_server_resolvers" : None,
 		
@@ -546,9 +561,9 @@ parameters = {
 		
 		
 		
-		"tls_ca_base" : parameters_choose_if (False, "/etc/haproxy/tls/ca"),
-		"tls_crt_base" : parameters_choose_if (False, "/etc/haproxy/tls/certificates"),
-		"tls_dh_params" : parameters_choose_if (True, "/etc/haproxy/tls/dh-params.pem"),
+		"tls_ca_base" : parameters_choose_if (False, parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/ca")),
+		"tls_crt_base" : parameters_choose_if (False, parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/certificates")),
+		"tls_dh_params" : parameters_choose_if (True, parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/dh-params.pem")),
 		
 		"tls_mode" : tls_mode,
 		"tls_ciphers" : parameters_choose_match (
@@ -589,6 +604,12 @@ parameters = {
 		
 		
 		
+		"geoip_enabled" : False,
+		"geoip_map" : parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_maps"), "/geoip.map"),
+		
+		
+		
+		
 		"daemon_node" : "localhost",
 		"daemon_name" : "haproxy",
 		"daemon_identifier" : parameters_format ("%s@%s", parameters_get ("daemon_name"), parameters_get ("daemon_node")),
@@ -596,13 +617,18 @@ parameters = {
 		
 		"daemon_user" : "haproxy",
 		"daemon_group" : parameters_get ("daemon_user"),
-		"daemon_pid" : "/var/run/haproxy.pid",
-		"daemon_chroot" : "/var/lib/haproxy",
-		"daemon_chroot_enabled" : True,
+		"daemon_pid" : parameters_format ("%s%s", parameters_get ("daemon_paths_runtime"), "/haproxy.pid"),
+		"daemon_chroot" : parameters_format ("%s%s", parameters_get ("daemon_paths_runtime"), "/haproxy.chroot"),
+		"daemon_chroot_enabled" : False,
 		"daemon_ulimit" : 65536,
 		"daemon_processes_count" : 1,
 		"daemon_processes_affinity" : ("all", 1),
-		"daemon_socket" : parameters_choose_if (True, "/var/run/haproxy.sock"),
+		"daemon_socket" : parameters_choose_if (True, parameters_format ("%s%s", parameters_get ("daemon_paths_runtime"), "/haproxy.sock")),
+		
+		"daemon_paths_configurations" : "/etc/haproxy",
+		"daemon_paths_configurations_tls" : parameters_format ("%s%s", parameters_get ("daemon_paths_configurations"), "/tls"),
+		"daemon_paths_configurations_maps" : parameters_format ("%s%s", parameters_get ("daemon_paths_configurations"), "/maps"),
+		"daemon_paths_runtime" : "/var/run",
 		
 		
 		
@@ -636,6 +662,7 @@ parameters = {
 				("json", parameters_get ("logging_http_format_json"))
 		),
 		"logging_http_variable_host" : "txn.logging_http_host",
+		"logging_http_variable_client" : "txn.logging_http_client",
 		"logging_http_variable_agent" : "txn.logging_http_agent",
 		"logging_http_variable_referrer" : "txn.logging_http_referrer",
 		"logging_http_variable_location" : "txn.logging_http_location",
@@ -647,13 +674,14 @@ parameters = {
 		"logging_http_variable_action" : "txn.logging_http_action",
 		"logging_http_header_session" : parameters_get ("http_tracking_session_header"),
 		"logging_http_header_action" : "X-HA-HTTP-Action",
+		"logging_geoip_country_variable" : "txn.logging_geoip_country",
 		
 		
 		
 		
 		"error_pages_enabled" : True,
 		"error_pages_codes" : (400, 401, 403, 404, 405, 408, 429, 500, 502, 503, 504,),
-		"error_pages_store" : "/etc/haproxy/errors/http",
+		"error_pages_store" : parameters_format ("%s%s", parameters_get ("daemon_paths_configurations"), "/errors/http"),
 		
 		
 		
@@ -706,6 +734,7 @@ parameters = {
 		
 		"http_harden_allowed_methods" : ('head', 'get', 'options'),
 		"http_harden_allowed_status_codes" : http_status_codes["harden_allowed"],
+		"http_harden_hsts_enabled" : True,
 		"http_harden_hsts_interval" : (24 * 3600),
 		"http_harden_hsts_descriptor" : parameters_format ("max-age=%d", parameters_get ("http_harden_hsts_interval")),
 		"http_harden_csp_descriptor" : "upgrade-insecure-requests",
