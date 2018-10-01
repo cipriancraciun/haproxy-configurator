@@ -96,11 +96,13 @@ def declare_globals_network (_configuration) :
 			"Advanced configuration",
 			("tune.bufsize", 128 * 1024),
 			("tune.maxrewrite", 16 * 1024),
-			("tune.rcvbuf.client", 16 * 1024),
-			("tune.sndbuf.client", 16 * 1024),
-			("tune.rcvbuf.server", 16 * 1024),
-			("tune.sndbuf.server", 16 * 1024),
-			("tune.pipesize", 16 * 1024),
+			#("tune.rcvbuf.client", 128 * 1024),
+			# FIXME:  Why do this break the dowload speed?
+			##("tune.sndbuf.client", 16 * 1024),
+			#("tune.rcvbuf.server", 128 * 1024),
+			#("tune.sndbuf.server", 128 * 1024),
+			#("tune.pipesize", 128 * 1024),
+			#("tune.idletimer", 1000),
 	)
 
 
@@ -122,7 +124,7 @@ def declare_globals_tls (_configuration) :
 	_configuration.declare_group (
 			"TLS advanced configuration",
 			("tune.ssl.default-dh-param", 2048),
-			("tune.ssl.maxrecord", 1400),
+			("tune.ssl.maxrecord", 16 * 1024),
 			("tune.ssl.cachesize", 262144),
 			("tune.ssl.lifetime", statement_seconds (3600)),
 	)
@@ -162,6 +164,13 @@ def declare_defaults_network (_configuration) :
 			("balance", "roundrobin"),
 			("retries", "4"),
 	)
+	if True :
+		_configuration.declare_group (
+				"Connections splicing",
+				("option", "splice-request"),
+				("option", "splice-response"),
+				("no", "option", "splice-auto"),
+		)
 
 
 def declare_defaults_timeouts (_configuration) :
