@@ -895,6 +895,9 @@ class HaSample (HaBase) :
 		self._generated = None
 	
 	
+	def statement_format (self) :
+		return statement_format ("%%[%s]", self)
+	
 	def generate (self) :
 		
 		if self._generated is not None :

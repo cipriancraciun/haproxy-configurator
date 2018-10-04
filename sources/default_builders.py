@@ -374,9 +374,14 @@ class HaHttpRuleBuilder (HaBuilder) :
 		self._declare_http_rule_0 (_mark_rule, _rule_condition, **_overrides)
 	
 	
-	def redirect (self, _target, _acl = None) :
+	def redirect (self, _target, _code = 307, _acl = None) :
 		_rule_condition = ("if", _acl, "TRUE")
-		_rule = ("redirect", "location", statement_quote ("\"", _target), "code", 307)
+		_rule = ("redirect", "location", statement_quote ("\"", _target), "code", _code)
+		self._declare_http_rule_0 (_rule, _rule_condition)
+	
+	def redirect_prefix (self, _target, _code = 307, _acl = None) :
+		_rule_condition = ("if", _acl, "TRUE")
+		_rule = ("redirect", "prefix", statement_quote ("\"", _target), "code", _code)
 		self._declare_http_rule_0 (_rule, _rule_condition)
 
 
@@ -535,7 +540,7 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 	
 	def redirect_favicon (self, _redirect = "$favicon_redirect_url", _acl = None) :
 		_acl_path = self._acl.path ("/favicon.ico")
-		self.redirect (_redirect, (_acl, _acl_path))
+		self.redirect (_redirect, 307, (_acl, _acl_path))
 	
 	
 	def expose_internals_0 (self, _acl_internals, _credentials = None, _acl = None, _mark_allowed = None, **_overrides) :
@@ -626,10 +631,10 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		_acl_tracked_via_cookie = self._acl.request_cookie_exists ("$http_tracking_session_cookie")
 		_acl_untracked = (_acl_tracked_via_header.negate (), _acl_tracked_via_cookie.negate ())
 		# FIXME:  Find a better way!
-		self.set_header ("$http_tracking_request_header", "%[rand(4294967295)].%[rand(4294967295)].%[rand(4294967295)].%[rand(4294967295)]", False, (_acl, _acl_request_explicit.negate (), _acl_enabled))
+		self.set_header ("$http_tracking_request_header", "%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]", False, (_acl, _acl_request_explicit.negate (), _acl_enabled))
 		self.set_variable ("$http_tracking_request_variable", self._samples.request_header ("$http_tracking_request_header"), (_acl, _acl_enabled))
 		# FIXME:  Find a better way!
-		self.set_header ("$http_tracking_session_header", "%[rand(4294967295)].%[rand(4294967295)].%[rand(4294967295)].%[rand(4294967295)]", False, (_acl, _acl_untracked, _acl_enabled))
+		self.set_header ("$http_tracking_session_header", "%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]", False, (_acl, _acl_untracked, _acl_enabled))
 		self.set_header ("$http_tracking_session_header", statement_format ("%%[%s]", self._samples.request_cookie ("$http_tracking_session_cookie")), False, (_acl, _acl_tracked_via_header.negate (), _acl_tracked_via_cookie, _acl_enabled))
 		self.set_variable ("$http_tracking_session_variable", self._samples.request_header ("$http_tracking_session_header"), (_acl, _acl_enabled))
 	
@@ -880,7 +885,7 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 	def force_caching (self, _max_age = 3600, _public = True, _must_revalidate = False, _immutable = None, _acl = None, _force = False) :
 		_acl_enabled = self._acl.variable_bool ("$http_force_caching_enabled_variable", True) if not _force else None
 		self.force_caching_control (_max_age, _public, _must_revalidate, _immutable, _acl, _force)
-		self.set_header ("ETag", "\"%[rand(4294967295)].%[rand(4294967295)].%[rand(4294967295)].%[rand(4294967295)]\"", False, (_acl, _acl_enabled))
+		self.set_header ("ETag", "\"%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]\"", False, (_acl, _acl_enabled))
 		if not _public :
 			self.set_header ("Vary", "Authorization", False, (_acl, _acl_enabled))
 			self.set_header ("Vary", "Cookie", False, (_acl, _acl_enabled))
@@ -898,11 +903,19 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		_immutable = statement_enforce_bool (_immutable)
 		_acl_enabled = self._acl.variable_bool ("$http_force_caching_enabled_variable", True) if not _force else None
 		self.set_header ("Cache-Control", statement_join (", ", (statement_choose_if (_public, "public"), statement_choose_if (_private, "private"), statement_choose_if (_must_revalidate, "must-revalidate"), statement_choose_if (_immutable, "immutable"), statement_format ("max-age=%d", _max_age))), False, (_acl, _acl_enabled))
-		self.set_header ("Last-Modified", statement_format ("%%[date(-%d),http_date()]", _max_age), False, (_acl, _acl_enabled))
-		self.set_header ("Expires", statement_format ("%%[date(%d),http_date()]", _max_age), False, (_acl, _acl_enabled))
-		self.set_header ("Date", statement_format ("%%[date(),http_date()]"), False, (_acl, _acl_enabled))
-		self.set_header ("Age", 0, False, (_acl, _acl_enabled))
-		self.delete_header ("Pragma", (_acl, _acl_enabled))
+		self.force_caching_maxage (_max_age, (_acl, _acl_enabled))
+	
+	def force_caching_no (self, _acl = None, _force = False) :
+		_acl_enabled = self._acl.variable_bool ("$http_force_caching_enabled_variable", True) .negate () if not _force else None
+		self.set_header ("Cache-Control", "no-cache", False, (_acl, _acl_enabled))
+		self.force_caching_maxage (0, (_acl, _acl_enabled))
+	
+	def force_caching_maxage (self, _max_age, _acl) :
+		self.set_header ("Last-Modified", statement_format ("%%[date(-%d),http_date()]", _max_age), False, _acl)
+		self.set_header ("Expires", statement_format ("%%[date(%d),http_date()]", _max_age), False, _acl)
+		self.set_header ("Date", statement_format ("%%[date(),http_date()]"), False, _acl)
+		self.set_header ("Age", 0, False, _acl)
+		self.delete_header ("Pragma", _acl)
 	
 	
 	def drop_cookies (self, _acl = None, _force = False) :
