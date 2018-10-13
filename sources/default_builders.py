@@ -652,6 +652,8 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 	def harden_headers (self, _acl = None, _force = False) :
 		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
 		self.delete_header ("Authorization", (_acl, _acl_enabled))
+		self.delete_header ("Range", (_acl, _acl_enabled, self._acl.variable_bool ("$http_ranges_allowed_variable", True) .negate ()))
+		self.delete_header ("If-Range", (_acl, _acl_enabled, self._acl.variable_bool ("$http_ranges_allowed_variable", True) .negate ()))
 	
 	def harden_all (self, _acl = None, _force = False) :
 		self.harden_http (_acl, _force)
@@ -832,10 +834,10 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		self.set_header ("X-Frame-Options", "$http_harden_frames_descriptor", True, (_acl, _acl_enabled, _acl_handled))
 		self.set_header ("X-Content-Type-Options", "$http_harden_cto_descriptor", True, (_acl, _acl_enabled, _acl_handled))
 		self.set_header ("X-XSS-Protection", "$http_harden_xss_descriptor", True, (_acl, _acl_enabled, _acl_handled))
-		self.set_header ("Accept-Ranges", "none", False, (_acl, _acl_enabled, _acl_handled))
 		self.delete_header ("Server", (_acl, _acl_enabled, _acl_handled))
 		self.delete_header ("Via", (_acl, _acl_enabled, _acl_handled))
 		self.delete_header ("X-Powered-By", (_acl, _acl_enabled, _acl_handled))
+		self.set_header ("Accept-Ranges", "none", False, (_acl, _acl_enabled, _acl_handled, self._acl.variable_bool ("$http_ranges_allowed_variable", True) .negate ()))
 	
 	def harden_redirects (self, _acl = None, _force = False) :
 		# _status_acl = self._acl.response_status ((301, 302, 303, 307, 308))

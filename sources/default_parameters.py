@@ -752,6 +752,8 @@ parameters = {
 		
 		"http_drop_cookies_enabled_variable" : "txn.http_drop_cookies_enabled",
 		
+		"http_ranges_allowed_variable" : "txn.http_ranges_allowed",
+		
 		
 		
 		
