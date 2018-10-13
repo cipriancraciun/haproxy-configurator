@@ -93,7 +93,7 @@ def declare_globals_network (_configuration) :
 			("maxzlibmem", 512),
 	)
 	_configuration.declare_group (
-			"Advanced configuration",
+			"Sockets",
 			("tune.bufsize", 128 * 1024),
 			("tune.maxrewrite", 16 * 1024),
 			#("tune.rcvbuf.client", 128 * 1024),
@@ -103,6 +103,12 @@ def declare_globals_network (_configuration) :
 			#("tune.sndbuf.server", 128 * 1024),
 			#("tune.pipesize", 128 * 1024),
 			#("tune.idletimer", 1000),
+	)
+	_configuration.declare_group (
+			"HTTP/2",
+			("tune.h2.header-table-size", 16 * 1024),
+			("tune.h2.initial-window-size", 128 * 1024),
+			("tune.h2.max-concurrent-streams", "128"),
 	)
 
 

@@ -128,7 +128,7 @@ logging_http_format_text = """{http:20161201:01} h-v:[%{Q}HV] h-m:[%{Q}HM] h-p:[
 
 
 
-def _expand_logging_format_json (_format) :
+def _expand_logging_format_json (_format, _parameters) :
 	
 	def _expand_value (_value) :
 		if isinstance (_value, basestring) :
@@ -152,6 +152,9 @@ def _expand_logging_format_json (_format) :
 					_token.append ("]")
 				elif _value.startswith ("'") :
 					_token.append (_value[1:])
+				elif _value.startswith ("$") :
+					_value = expand_token (_value, _parameters)
+					_token.append (_value)
 				else :
 					raise_error ("62d234ed", _value)
 				if _quote :
@@ -186,6 +189,7 @@ logging_tcp_format_json = None
 logging_http_format_json_template = [
 		
 		("s", "''20161201:01"),
+		("ss", "'$logging_http_format_subschema"),
 		("t", "=%Ts.%ms"),
 		
 		("f_id", "'%f"),
@@ -230,6 +234,7 @@ logging_http_format_json_template = [
 		
 		("f_cnt", ["+%ac", "+%fc", "+%bc", "+%sc", "+%rc"]),
 		("f_st", "'%tsc"),
+		("f_hvm", "+@fc_http_major"),
 		("b_cnt", ["+%bq", "+%sq"]),
 		("g_cnt", ["+%lc", "+%rt"]),
 		
@@ -243,7 +248,7 @@ logging_http_format_json_template = [
 				"+@ssl_fc_is_resumed",
 				"+@ssl_fc_has_sni",
 				"'@ssl_fc_sni,json()",
-				"=null", # "'@ssl_fc_alpn,json()", #!
+				"'@ssl_fc_alpn,json()",
 				"'@ssl_fc_npn,json()",
 		]),
 		("ssl_xf", [
@@ -282,7 +287,7 @@ logging_http_format_json_template = [
 		
 	]
 
-logging_http_format_json = _expand_logging_format_json (logging_http_format_json_template)
+logging_http_format_json = lambda (_parameters) : _expand_logging_format_json (logging_http_format_json_template, _parameters)
 
 
 
@@ -348,7 +353,8 @@ parameters = {
 		"frontend_tls_ciphers_descriptor" : parameters_choose_if_non_null ("frontend_tls_ciphers", parameters_join (":", parameters_get ("frontend_tls_ciphers"))),
 		"frontend_tls_options" : parameters_choose_match (
 				parameters_get ("frontend_tls_mode"),
-				(None, parameters_get ("tls_options")),
+				(None, (
+						parameters_get ("tls_options"))),
 				("normal", (
 						parameters_get ("tls_options_normal"),
 						parameters_get ("tls_alpn_descriptor"),
@@ -596,10 +602,10 @@ parameters = {
 		"tls_options_backdoor" : tls_options_backdoor,
 		"tls_alpn_enabled" : False,
 		"tls_alpn_descriptor" : parameters_choose_if (parameters_get ("tls_alpn_enabled"), ("alpn", parameters_join (",", parameters_get ("tls_alpn_protocols")))),
-		"tls_alpn_protocols" : ("http/1.1", "http/1.0"),
+		"tls_alpn_protocols" : ("h2,http/1.1", "http/1.0"),
 		"tls_npn_enabled" : False,
 		"tls_npn_descriptor" : parameters_choose_if (parameters_get ("tls_npn_enabled"), ("npn", parameters_join (",", parameters_get ("tls_npn_protocols")))),
-		"tls_npn_protocols" : ("http/1.1", "http/1.0"),
+		"tls_npn_protocols" : ("h2,http/1.1", "http/1.0"),
 		
 		
 		
@@ -656,6 +662,7 @@ parameters = {
 		"logging_http_type" : parameters_get ("logging_type"),
 		"logging_http_format_text" : logging_http_format_text,
 		"logging_http_format_json" : logging_http_format_json,
+		"logging_http_format_subschema" : "default",
 		"logging_http_format" : parameters_choose_match (
 				parameters_get ("logging_http_type"),
 				("text", parameters_get ("logging_http_format_text")),
