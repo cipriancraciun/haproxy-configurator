@@ -770,7 +770,7 @@ parameters = {
 		"http_harden_hsts_interval" : (24 * 3600),
 		"http_harden_hsts_descriptor" : parameters_format ("max-age=%d", parameters_get ("http_harden_hsts_interval")),
 		"http_harden_csp_descriptor" : "upgrade-insecure-requests",
-		"http_harden_referrer_descriptor" : "\"strict-origin-when-cross-origin\"",
+		"http_harden_referrer_descriptor" : "strict-origin-when-cross-origin",
 		"http_harden_frames_descriptor" : "SAMEORIGIN",
 		"http_harden_cto_descriptor" : "nosniff",
 		"http_harden_xss_descriptor" : "1; mode=block",
