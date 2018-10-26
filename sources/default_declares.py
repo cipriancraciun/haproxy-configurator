@@ -89,8 +89,11 @@ def declare_globals_network (_configuration) :
 	_configuration.declare_group (
 			"Compression",
 			("maxcomprate", 0),
-			("maxcompcpuusage", 50),
+			("maxcompcpuusage", 25),
 			("maxzlibmem", 512),
+			("tune.comp.maxlevel", 9),
+			("tune.zlib.memlevel", 9),
+			("tune.zlib.windowsize", 15),
 	)
 	_configuration.declare_group (
 			"Sockets",
@@ -223,9 +226,8 @@ def declare_defaults_http (_configuration) :
 	_configuration.declare_group (
 			"HTTP compression",
 			("compression", "algo", "gzip", "deflate"),
-			# FIXME:  Investigate this further!
-			# ("compression", "offload"),
 			("compression", "type", "$\'defaults_compression_content_types"),
+			("compression", "offload"),
 	)
 
 

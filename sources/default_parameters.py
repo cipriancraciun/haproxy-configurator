@@ -112,9 +112,32 @@ http_status_codes["harden_allowed"] = \
 
 
 compression_content_types = (
-		"text/html", "text/javascript", "text/css",
-		"text/plain", "text/csv", "text/tab-separated-values",
-		"application/json",
+		
+		"text/html",
+		"text/css",
+		"application/javascript", "text/javascript",
+		
+		"application/xml", "text/xml",
+		"application/xhtml+xml",
+		"application/rss+xml", "application/atom+xml",
+		
+		"application/json", "text/json",
+		
+		"text/plain",
+		"text/csv",
+		"text/tab-separated-values",
+		
+		"image/svg+xml",
+		"image/vnd.microsoft.icon", "image/x-icon",
+		
+		"font/collection",
+		"font/otf", "application/font-otf", "application/x-font-otf", "application/x-font-opentype",
+		"font/ttf", "application/font-ttf", "application/x-font-ttf", "application/x-font-truetype",
+		"font/sfnt", "application/font-sfnt", "application/x-font-sfnt",
+		"font/woff", "application/font-woff", "application/x-font-woff",
+		"font/woff2", "application/font-woff2", "application/x-font-woff2",
+		"font/eot", "application/font-eot", "application/x-font-eot", "application/vnd.ms-fontobject",
+		
 	)
 
 
@@ -222,6 +245,8 @@ logging_http_format_json_template = [
 		
 		("h_i_ck", "'%CC"), #!
 		("h_o_ck", "'%CS"), #!
+		
+		("h_o_comp", ["+@res.comp", "'@res.comp_algo"]),
 		
 		("c_sck", ["'%ci", "'%cp"]),
 		("f_sck", ["'%fi", "'%fp"]),
