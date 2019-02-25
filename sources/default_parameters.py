@@ -522,7 +522,9 @@ parameters = {
 								"ssl",
 								# FIXME:  Make the following options configurable!
 								("verify", "none"),
-								"check-ssl",
+								parameters_choose_if (
+										parameters_get ("server_check_enabled"),
+										"check-ssl"),
 						)
 				),
 		
