@@ -653,7 +653,9 @@ parameters = {
 		"daemon_chroot_enabled" : False,
 		"daemon_ulimit" : 65536,
 		"daemon_processes_count" : 1,
-		"daemon_processes_affinity" : ("all", 1),
+		# "daemon_processes_affinity" : ("all", 1),
+		"daemon_processes_affinity" : None,
+		"daemon_threads_count" : 1,
 		"daemon_socket" : parameters_choose_if (True, parameters_format ("%s%s", parameters_get ("daemon_paths_runtime"), "/haproxy.sock")),
 		
 		"daemon_paths_configurations" : "/etc/haproxy",
