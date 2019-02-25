@@ -522,7 +522,8 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 			if _source_path_exact is True :
 				_acl_path = self._acl.path (_source_path)
 			elif _source_path_exact is False :
-				_acl_path = self._acl.subpath (_source_path)
+				# NOTE:  This is a hack!
+				_acl_path = (self._acl.subpath (_source_path), self._acl.path_prefix (_source_path))
 			elif _source_path_exact == "prefix" :
 				_acl_path = self._acl.path_prefix (_source_path)
 			else :
