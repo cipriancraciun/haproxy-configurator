@@ -924,8 +924,8 @@ class HaSample (HaBase) :
 				_tokens.append (_transform[0])
 				if len (_transform) > 1 :
 					_tokens.append ("(")
-					_tokens.append (_transform[1])
-					for _transform_argument in _transforms[2:] :
+					_tokens.append (str(_transform[1]))
+					for _transform_argument in _transform[2:] :
 						_transform_argument = str (_transform_argument)
 						_tokens.append (",")
 						_tokens.append (_transform_argument)
