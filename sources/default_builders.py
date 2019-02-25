@@ -222,7 +222,13 @@ class HaHttpSampleBuilder (HaBuilder) :
 	
 	
 	def via_tls (self, _expected = True) :
-		return self._context.sample_0 ("ssl_fc", None, (None if _expected else "not"))
+		_method = self._parameters._get_and_expand ("samples_via_tls_method")
+		if _method == "ssl_fc" :
+			return self._context.sample_0 ("ssl_fc", None, (None if _expected else "not"))
+		elif _method == "dst_port_443" :
+			return self._context.sample_0 ("dst_port", None, (("xor", 443), "bool", ("not" if _expected else None)))
+		else :
+			raise_error ("fd58dd1e", self)
 	
 	
 	def authenticated (self, _credentials, _expected = True) :
