@@ -77,6 +77,9 @@ class HaHttpAclBuilder (HaBuilder) :
 	def path_prefix (self, _path) :
 		return self._context.acl_0 (None, self._samples.path (), "beg", None, None, _path)
 	
+	def path_substring (self, _path) :
+		return self._context.acl_0 (None, self._samples.path (), "sub", None, None, _path)
+	
 	def subpath (self, _path) :
 		return self._context.acl_0 (None, self._samples.path (), "dir", None, None, _path)
 	
@@ -273,6 +276,10 @@ class HaHttpRuleBuilder (HaBuilder) :
 		_acl_path = self._acl.path_prefix (_path)
 		self.allow ((_acl, _acl_path), **_overrides)
 	
+	def allow_path_substring (self, _path, _acl = None, **_overrides) :
+		_acl_path = self._acl.path_substring (_path)
+		self.allow ((_acl, _acl_path), **_overrides)
+	
 	def allow_subpath (self, _path, _acl = None, **_overrides) :
 		_acl_path = self._acl.subpath (_path)
 		self.allow ((_acl, _acl_path), **_overrides)
@@ -296,6 +303,10 @@ class HaHttpRuleBuilder (HaBuilder) :
 	
 	def deny_path_prefix (self, _path, _acl = None, _code = None, _mark = None, **_overrides) :
 		_acl_path = self._acl.path_prefix (_path)
+		self.deny ((_acl, _acl_path), _code, _mark, **_overrides)
+	
+	def deny_path_substring (self, _path, _acl = None, _code = None, _mark = None, **_overrides) :
+		_acl_path = self._acl.path_substring (_path)
 		self.deny ((_acl, _acl_path), _code, _mark, **_overrides)
 	
 	def deny_subpath (self, _path, _acl = None, _code = None, _mark = None, **_overrides) :
