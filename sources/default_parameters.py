@@ -644,7 +644,7 @@ parameters = {
 		"daemon_node" : "localhost",
 		"daemon_name" : "haproxy",
 		"daemon_identifier" : parameters_format ("%s@%s", parameters_get ("daemon_name"), parameters_get ("daemon_node")),
-		"daemon_description" : parameters_get ("daemon_identifier"),
+		"daemon_description" : "[]",
 		
 		"daemon_user" : "haproxy",
 		"daemon_group" : parameters_get ("daemon_user"),
@@ -661,6 +661,8 @@ parameters = {
 		"daemon_paths_configurations_maps" : parameters_format ("%s%s", parameters_get ("daemon_paths_configurations"), "/maps"),
 		"daemon_paths_runtime" : "/var/run",
 		
+		"daemon_paths_states_prefix" : parameters_format ("%s%s", parameters_get ("daemon_paths_runtime"), "/haproxy-state--"),
+		"daemon_paths_state_global" : parameters_format ("%s%s", parameters_get ("daemon_paths_runtime"), "/haproxy.state"),
 		
 		
 		

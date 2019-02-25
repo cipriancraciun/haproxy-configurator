@@ -60,14 +60,15 @@ def declare_globals_daemon (_configuration) :
 	_configuration.declare_group (
 			"Daemon",
 			("nbproc", "$+daemon_processes_count"),
+			("nbthread", "$+daemon_threads_count"),
 			statement_choose_if_non_null ("$~daemon_processes_affinity", ("cpu-map", "$~daemon_processes_affinity")),
 			statement_choose_if_non_null ("$+daemon_ulimit", ("ulimit-n", "$+daemon_ulimit")),
 			("user", "$\'daemon_user"),
 			("group", "$\'daemon_group"),
 			("pidfile", "$\'daemon_pid"),
 			statement_choose_if ("$?daemon_chroot_enabled", ("chroot", "$\'daemon_chroot")),
-			("server-state-base", "#\'/state/"),
-			("server-state-file", "#\'/state/global"),
+			("server-state-base", "$\'daemon_paths_states_prefix"),
+			("server-state-file", "$\'daemon_paths_state_global"),
 	)
 
 
@@ -268,7 +269,7 @@ def declare_defaults_miscellaneous (_configuration) :
 			"Miscellaneous",
 			("option", "clitcpka"),
 			("option", "srvtcpka"),
-			("load-server-state-from-file", "local"),
+			("load-server-state-from-file", "global"),
 			# FIXME:  Add `server-state-file-name`!
 	)
 
