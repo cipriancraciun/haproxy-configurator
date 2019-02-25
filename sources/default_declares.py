@@ -143,7 +143,8 @@ def declare_globals_tls (_configuration) :
 def declare_globals_logging (_configuration) :
 	_configuration.declare_group (
 			"Logging",
-			statement_choose_if ("$?syslog_enabled", ("log", "$\'syslog_endpoint", "len", 65535, "format", "$\'syslog_protocol", "daemon", "info", "err")),
+			statement_choose_if ("$?syslog_1_enabled", ("log", "$\'syslog_1_endpoint", "len", 65535, "format", "$\'syslog_1_protocol", "daemon", "info", "err")),
+			statement_choose_if ("$?syslog_2_enabled", ("log", "$\'syslog_2_endpoint", "len", 65535, "format", "$\'syslog_2_protocol", "daemon", "info", "err")),
 			statement_choose_if ("$syslog_source_node", ("log-send-hostname", "$\'syslog_source_node")),
 			("log-tag", "$\'syslog_source_tag"),
 			("quiet"),

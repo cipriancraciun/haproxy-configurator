@@ -666,8 +666,15 @@ parameters = {
 		
 		
 		
-		"syslog_enabled" : True,
-		"syslog_endpoint" : "/dev/log",
+		
+		"syslog_1_enabled" : True,
+		"syslog_1_endpoint" : "/dev/log",
+		"syslog_1_protocol" : parameters_get ("syslog_protocol"),
+		
+		"syslog_2_enabled" : False,
+		"syslog_2_endpoint" : "127.0.0.1:514",
+		"syslog_2_protocol" : parameters_get ("syslog_protocol"),
+		
 		# NOTE:  Preferred protocol should be `rfc5424`!
 		#        If there are issues, use `rfc3164` and set `syslog_source_node` to `None`.
 		"syslog_protocol" : "rfc5424",
