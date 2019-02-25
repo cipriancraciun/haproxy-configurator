@@ -708,16 +708,28 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		return self.capture (_sample, _acl)
 	
 	def capture_defaults (self, _acl = None) :
+		self.capture_protocol (_acl)
+		self.capture_cookies (_acl)
+		self.capture_forwarded (_acl)
+		self.capture_geoip (_acl)
+	
+	def capture_protocol (self, _acl = None) :
 		self.capture_header ("Host", "base64", _acl)
 		self.capture_header ("User-Agent", "base64", _acl)
 		self.capture_header ("Referer", "base64", _acl)
+	
+	def capture_cookies (self, _acl = None) :
 		self.capture_header ("Cookie", "base64", _acl, 1)
 		self.capture_header ("Cookie", "base64", _acl, 2)
 		self.capture_header ("Cookie", "base64", _acl, 3)
 		self.capture_header ("Cookie", "base64", _acl, 4)
+	
+	def capture_forwarded (self, _acl = None) :
 		self.capture_header ("$http_tracking_session_header", "base64", _acl)
 		self.capture_header ("X-Forwarded-Host", "base64", _acl)
 		self.capture_header ("X-Forwarded-For", None, _acl)
+	
+	def capture_geoip (self, _acl = None) :
 		_geoip_enabled = self._parameters._get_and_expand ("geoip_enabled")
 		if _geoip_enabled :
 			self.capture_header ("X-Country", None, _acl)
@@ -948,11 +960,17 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		return self.capture (_sample, _acl)
 	
 	def capture_defaults (self, _acl = None) :
+		self.capture_protocol (_acl)
+		self.capture_cookies (_acl)
+	
+	def capture_protocol (self, _acl = None) :
 		self.capture_header ("Location", "base64", _acl)
 		self.capture_header ("Content-Type", "base64", _acl)
 		self.capture_header ("Content-Encoding", "base64", _acl)
 		self.capture_header ("Content-Length", "base64", _acl)
 		self.capture_header ("Cache-Control", "base64", _acl)
+	
+	def capture_cookies (self, _acl = None) :
 		self.capture_header ("Set-Cookie", "base64", _acl, 1)
 		self.capture_header ("Set-Cookie", "base64", _acl, 2)
 		self.capture_header ("Set-Cookie", "base64", _acl, 3)
