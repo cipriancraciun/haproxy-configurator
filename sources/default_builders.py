@@ -1142,6 +1142,13 @@ class HaHttpBackendBuilder (HaBuilder) :
 			_frontend_http_requests = _frontend.http_request_rule_builder ()
 			_frontend_http_responses = _frontend.http_response_rule_builder ()
 			_callable (_frontend_routes, _frontend_http_requests, _frontend_http_responses)
+	
+	def fallback (self) :
+		return self.basic (
+				"fallback-http",
+				"ipv4@127.255.255.254:8080",
+				backend_check_enabled = True,
+			)
 
 
 
