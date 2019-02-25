@@ -465,11 +465,13 @@ parameters = {
 		"server_max_connections_queue_count" : None, # parameters_get ("defaults_server_max_connections_queue_count"),
 		"server_check_enabled" : parameters_get ("backend_check_enabled"),
 		"server_send_proxy_enabled" : False,
+		"server_send_proxy_version" : "v1",
 		
 		"server_tcp_max_connections_active_count" : parameters_get ("server_max_connections_active_count"),
 		"server_tcp_max_connections_queue_count" : parameters_get ("server_max_connections_queue_count"),
 		"server_tcp_check_enabled" : parameters_get ("server_check_enabled"),
 		"server_tcp_send_proxy_enabled" : parameters_get ("server_send_proxy_enabled"),
+		"server_tcp_send_proxy_version" : parameters_get ("server_send_proxy_version"),
 		"server_tcp_options" : (
 				parameters_choose_if (
 						parameters_get ("server_tcp_check_enabled"),
@@ -486,7 +488,14 @@ parameters = {
 				parameters_choose_if (
 						parameters_get ("server_tcp_send_proxy_enabled"),
 						(
-							"send-proxy-v2",
+							parameters_choose_match (
+								parameters_get ("server_tcp_send_proxy_version"),
+								(True, "send-proxy"),
+								("v1", "send-proxy"),
+								("v2", "send-proxy-v2"),
+								("v2-ssl", "send-proxy-v2-ssl"),
+								("v2-ssl-cn", "send-proxy-v2-ssl-cn"),
+							),
 							parameters_choose_if (parameters_get ("server_tcp_check_enabled"), "check-send-proxy"))),
 			),
 		
@@ -494,6 +503,7 @@ parameters = {
 		"server_http_max_connections_queue_count" : parameters_get ("server_max_connections_queue_count"),
 		"server_http_check_enabled" : parameters_get ("server_check_enabled"),
 		"server_http_send_proxy_enabled" : parameters_get ("server_send_proxy_enabled"),
+		"server_http_send_proxy_version" : parameters_get ("server_send_proxy_version"),
 		"server_http_options" : (
 				parameters_choose_if (
 						parameters_get ("server_http_check_enabled"),
@@ -510,7 +520,14 @@ parameters = {
 				parameters_choose_if (
 						parameters_get ("server_http_send_proxy_enabled"),
 						(
-							"send-proxy-v2",
+							parameters_choose_match (
+								parameters_get ("server_http_send_proxy_version"),
+								(True, "send-proxy"),
+								("v1", "send-proxy"),
+								("v2", "send-proxy-v2"),
+								("v2-ssl", "send-proxy-v2-ssl"),
+								("v2-ssl-cn", "send-proxy-v2-ssl-cn"),
+							),
 							parameters_choose_if (parameters_get ("server_http_check_enabled"), "check-send-proxy"))),
 			),
 		
