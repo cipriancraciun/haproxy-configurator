@@ -503,6 +503,12 @@ def statement_choose_match (_condition, *_cases) :
 		raise_error ("7e97f033", _condition, _actual)
 	return _function
 
+def statement_choose_max (*_values) :
+	return lambda _expand : max (*[_expand (_value) for _value in _values])
+
+def statement_choose_min (*_values) :
+	return lambda _expand : min (*[_expand (_value) for _value in _values])
+
 
 
 
