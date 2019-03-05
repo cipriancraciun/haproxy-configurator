@@ -211,13 +211,20 @@ logging_tcp_format_json = None
 
 logging_http_format_json_template = [
 		
-		("s", "''20161201:01"),
+		("s", "''20190305:01"),
 		("ss", "'$logging_http_format_subschema"),
 		("t", "=%Ts.%ms"),
 		
-		("f_id", "'%f"),
-		("b_id", "'%b"),
-		("s_id", "'%s"),
+		("f_id", "'%f"), #!
+		("b_id", "'%b"), #!
+		("s_id", "'%s"), #!
+		
+		("h_v", "'%HV"), #!
+		("h_vm", "+@fc_http_major"),
+		("h_m", "'%HM"), #!
+		("h_p", "'%HP"), #!
+		("h_q", "'%HQ"), #!
+		("h_s", "+%ST"),
 		
 		# FIXME:  Make this configurable!
 		("h_h", "'@var(txn.logging_http_host),json()"),
@@ -227,12 +234,7 @@ logging_http_format_json_template = [
 		("h_f_f", "'@var(txn.logging_http_forwarded_for),json()"),
 		("h_f_p", "'@var(txn.logging_http_forwarded_proto),json()"),
 		
-		("h_v", "'%HV"), #!
-		("h_m", "'%HM"), #!
-		("h_p", "'%HP"), #!
-		("h_q", "'%HQ"), #!
-		("h_s", "+%ST"),
-		
+		("h_r_t", "'%trg"), #!
 		("h_r_i", "'%ID"), #!
 		
 		# FIXME:  Make this configurable!
@@ -260,12 +262,12 @@ logging_http_format_json_template = [
 		
 		("i_sz", "+%U"),
 		("o_sz", "+%B"),
-		("w", ["+%Tq", "+%Tw", "+%Tc", "+%Tr", "+%Tt"]),
 		
-		("f_cnt", ["+%ac", "+%fc", "+%bc", "+%sc", "+%rc"]),
+		("w", ["+%Tt", "+%Tq", "+%Ta"]),
+		("w_x", ["+%Th", "+%Ti", "+%TR", "+%Tw", "+%Tc", "+%Tr", "+%Td"]),
+		
+		("f_ld", ["+%ac", "+%fc", "+%bc", "+%bq", "+%sc", "+%sq", "+%rc"]),
 		("f_st", "'%tsc"),
-		("f_hvm", "+@fc_http_major"),
-		("b_cnt", ["+%bq", "+%sq"]),
 		("g_cnt", ["+%lc", "+%rt"]),
 		
 		("ssl", ["'%sslv", "'%sslc"]),
