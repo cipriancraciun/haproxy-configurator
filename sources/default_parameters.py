@@ -809,9 +809,11 @@ parameters = {
 		"http_harden_enabled_variable" : "txn.http_harden_enabled",
 		"http_hardened_header" : "X-HA-Hardened",
 		
+		# FIXME:  Implement:  "http_drop_caching_forced" : False,
 		"http_drop_caching_enabled_variable" : "txn.http_drop_caching_enabled",
 		"http_force_caching_enabled_variable" : "txn.http_force_caching_enabled",
 		
+		# FIXME:  Implement: "http_drop_cookies_forced" : False,
 		"http_drop_cookies_enabled_variable" : "txn.http_drop_cookies_enabled",
 		
 		"http_ranges_allowed_variable" : "txn.http_ranges_allowed",

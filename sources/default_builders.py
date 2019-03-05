@@ -729,11 +729,14 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		self.set_enabled_for_domain ("$http_harden_enabled_variable", _domain, _acl)
 	
 	
-	def drop_caching (self, _acl = None, _force = False) :
+	def drop_caching (self, _acl = None, _force = False, _keep_etag_acl = None) :
 		_acl_enabled = self._acl.variable_bool ("$http_drop_caching_enabled_variable", True) if not _force else None
-		self.delete_header ("If-None-Match", (_acl, _acl_enabled))
-		self.delete_header ("If-Modified-Since", (_acl, _acl_enabled))
 		self.delete_header ("Cache-Control", (_acl, _acl_enabled))
+		if _keep_etag_acl is None or _keep_etag_acl is not True :
+			self.delete_header ("If-None-Match", (_acl, _acl_enabled))
+			self.delete_header ("If-Match", (_acl, _acl_enabled))
+		self.delete_header ("If-Modified-Since", (_acl, _acl_enabled))
+		self.delete_header ("If-Unmodified-Since", (_acl, _acl_enabled))
 		self.delete_header ("Pragma", (_acl, _acl_enabled))
 	
 	def drop_caching_enable_for_domain (self, _domain, _acl = None) :
@@ -963,21 +966,23 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 			self.set_mark (_mark_allowed, (_acl_enabled, _acl_handled, _acl))
 	
 	
-	def drop_caching (self, _acl = None, _force = False) :
+	def drop_caching (self, _acl = None, _force = False, _keep_etag_acl = None) :
 		_acl_enabled = self._acl.variable_bool ("$http_drop_caching_enabled_variable", True) if not _force else None
 		self.delete_header ("Cache-Control", (_acl, _acl_enabled))
 		self.delete_header ("Last-Modified", (_acl, _acl_enabled))
 		self.delete_header ("Expires", (_acl, _acl_enabled))
 		self.delete_header ("Date", (_acl, _acl_enabled))
-		self.delete_header ("ETag", (_acl, _acl_enabled))
+		if _keep_etag_acl is None or _keep_etag_acl is not True :
+			self.delete_header ("ETag", (_acl, _acl_enabled))
 		self.delete_header ("Vary", (_acl, _acl_enabled))
 		self.delete_header ("Age", (_acl, _acl_enabled))
 		self.delete_header ("Pragma", (_acl, _acl_enabled))
 	
-	def force_caching (self, _max_age = 3600, _public = True, _must_revalidate = False, _immutable = None, _acl = None, _force = False, _store_max_age = None) :
+	def force_caching (self, _max_age = 3600, _public = True, _must_revalidate = False, _immutable = None, _acl = None, _force = False, _store_max_age = None, _keep_etag_acl = None) :
 		_acl_enabled = self._acl.variable_bool ("$http_force_caching_enabled_variable", True) if not _force else None
 		self.force_caching_control (_max_age, _public, _must_revalidate, _immutable, _acl, _force, _store_max_age)
-		self.set_header ("ETag", "\"%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]\"", False, (_acl, _acl_enabled))
+		if _keep_etag_acl is None or _keep_etag_acl is not True :
+			self.set_header ("ETag", "\"%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]\"", False, (_acl, _acl_enabled))
 		if not _public :
 			self.set_header ("Vary", "Authorization", False, (_acl, _acl_enabled))
 			self.set_header ("Vary", "Cookie", False, (_acl, _acl_enabled))
@@ -996,7 +1001,16 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		_must_revalidate = statement_enforce_bool (_must_revalidate)
 		_immutable = statement_enforce_bool (_immutable)
 		_acl_enabled = self._acl.variable_bool ("$http_force_caching_enabled_variable", True) if not _force else None
-		self.set_header ("Cache-Control", statement_join (", ", (statement_choose_if (_public, "public"), statement_choose_if (_private, "private"), statement_choose_if (_must_revalidate, "must-revalidate"), statement_choose_if (_immutable, "immutable"), statement_format ("max-age=%d", _max_age), statement_choose_if (_store_max_age, statement_format ("s-maxage=%d", _store_max_age)))), False, (_acl, _acl_enabled))
+		self.set_header ("Cache-Control",
+				statement_join (", ", (
+						statement_choose_if (_public, "public"),
+						statement_choose_if (_private, "private"),
+						statement_choose_if (_must_revalidate, "must-revalidate"),
+						statement_choose_if (_immutable, "immutable"),
+						statement_format ("max-age=%d", _max_age),
+						statement_choose_if (_store_max_age, statement_format ("s-maxage=%d", _store_max_age)),
+						# statement_choose_if (_store_max_age, statement_choose_if (_must_revalidate, statement_format ("proxy-revalidate"))),
+				)), False, (_acl, _acl_enabled))
 		_expire_age = _max_age
 		if _store_max_age is not None :
 			_expire_age = statement_choose_max (_expire_age, _store_max_age)
