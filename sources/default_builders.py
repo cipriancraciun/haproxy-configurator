@@ -701,15 +701,29 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
 		self.deny ((_acl, _acl_methods, _acl_enabled), None, _mark_denied)
 	
-	def harden_headers (self, _acl = None, _force = False) :
+	def harden_authorization (self, _acl = None, _force = False) :
 		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
 		self.delete_header ("Authorization", (_acl, _acl_enabled))
-		self.delete_header ("Range", (_acl, _acl_enabled, self._acl.variable_bool ("$http_ranges_allowed_variable", True) .negate ()))
-		self.delete_header ("If-Range", (_acl, _acl_enabled, self._acl.variable_bool ("$http_ranges_allowed_variable", True) .negate ()))
+	
+	def harden_browsing (self, _acl = None, _force = False) :
+		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
+		self.delete_header ("User-Agent", (_acl, _acl_enabled))
+		self.delete_header ("Referer", (_acl, _acl_enabled))
+		self.delete_header ("Accept-Encoding", (_acl, _acl_enabled))
+		self.delete_header ("Accept-Language", (_acl, _acl_enabled))
+		self.delete_header ("Accept-Charset", (_acl, _acl_enabled))
+	
+	def harden_ranges (self, _acl = None, _force = False) :
+		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
+		_acl_forbidden = self._acl.variable_bool ("$http_ranges_allowed_variable", True) .negate () if not _force else None
+		self.delete_header ("Range", (_acl, _acl_enabled, _acl_forbidden))
+		self.delete_header ("If-Range", (_acl, _acl_enabled, _acl_forbidden))
 	
 	def harden_all (self, _acl = None, _force = False) :
 		self.harden_http (_acl, _force)
-		self.harden_headers (_acl, _force)
+		self.harden_browsing (_acl, _force)
+		self.harden_authorization (_acl, _force)
+		self.harden_ranges (_acl, _force)
 	
 	def harden_enable_for_domain (self, _domain, _acl = None) :
 		self.set_enabled_for_domain ("$http_harden_enabled_variable", _domain, _acl)
@@ -899,10 +913,19 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		self.set_header ("X-Frame-Options", "$http_harden_frames_descriptor", True, (_acl, _acl_enabled, _acl_handled))
 		self.set_header ("X-Content-Type-Options", "$http_harden_cto_descriptor", True, (_acl, _acl_enabled, _acl_handled))
 		self.set_header ("X-XSS-Protection", "$http_harden_xss_descriptor", True, (_acl, _acl_enabled, _acl_handled))
-		self.delete_header ("Server", (_acl, _acl_enabled, _acl_handled))
+	
+	def harden_via (self, _acl = None, _force = False) :
+		_acl_handled = self._acl.response_header_exists ("$http_hardened_header", False) if not _force else None
+		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
 		self.delete_header ("Via", (_acl, _acl_enabled, _acl_handled))
+		self.delete_header ("Server", (_acl, _acl_enabled, _acl_handled))
 		self.delete_header ("X-Powered-By", (_acl, _acl_enabled, _acl_handled))
-		self.set_header ("Accept-Ranges", "none", False, (_acl, _acl_enabled, _acl_handled, self._acl.variable_bool ("$http_ranges_allowed_variable", True) .negate ()))
+	
+	def harden_ranges (self, _acl = None, _force = False) :
+		_acl_handled = self._acl.response_header_exists ("$http_hardened_header", False) if not _force else None
+		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
+		_acl_forbidden = self._acl.variable_bool ("$http_ranges_allowed_variable", True) .negate () if not _force else None
+		self.set_header ("Accept-Ranges", "none", False, (_acl, _acl_enabled, _acl_handled, _acl_forbidden))
 	
 	def harden_redirects (self, _acl = None, _force = False) :
 		# _status_acl = self._acl.response_status ((301, 302, 303, 307, 308))
@@ -925,6 +948,8 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		_mark_allowed = self._value_or_parameters_get_and_expand (_mark_denied, "http_harden_netfilter_mark_allowed")
 		self.harden_http (_acl, _force, _mark_denied)
 		self.harden_headers (_acl, _force)
+		self.harden_via (_acl, _force)
+		self.harden_ranges (_acl, _force)
 		self.harden_redirects (_acl, _force)
 		self.harden_tls (_acl, _force)
 		# FIXME:  Make this deferable!
