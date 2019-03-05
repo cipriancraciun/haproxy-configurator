@@ -613,10 +613,10 @@ parameters = {
 		
 		
 		
-		
-		"tls_ca_base" : parameters_choose_if (False, parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/ca")),
-		"tls_crt_base" : parameters_choose_if (False, parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/certificates")),
-		"tls_dh_params" : parameters_choose_if (True, parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/dh-params.pem")),
+		"tls_enabled" : True,
+		"tls_ca_base" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (False, parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/ca"))),
+		"tls_crt_base" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (False, parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/certificates"))),
+		"tls_dh_params" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (True, parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/dh-params.pem"))),
 		
 		"tls_mode" : tls_mode,
 		"tls_ciphers" : parameters_choose_match (
