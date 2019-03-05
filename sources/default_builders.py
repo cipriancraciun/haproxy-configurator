@@ -666,6 +666,7 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		self.delete_header ("X-Forwarded-Port", _acl)
 		self.delete_header ("X-Forwarded-Server-Ip", _acl)
 		self.delete_header ("X-Forwarded-Server-Port", _acl)
+		self.delete_header ("$logging_http_header_action", _acl)
 	
 	
 	def set_geoip_headers (self, _ignore_if_exists = False, _acl = None) :
@@ -813,7 +814,9 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 	
 	def capture_logging (self, _acl = None) :
 		self.set_variable ("$logging_http_variable_host", self._samples.host (), _acl)
-		self.set_variable ("$logging_http_variable_client", self._samples.request_header ("$backend_http_header_forwarded_for"), _acl)
+		self.set_variable ("$logging_http_variable_forwarded_host", self._samples.forwarded_host (), _acl)
+		self.set_variable ("$logging_http_variable_forwarded_for", self._samples.forwarded_for (), _acl)
+		self.set_variable ("$logging_http_variable_forwarded_proto", self._samples.forwarded_proto (), _acl)
 		self.set_variable ("$logging_http_variable_agent", self._samples.request_header ("User-Agent"), _acl)
 		self.set_variable ("$logging_http_variable_referrer", self._samples.request_header ("Referer"), _acl)
 		self.set_variable ("$logging_http_variable_session", self._samples.request_header ("$logging_http_header_session"), _acl)
@@ -1098,7 +1101,7 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		self.set_variable ("$logging_http_variable_content_encoding", self._samples.response_header ("Content-Encoding"), _acl)
 		self.set_variable ("$logging_http_variable_content_length", self._samples.response_header ("Content-Length"), _acl)
 		self.set_variable ("$logging_http_variable_cache_control", self._samples.response_header ("Cache-Control"), _acl)
-		# self.set_header ("$logging_http_header_action", statement_format ("%%[%s]", self._samples.variable ("$logging_http_variable_action")), False, _acl)
+		self.set_header ("$logging_http_header_action", statement_format ("%%[%s]", self._samples.variable ("$logging_http_variable_action")), False, _acl)
 	
 	
 	def authenticate_trigger (self, _credentials, _acl = None) :

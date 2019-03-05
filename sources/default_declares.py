@@ -359,7 +359,8 @@ def declare_http_backend_connections (_configuration) :
 			statement_choose_if ("$?backend_enabled", "enabled", "disabled"),
 			("mode", "http"),
 			("option", "http-server-close"),
-			("option", "forwardfor", "header", "$\'backend_http_header_forwarded_for"),
+			# FIXME:  Make this configurable!
+			("option", "forwardfor", "header", "X-Forwarded-For", "if-none"),
 	)
 
 def declare_http_backend_check (_configuration) :

@@ -222,6 +222,11 @@ logging_http_format_json_template = [
 		# FIXME:  Make this configurable!
 		("h_h", "'@var(txn.logging_http_host),json()"),
 		
+		# FIXME:  Make this configurable!
+		("h_f_h", "'@var(txn.logging_http_forwarded_host),json()"),
+		("h_f_f", "'@var(txn.logging_http_forwarded_for),json()"),
+		("h_f_p", "'@var(txn.logging_http_forwarded_proto),json()"),
+		
 		("h_v", "'%HV"), #!
 		("h_m", "'%HM"), #!
 		("h_p", "'%HP"), #!
@@ -434,8 +439,6 @@ parameters = {
 			),
 		"backend_http_check_expect_matcher" : "status",
 		"backend_http_check_expect_pattern" : "200",
-		
-		"backend_http_header_forwarded_for" : "X-HA-Forwarded-For",
 		
 		"backend_server_max_connections_active_count" : None,
 		"backend_server_max_connections_queue_count" : parameters_math ("*", parameters_get ("backend_server_max_connections_active_count"), 4, True),
@@ -724,7 +727,9 @@ parameters = {
 				("json", parameters_get ("logging_http_format_json"))
 		),
 		"logging_http_variable_host" : "txn.logging_http_host",
-		"logging_http_variable_client" : "txn.logging_http_client",
+		"logging_http_variable_forwarded_host" : "txn.logging_http_forwarded_host",
+		"logging_http_variable_forwarded_for" : "txn.logging_http_forwarded_for",
+		"logging_http_variable_forwarded_proto" : "txn.logging_http_forwarded_proto",
 		"logging_http_variable_agent" : "txn.logging_http_agent",
 		"logging_http_variable_referrer" : "txn.logging_http_referrer",
 		"logging_http_variable_location" : "txn.logging_http_location",
