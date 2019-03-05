@@ -185,16 +185,16 @@ class HaHttpSampleBuilder (HaBuilder) :
 	
 	
 	def forwarded_host (self, _transforms = None) :
-		return self._context.sample_0 ("req.hdr", ("X-Forwarded-Host", 1), _transforms)
+		return self._context.sample_0 ("req.hdr", ("$logging_http_header_forwarded_host", 1), _transforms)
 	
 	def forwarded_for (self, _transforms = None) :
-		return self._context.sample_0 ("req.hdr", ("X-Forwarded-For", 1), _transforms)
+		return self._context.sample_0 ("req.hdr", ("$logging_http_header_forwarded_for", 1), _transforms)
 	
 	def forwarded_proto (self, _transforms = None) :
-		return self._context.sample_0 ("req.hdr", ("X-Forwarded-Proto", 1), _transforms)
+		return self._context.sample_0 ("req.hdr", ("$logging_http_header_forwarded_proto", 1), _transforms)
 	
 	def forwarded_port (self, _transforms = None) :
-		return self._context.sample_0 ("req.hdr", ("X-Forwarded-Port", 1), _transforms)
+		return self._context.sample_0 ("req.hdr", ("$logging_http_header_forwarded_port", 1), _transforms)
 	
 	
 	def host (self, _transforms = None) :
@@ -649,23 +649,23 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 	def set_forwarded_headers (self, _ignore_if_exists = False, _acl = None) :
 		_acl_with_tls = self._acl.via_tls (True)
 		_acl_without_tls = self._acl.via_tls (False)
-		self.set_header ("X-Forwarded-Host", statement_format ("%%[%s]", self._samples.host ()), _ignore_if_exists, _acl)
-		self.set_header ("X-Forwarded-For", "%ci", _ignore_if_exists, _acl)
-		self.set_header ("X-Forwarded-Proto", "http", _ignore_if_exists, (_acl_without_tls, _acl))
-		self.set_header ("X-Forwarded-Proto", "https", _ignore_if_exists, (_acl_with_tls, _acl))
-		self.set_header ("X-Forwarded-Port", 80, _ignore_if_exists, (_acl_without_tls, _acl))
-		self.set_header ("X-Forwarded-Port", 443, _ignore_if_exists, (_acl_with_tls, _acl))
-		self.set_header ("X-Forwarded-Server-Ip", "%fi", _ignore_if_exists, _acl)
-		self.set_header ("X-Forwarded-Server-Port", "%fp", _ignore_if_exists, _acl)
+		self.set_header ("$logging_http_header_forwarded_host", statement_format ("%%[%s]", self._samples.host ()), _ignore_if_exists, _acl)
+		self.set_header ("$logging_http_header_forwarded_for", "%ci", _ignore_if_exists, _acl)
+		self.set_header ("$logging_http_header_forwarded_proto", "http", _ignore_if_exists, (_acl_without_tls, _acl))
+		self.set_header ("$logging_http_header_forwarded_proto", "https", _ignore_if_exists, (_acl_with_tls, _acl))
+		self.set_header ("$logging_http_header_forwarded_port", 80, _ignore_if_exists, (_acl_without_tls, _acl))
+		self.set_header ("$logging_http_header_forwarded_port", 443, _ignore_if_exists, (_acl_with_tls, _acl))
+		self.set_header ("$logging_http_header_forwarded_server_ip", "%fi", _ignore_if_exists, _acl)
+		self.set_header ("$logging_http_header_forwarded_server_port", "%fp", _ignore_if_exists, _acl)
 		self.set_geoip_headers (_ignore_if_exists, _acl)
 	
 	def drop_forwarded_headers (self, _acl = None) :
-		self.delete_header ("X-Forwarded-Host", _acl)
-		self.delete_header ("X-Forwarded-For", _acl)
-		self.delete_header ("X-Forwarded-Proto", _acl)
-		self.delete_header ("X-Forwarded-Port", _acl)
-		self.delete_header ("X-Forwarded-Server-Ip", _acl)
-		self.delete_header ("X-Forwarded-Server-Port", _acl)
+		self.delete_header ("$logging_http_header_forwarded_host", _acl)
+		self.delete_header ("$logging_http_header_forwarded_for", _acl)
+		self.delete_header ("$logging_http_header_forwarded_proto", _acl)
+		self.delete_header ("$logging_http_header_forwarded_port", _acl)
+		self.delete_header ("$logging_http_header_forwarded_server_ip", _acl)
+		self.delete_header ("$logging_http_header_forwarded_server_port", _acl)
 		self.delete_header ("$logging_http_header_action", _acl)
 	
 	
@@ -799,10 +799,10 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		self.capture_header ("Pragma", "base64", _acl)
 	
 	def capture_forwarded (self, _acl = None) :
-		self.capture_header ("X-Forwarded-Host", "base64", _acl)
-		self.capture_header ("X-Forwarded-For", "base64", _acl)
-		self.capture_header ("X-Forwarded-Proto", "base64", _acl)
-		self.capture_header ("X-Forwarded-Port", "base64", _acl)
+		self.capture_header ("$logging_http_header_forwarded_host", "base64", _acl)
+		self.capture_header ("$logging_http_header_forwarded_for", "base64", _acl)
+		self.capture_header ("$logging_http_header_forwarded_proto", "base64", _acl)
+		self.capture_header ("$logging_http_header_forwarded_port", "base64", _acl)
 		self.capture_header ("$http_tracking_request_header", "base64", _acl)
 		self.capture_header ("$http_tracking_session_header", "base64", _acl)
 	

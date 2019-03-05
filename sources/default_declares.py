@@ -360,7 +360,7 @@ def declare_http_backend_connections (_configuration) :
 			("mode", "http"),
 			("option", "http-server-close"),
 			# FIXME:  Make this configurable!
-			("option", "forwardfor", "header", "X-Forwarded-For", "if-none"),
+			("option", "forwardfor", "header", "$logging_http_header_forwarded_for", "if-none"),
 	)
 
 def declare_http_backend_check (_configuration) :
