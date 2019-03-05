@@ -66,6 +66,22 @@ class HaHttpAclBuilder (HaBuilder) :
 	def client_ip (self, _ip) :
 		return self._context.acl_0 (None, self._samples.client_ip (), "ip", None, None, _ip)
 	
+	def frontend_port (self, _port) :
+		return self._context.acl_0 (None, self._samples.frontend_port (), "int", None, "eq", (_port,))
+	
+	
+	def forwarded_host (self, _host) :
+		return self._context.acl_0 (None, self._samples.forwarded_host (), "str", ("-i",), "eq", _host)
+	
+	def forwarded_for (self, _ip) :
+		return self._context.acl_0 (None, self._samples.forwarded_for (), "ip", None, None, (_ip,))
+	
+	def forwarded_proto (self, _proto) :
+		return self._context.acl_0 (None, self._samples.forwarded_proto (), "str", ("-i"), "eq", (_proto,))
+	
+	def forwarded_port (self, _port) :
+		return self._context.acl_0 (None, self._samples.forwarded_for (), "int", None, "eq", (_port,))
+	
 	
 	def host (self, _host) :
 		return self._context.acl_0 (None, self._samples.host (), "str", ("-i",), "eq", _host)
@@ -164,6 +180,22 @@ class HaHttpSampleBuilder (HaBuilder) :
 	def client_ip (self, _transforms = None) :
 		return self._context.sample_0 ("src", None, _transforms)
 	
+	def frontend_port (self, _transforms = None) :
+		return self._context.sample_0 ("dst_port", None, _transforms)
+	
+	
+	def forwarded_host (self, _transforms = None) :
+		return self._context.sample_0 ("req.hdr", ("X-Forwarded-Host", 1), _transforms)
+	
+	def forwarded_for (self, _transforms = None) :
+		return self._context.sample_0 ("req.hdr", ("X-Forwarded-For", 1), _transforms)
+	
+	def forwarded_proto (self, _transforms = None) :
+		return self._context.sample_0 ("req.hdr", ("X-Forwarded-Proto", 1), _transforms)
+	
+	def forwarded_port (self, _transforms = None) :
+		return self._context.sample_0 ("req.hdr", ("X-Forwarded-Port", 1), _transforms)
+	
 	
 	def host (self, _transforms = None) :
 		return self._context.sample_0 ("req.fhdr", ("Host", -1), _transforms)
@@ -245,7 +277,7 @@ class HaHttpSampleBuilder (HaBuilder) :
 	def geoip_country_extracted (self) :
 		# FIXME:  Refactor this!
 		# return self._context.sample_0 ("src", None, (("map_ip", "$'geoip_map"),))
-		return self._context.sample_0 ("req.fhdr", ("X-Forwarded-For", -1), (("map_ip", "$geoip_map"),))
+		return self.forwarded_for ((("map_ip", "$geoip_map"),))
 	
 	def geoip_country_captured (self) :
 		return self.variable ("$logging_geoip_country_variable")
