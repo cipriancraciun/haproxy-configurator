@@ -674,17 +674,19 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 			self.set_header ("X-Country", statement_format ("%%[%s]", self._samples.geoip_country_extracted ()), _ignore_if_exists, _acl)
 	
 	
-	def track (self, _acl = None, _force = False) :
+	def track (self, _acl = None, _force = False, _generate = True) :
 		_acl_enabled = self._acl.variable_bool ("$http_tracking_enabled_variable", True) if not _force else None
 		_acl_request_explicit = self._acl.request_header_exists ("$http_tracking_request_header")
 		_acl_tracked_via_header = self._acl.request_header_exists ("$http_tracking_session_header")
 		_acl_tracked_via_cookie = self._acl.request_cookie_exists ("$http_tracking_session_cookie")
 		_acl_untracked = (_acl_tracked_via_header.negate (), _acl_tracked_via_cookie.negate ())
-		# FIXME:  Find a better way!
-		self.set_header ("$http_tracking_request_header", "%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]", False, (_acl, _acl_request_explicit.negate (), _acl_enabled))
+		if _generate :
+			# FIXME:  Find a better way!
+			self.set_header ("$http_tracking_request_header", "%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]", False, (_acl, _acl_request_explicit.negate (), _acl_enabled))
 		self.set_variable ("$http_tracking_request_variable", self._samples.request_header ("$http_tracking_request_header"), (_acl, _acl_enabled))
-		# FIXME:  Find a better way!
-		self.set_header ("$http_tracking_session_header", "%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]", False, (_acl, _acl_untracked, _acl_enabled))
+		if _generate :
+			# FIXME:  Find a better way!
+			self.set_header ("$http_tracking_session_header", "%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]%[rand(4294967295),bytes(4,4),hex,lower]", False, (_acl, _acl_untracked, _acl_enabled))
 		self.set_header ("$http_tracking_session_header", statement_format ("%%[%s]", self._samples.request_cookie ("$http_tracking_session_cookie")), False, (_acl, _acl_tracked_via_header.negate (), _acl_tracked_via_cookie, _acl_enabled))
 		self.set_variable ("$http_tracking_session_variable", self._samples.request_header ("$http_tracking_session_header"), (_acl, _acl_enabled))
 	
@@ -872,11 +874,12 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		self.protect_internals_path_prefix ("$internals_path_prefix", _acl, _mark_denied)
 	
 	
-	def track (self, _acl = None, _force = False) :
+	def track (self, _acl = None, _force = False, _set_cookie = True) :
 		_acl_enabled = self._acl.variable_bool ("$http_tracking_enabled_variable", True) if not _force else None
 		self.set_header ("$http_tracking_request_header", statement_format ("%%[%s]", self._samples.variable ("$http_tracking_request_variable")), False, (_acl, _acl_enabled))
 		self.set_header ("$http_tracking_session_header", statement_format ("%%[%s]", self._samples.variable ("$http_tracking_session_variable")), False, (_acl, _acl_enabled))
-		self.set_cookie ("$http_tracking_session_cookie", statement_format ("%%[%s]", self._samples.variable ("$http_tracking_session_variable")), "/", "$http_tracking_session_cookie_max_age", (_acl, _acl_enabled))
+		if _set_cookie :
+			self.set_cookie ("$http_tracking_session_cookie", statement_format ("%%[%s]", self._samples.variable ("$http_tracking_session_variable")), "/", "$http_tracking_session_cookie_max_age", (_acl, _acl_enabled))
 	
 	
 	def harden_http (self, _acl = None, _force = False, _mark_denied = None) :
