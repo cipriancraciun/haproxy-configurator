@@ -1026,7 +1026,8 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		_private = not _public
 		if _immutable is None :
 			_immutable = not _no_cache and not _must_revalidate
-		_max_age = statement_enforce_int (_max_age)
+		if _max_age is not None :
+			_max_age = statement_enforce_int (_max_age)
 		if _store_max_age is not None :
 			_store_max_age = statement_enforce_int (_store_max_age)
 		_public = statement_enforce_bool (_public)
@@ -1042,7 +1043,7 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 						statement_choose_if (_no_cache, "no-cache"),
 						statement_choose_if (_must_revalidate, "must-revalidate"),
 						statement_choose_if (_immutable, "immutable"),
-						statement_format ("max-age=%d", _max_age),
+						statement_choose_if (_max_age, statement_format ("max-age=%d", _max_age)),
 						statement_choose_if (_store_max_age, statement_format ("s-maxage=%d", _store_max_age)),
 						# statement_choose_if (_store_max_age, statement_choose_if (_must_revalidate, statement_format ("proxy-revalidate"))),
 				)), False, (_acl, _acl_enabled))
@@ -1057,10 +1058,16 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		self.force_caching_maxage (0, (_acl, _acl_enabled))
 	
 	def force_caching_maxage (self, _max_age, _acl) :
-		self.set_header ("Last-Modified", statement_format ("%%[date(-%d),http_date()]", _max_age), False, _acl)
-		self.set_header ("Expires", statement_format ("%%[date(%d),http_date()]", _max_age), False, _acl)
-		self.set_header ("Date", statement_format ("%%[date(),http_date()]"), False, _acl)
-		self.set_header ("Age", 0, False, _acl)
+		if _max_age is not None :
+			self.set_header ("Last-Modified", statement_format ("%%[date(-%d),http_date()]", _max_age), False, _acl)
+			self.set_header ("Expires", statement_format ("%%[date(%d),http_date()]", _max_age), False, _acl)
+			self.set_header ("Date", statement_format ("%%[date(),http_date()]"), False, _acl)
+			self.set_header ("Age", 0, False, _acl)
+		else :
+			self.delete_header ("Last-Modified", _acl)
+			self.delete_header ("Expires", _acl)
+			self.delete_header ("Date", _acl)
+			self.delete_header ("Age", _acl)
 		self.delete_header ("Pragma", _acl)
 	
 	
