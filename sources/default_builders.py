@@ -70,17 +70,17 @@ class HaHttpAclBuilder (HaBuilder) :
 		return self._context.acl_0 (None, self._samples.frontend_port (), "int", None, "eq", (_port,))
 	
 	
-	def forwarded_host (self, _host) :
-		return self._context.acl_0 (None, self._samples.forwarded_host (), "str", ("-i",), "eq", _host)
+	def forwarded_host (self, _host, _from_logging = False) :
+		return self._context.acl_0 (None, self._samples.forwarded_host (None, _from_logging), "str", ("-i",), "eq", _host)
 	
-	def forwarded_for (self, _ip) :
-		return self._context.acl_0 (None, self._samples.forwarded_for (), "ip", None, None, (_ip,))
+	def forwarded_for (self, _ip, _from_logging = False) :
+		return self._context.acl_0 (None, self._samples.forwarded_for (None, _from_logging), "ip", None, None, (_ip,))
 	
-	def forwarded_proto (self, _proto) :
-		return self._context.acl_0 (None, self._samples.forwarded_proto (), "str", ("-i"), "eq", (_proto,))
+	def forwarded_proto (self, _proto, _from_logging = False) :
+		return self._context.acl_0 (None, self._samples.forwarded_proto (None, _from_logging), "str", ("-i"), "eq", (_proto,))
 	
-	def forwarded_port (self, _port) :
-		return self._context.acl_0 (None, self._samples.forwarded_for (), "int", None, "eq", (_port,))
+	def forwarded_port (self, _port, _from_logging = False) :
+		return self._context.acl_0 (None, self._samples.forwarded_for (None, _from_logging), "int", None, "eq", (_port,))
 	
 	
 	def host (self, _host) :
@@ -184,17 +184,29 @@ class HaHttpSampleBuilder (HaBuilder) :
 		return self._context.sample_0 ("dst_port", None, _transforms)
 	
 	
-	def forwarded_host (self, _transforms = None) :
-		return self._context.sample_0 ("req.hdr", ("$logging_http_header_forwarded_host", 1), _transforms)
+	def forwarded_host (self, _transforms = None, _from_logging = False) :
+		if _from_logging :
+			return self._context.sample_0 ("var", ("$logging_http_variable_forwarded_host",), _transforms)
+		else :
+			return self._context.sample_0 ("req.hdr", ("$logging_http_header_forwarded_host", 1), _transforms)
 	
-	def forwarded_for (self, _transforms = None) :
-		return self._context.sample_0 ("req.hdr", ("$logging_http_header_forwarded_for", 1), _transforms)
+	def forwarded_for (self, _transforms = None, _from_logging = False) :
+		if _from_logging :
+			return self._context.sample_0 ("var", ("$logging_http_variable_forwarded_for",), _transforms)
+		else :
+			return self._context.sample_0 ("req.hdr", ("$logging_http_header_forwarded_for", 1), _transforms)
 	
-	def forwarded_proto (self, _transforms = None) :
-		return self._context.sample_0 ("req.hdr", ("$logging_http_header_forwarded_proto", 1), _transforms)
+	def forwarded_proto (self, _transforms = None, _from_logging = False) :
+		if _from_logging :
+			return self._context.sample_0 ("var", ("$logging_http_variable_forwarded_proto",), _transforms)
+		else :
+			return self._context.sample_0 ("req.hdr", ("$logging_http_header_forwarded_proto", 1), _transforms)
 	
-	def forwarded_port (self, _transforms = None) :
-		return self._context.sample_0 ("req.hdr", ("$logging_http_header_forwarded_port", 1), _transforms)
+	def forwarded_port (self, _transforms = None, _from_logging = False) :
+		if _from_logging :
+			return self._context.sample_0 ("var", ("$logging_http_variable_forwarded_port",), _transforms)
+		else :
+			return self._context.sample_0 ("req.hdr", ("$logging_http_header_forwarded_port", 1), _transforms)
 	
 	
 	def host (self, _transforms = None) :
