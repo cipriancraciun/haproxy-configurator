@@ -745,8 +745,12 @@ class HaAcl (HaBase) :
 		_tokens.append ("-m")
 		_tokens.append (_matcher)
 		
+		_patterns_in_files = False
 		if _flags is not None :
 			for _flag in _flags :
+				if _flag == "-f" :
+					_patterns_in_files = True
+					continue
 				_tokens.append (_flag)
 		
 		if _operator is not None :
@@ -754,11 +758,17 @@ class HaAcl (HaBase) :
 		
 		if _patterns is not None :
 			
-			_tokens.append ("--")
+			if not _patterns_in_files :
+				_tokens.append ("--")
 			
 			_patterns_batch = 1
+			if _patterns_in_files :
+				_patterns_batch = 1
+			
 			if len (_patterns) <= _patterns_batch :
 				for _pattern in _patterns :
+					if _patterns_in_files :
+						_tokens.append ("-f")
 					_tokens.append (_pattern)
 				_tokens = tuple (_tokens)
 				
