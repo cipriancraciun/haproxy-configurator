@@ -167,6 +167,10 @@ class HaHttpAclBuilder (HaBuilder) :
 	
 	def geoip_country_captured (self, _country, _expected = True) :
 		return self._context.acl_0 (None, self._samples.geoip_country_captured (), "str", None, "eq", _country)
+	
+	
+	def bot (self) :
+		return self._context.acl_0 (None, self._samples.request_header ("User-Agent", ("lower",)), "str", ("-i", "-f"), "sub", "$'bots_acl")
 
 
 
@@ -368,6 +372,10 @@ class HaHttpRuleBuilder (HaBuilder) :
 		if _negated :
 			_acl_country = _acl_country.negate ()
 		self.deny ((_acl, _acl_country), _code, _mark, **_overrides)
+	
+	def deny_bot (self, _acl = None, _code = None, _mark = None, **_overrides) :
+		_acl_bot = self._acl.bot ()
+		self.deny ((_acl, _acl_bot), _code, _mark, **_overrides)
 	
 	
 	def set_header (self, _header, _value, _ignore_if_exists = False, _acl = None) :

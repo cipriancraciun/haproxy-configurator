@@ -662,6 +662,8 @@ parameters = {
 		"geoip_enabled" : False,
 		"geoip_map" : parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_maps"), "/geoip.map"),
 		
+		"bots_acl" : parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_maps"), "/bots.acl"),
+		
 		
 		
 		
