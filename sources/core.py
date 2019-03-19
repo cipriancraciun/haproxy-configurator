@@ -237,8 +237,8 @@ class HaSection (HaBase) :
 	def __init__ (self, _parameters, declare_implicit_if = True) :
 		HaBase.__init__ (self)
 		self._parameters = _parameters
-		self._statements = HaStatementGroup (self._parameters, None)
-		self._custom_statements = HaStatementGroup (self._parameters, "Custom")
+		self._statements = HaStatementGroup (self._parameters, None, order = 4000)
+		self._custom_statements = HaStatementGroup (self._parameters, "Custom", order = 6000)
 		self._declare_implicit_if = declare_implicit_if
 		self._declare_implicit_done = False
 	
@@ -282,11 +282,11 @@ class HaSection (HaBase) :
 		_scroll = Scroll ()
 		_scroll.include_empty_line (99, 0, 4)
 		_scroll.include_normal_line (100, 0, self._generate_header ())
-		_scroll.include_empty_line (100, 0, 1)
+		_scroll.include_empty_line (199, 0, 1)
 		_scroll.include_normal_line (200, 0, self._generate_statements ())
-		_scroll.include_empty_line (200, 0, 1)
+		_scroll.include_empty_line (299, 0, 1)
 		_scroll.include_normal_line (300, 0, self._generate_trailer ())
-		_scroll.include_empty_line (300, 0, 4)
+		_scroll.include_empty_line (399, 0, 4)
 		return _scroll
 	
 	def _generate_header (self) :
@@ -297,9 +297,9 @@ class HaSection (HaBase) :
 	
 	def _generate_statements (self) :
 		_scroll = Scroll (1)
-		self._statements.generate (_scroll)
+		self._statements.generate (_scroll, _merge = True)
 		self._generate_statements_extra (_scroll)
-		self._custom_statements.generate (_scroll)
+		self._custom_statements.generate (_scroll, _merge = True)
 		return _scroll
 	
 	def _generate_statements_extra (self, _scroll) :
@@ -345,9 +345,9 @@ class HaResolvers (HaSection) :
 	def __init__ (self, _identifier, _parameters) :
 		HaSection.__init__ (self, _parameters)
 		self.identifier = enforce_identifier (self._parameters, _identifier)
-		self._nameserver_statements = HaStatementGroup (self._parameters, "Nameservers")
+		self._nameserver_statements = HaStatementGroup (self._parameters, "Nameservers", order = 5000 + 100)
 		
-		self._parameter_statements = HaStatementGroup (self._parameters, "Parameters")
+		self._parameter_statements = HaStatementGroup (self._parameters, "Parameters", order = 5000 + 200)
 		self._parameter_statements.declare (("hold", "valid", statement_seconds (360)))
 		self._parameter_statements.declare (("hold", "nx", statement_seconds (60)))
 		self._parameter_statements.declare (("hold", "refused", statement_seconds (60)))
@@ -391,8 +391,8 @@ class HaCredentials (HaSection) :
 	def __init__ (self, _identifier, _parameters) :
 		HaSection.__init__ (self, _parameters)
 		self.identifier = enforce_identifier (self._parameters, _identifier)
-		self._group_statements = HaStatementGroup (self._parameters, "Groups")
-		self._user_statements = HaStatementGroup (self._parameters, "Users")
+		self._group_statements = HaStatementGroup (self._parameters, "Groups", order = 5000 + 100)
+		self._user_statements = HaStatementGroup (self._parameters, "Users", order = 5000 + 200)
 	
 	
 	def declare_group (self, _group, _users = None) :
@@ -444,8 +444,8 @@ class HaWorker (HaSection) :
 		self.identifier = enforce_identifier (self._parameters, _identifier)
 		self._acl = list ()
 		self._samples = list ()
-		self._http_request_rule_statements = HaStatementGroup (self._parameters, "HTTP Request Rules")
-		self._http_response_rule_statements = HaStatementGroup (self._parameters, "HTTP Response Rules")
+		self._http_request_rule_statements = HaStatementGroup (self._parameters, "HTTP Request Rules", order = 5000 + 300)
+		self._http_response_rule_statements = HaStatementGroup (self._parameters, "HTTP Response Rules", order = 5000 + 400)
 	
 	
 	def acl_1 (self, _criteria, _matcher, _patterns) :
@@ -520,7 +520,7 @@ class HaWorker (HaSection) :
 				else :
 					_acl_statements.append ((_acl_identifier, _acl_tokens))
 			_acl_statements.sort (key = lambda _acl_statement : _acl_statement[1][2:])
-			_statements = HaStatementGroup (self._parameters, "ACL")
+			_statements = HaStatementGroup (self._parameters, "ACL", order = 5000 + 200)
 			for _acl_statement in _acl_statements :
 				_statements.declare (_acl_statement[1])
 			_statements.generate (_scroll)
@@ -543,11 +543,11 @@ class HaFrontend (HaWorker) :
 	
 	def __init__ (self, _identifier, _parameters) :
 		HaWorker.__init__ (self, _identifier, _parameters)
-		self._bind_statements = HaStatementGroup (self._parameters, "Sockets")
-		self._route_statements = HaStatementGroup (self._parameters, "Routes")
-		self._request_capture_statements = HaStatementGroup (self._parameters, "Captures for requests")
+		self._bind_statements = HaStatementGroup (self._parameters, "Sockets", order = 5000 + 120)
+		self._route_statements = HaStatementGroup (self._parameters, "Routes", order = 5000 + 500)
+		self._request_capture_statements = HaStatementGroup (self._parameters, "Captures for requests", order = 8000 + 830)
 		self._request_captures_count = 0
-		self._response_capture_statements = HaStatementGroup (self._parameters, "Captures for responses")
+		self._response_capture_statements = HaStatementGroup (self._parameters, "Captures for responses", order = 8000 + 840)
 		self._response_captures_count = 0
 	
 	
@@ -620,7 +620,7 @@ class HaBackend (HaWorker) :
 	
 	def __init__ (self, _identifier, _parameters) :
 		HaWorker.__init__ (self, _identifier, _parameters)
-		self._server_statements = HaStatementGroup (self._parameters, "Servers")
+		self._server_statements = HaStatementGroup (self._parameters, "Servers", order = 5000 + 800)
 	
 	
 	def declare_server (self, _identifier, _endpoint, _options = "$server_options", _acl = None, order = None, **_overrides) :
@@ -1006,10 +1006,10 @@ class HaStatement (HaBase) :
 		if self._overrides is not None :
 			self._parameters = self._parameters._fork (**self._overrides)
 	
-	def generate (self, _scroll) :
+	def generate (self, _scroll, **_options) :
 		_enabled = self._resolve_token (self._enabled_if)
 		if _enabled is True :
-			self._generate (_scroll)
+			self._generate (_scroll, **_options)
 		elif _enabled is False :
 			pass
 		else :
@@ -1078,18 +1078,22 @@ class HaStatementGroup (HaStatement) :
 		else :
 			raise_error ("a67b1ba7", _statement)
 	
-	def _generate (self, _scroll) :
+	def _generate (self, _scroll, _merge = False) :
 		_statements_scroll = Scroll ()
 		for _statement in self._statements :
 			_statement.generate (_statements_scroll)
 		if not _statements_scroll.is_empty () :
-			_self_scroll = Scroll ()
-			_self_scroll.include_empty_line (0, 0, 1)
-			if self._heading is not None :
-				_self_scroll.include_comment_line (0, 0, HaStatementGroup.heading_prefix + self._heading)
-			_self_scroll.include_normal_line (0, 0, _statements_scroll)
-			_self_scroll.include_empty_line (0, 0, 1)
-			_scroll.include_normal_line (self._order, 0, _self_scroll)
+			if _merge :
+				_scroll.include_scroll_lines (self._order, 0, _statements_scroll, False)
+			else :
+				_self_scroll = Scroll ()
+				_self_scroll.include_empty_line (0, 0, 1)
+				if self._heading is not None :
+					_heading = " -- ".join (self._heading)
+					_self_scroll.include_comment_line (0, 0, HaStatementGroup.heading_prefix + _heading)
+				_self_scroll.include_normal_line (0, 0, _statements_scroll)
+				_self_scroll.include_empty_line (0, 0, 1)
+				_scroll.include_normal_line (self._order, 0, _self_scroll)
 	
 	heading_prefix = "#---- "
 

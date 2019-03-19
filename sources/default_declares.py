@@ -285,6 +285,7 @@ def declare_http_frontend_connections (_configuration) :
 			("maxconn", "$+frontend_max_connections_active_count"),
 			("backlog", "$+frontend_max_connections_backlog_count"),
 			("option", "http-keep-alive"),
+			order = 2000 + 100,
 	)
 
 
@@ -295,6 +296,7 @@ def declare_http_frontend_monitor (_configuration) :
 			("monitor-net", "$\'frontend_monitor_network"),
 			("monitor", "fail", "if", "$~frontend_monitor_fail_acl"),
 			enabled_if = statement_and ("$?frontend_monitor_enabled", "$?!frontend_minimal"),
+			order = 7000 + 100,
 	)
 
 
@@ -312,6 +314,7 @@ def declare_http_frontend_stats (_configuration) :
 			statement_choose_if_false ("$?frontend_stats_version", ("stats", "hide-version")),
 			("stats", "refresh", statement_seconds ("$+frontend_stats_refresh")),
 			enabled_if = statement_and ("$?frontend_stats_enabled", "$?!frontend_minimal"),
+			order = 7000 + 200,
 	)
 
 
@@ -320,6 +323,7 @@ def declare_http_frontend_logging (_configuration) :
 			"Logging",
 			("option", "httplog"),
 			("log-format", "$\"logging_http_format"),
+			order = 7000 + 400,
 	)
 
 
@@ -348,6 +352,7 @@ def declare_http_frontend_stick (_configuration) :
 						))
 			),
 			("http-request", "track-sc0", "src"),
+			order = 7000 + 300,
 		)
 
 
