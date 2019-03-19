@@ -246,6 +246,7 @@ logging_http_format_json_template = [
 		("h_h_ce", "'@var(txn.logging_http_content_encoding),json()"),
 		("h_h_cl", "'@var(txn.logging_http_content_length),json()"),
 		("h_h_cc", "'@var(txn.logging_http_cache_control),json()"),
+		("h_h_cv", "'@var(txn.logging_http_cache_etag),json()"),
 		
 		("h_i_hdr", "'%hrl"), #!
 		("h_o_hdr", "'%hsl"), #!
@@ -741,6 +742,7 @@ parameters = {
 		"logging_http_variable_content_encoding" : "txn.logging_http_content_encoding",
 		"logging_http_variable_content_length" : "txn.logging_http_content_length",
 		"logging_http_variable_cache_control" : "txn.logging_http_cache_control",
+		"logging_http_variable_cache_etag" : "txn.logging_http_cache_etag",
 		"logging_http_variable_session" : "txn.logging_http_session",
 		"logging_http_variable_action" : "txn.logging_http_action",
 		"logging_http_header_forwarded_host" : "X-Forwarded-Host",
