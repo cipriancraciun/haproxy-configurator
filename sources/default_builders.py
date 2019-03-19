@@ -63,114 +63,114 @@ class HaHttpAclBuilder (HaBuilder) :
 		self._samples = HaHttpSampleBuilder (_context, _parameters)
 	
 	
-	def client_ip (self, _ip) :
-		return self._context.acl_0 (None, self._samples.client_ip (), "ip", None, None, _ip)
+	def client_ip (self, _ip, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.client_ip (), "ip", None, None, _ip)
 	
-	def frontend_port (self, _port) :
-		return self._context.acl_0 (None, self._samples.frontend_port (), "int", None, "eq", (_port,))
-	
-	
-	def forwarded_host (self, _host, _from_logging = False) :
-		return self._context.acl_0 (None, self._samples.forwarded_host (None, _from_logging), "str", ("-i",), "eq", _host)
-	
-	def forwarded_for (self, _ip, _from_logging = False) :
-		return self._context.acl_0 (None, self._samples.forwarded_for (None, _from_logging), "ip", None, None, (_ip,))
-	
-	def forwarded_proto (self, _proto, _from_logging = False) :
-		return self._context.acl_0 (None, self._samples.forwarded_proto (None, _from_logging), "str", ("-i"), "eq", (_proto,))
-	
-	def forwarded_port (self, _port, _from_logging = False) :
-		return self._context.acl_0 (None, self._samples.forwarded_for (None, _from_logging), "int", None, "eq", (_port,))
+	def frontend_port (self, _port, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.frontend_port (), "int", None, "eq", (_port,))
 	
 	
-	def host (self, _host) :
-		return self._context.acl_0 (None, self._samples.host (), "str", ("-i",), "eq", _host)
+	def forwarded_host (self, _host, _from_logging = False, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.forwarded_host (None, _from_logging), "str", ("-i",), "eq", _host)
+	
+	def forwarded_for (self, _ip, _from_logging = False, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.forwarded_for (None, _from_logging), "ip", None, None, (_ip,))
+	
+	def forwarded_proto (self, _proto, _from_logging = False, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.forwarded_proto (None, _from_logging), "str", ("-i"), "eq", (_proto,))
+	
+	def forwarded_port (self, _port, _from_logging = False, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.forwarded_for (None, _from_logging), "int", None, "eq", (_port,))
 	
 	
-	def path (self, _path) :
-		return self._context.acl_0 (None, self._samples.path (), "str", None, "eq", _path)
-	
-	def path_prefix (self, _path) :
-		return self._context.acl_0 (None, self._samples.path (), "beg", None, None, _path)
-	
-	def path_substring (self, _path) :
-		return self._context.acl_0 (None, self._samples.path (), "sub", None, None, _path)
-	
-	def subpath (self, _path) :
-		return self._context.acl_0 (None, self._samples.path (), "dir", None, None, _path)
-	
-	def path_regex (self, _path_regex) :
-		return self._context.acl_0 (None, self._samples.path (), "reg", None, None, _path_regex)
+	def host (self, _host, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.host (), "str", ("-i",), "eq", _host)
 	
 	
-	def query (self, _query) :
-		return self._context.acl_0 (None, self._samples.query (), "str", None, "eq", _query)
+	def path (self, _path, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.path (), "str", None, "eq", _path)
 	
-	def query_prefix (self, _query) :
-		return self._context.acl_0 (None, self._samples.query (), "beg", None, None, _query)
+	def path_prefix (self, _path, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.path (), "beg", None, None, _path)
 	
+	def path_substring (self, _path, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.path (), "sub", None, None, _path)
 	
-	def request_method (self, _method) :
-		return self._context.acl_0 (None, self._samples.request_method (), "str", ("-i",), "eq", (_method,))
+	def subpath (self, _path, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.path (), "dir", None, None, _path)
 	
-	def response_status (self, _code) :
-		return self._context.acl_0 (None, self._samples.response_status (), "int", None, "eq", (_code,))
-	
-	
-	def request_header (self, _name, _value) :
-		return self._context.acl_0 (None, self._samples.request_header (_name), "str", None, "eq", (_value,))
-	
-	def request_header_exists (self, _header, _expected = True) :
-		return self._context.acl_0 (None, self._samples.request_header_exists (_header, _expected), "bool", None, None, None)
-	
-	def response_header (self, _name, _value) :
-		return self._context.acl_0 (None, self._samples.response_header (_name), "str", None, "eq", (_value,))
-	
-	def response_header_exists (self, _header, _expected = True) :
-		return self._context.acl_0 (None, self._samples.response_header_exists (_header, _expected), "bool", None, None, None)
+	def path_regex (self, _path_regex, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.path (), "reg", None, None, _path_regex)
 	
 	
-	def request_cookie_exists (self, _cookie, _expected = True) :
-		return self._context.acl_0 (None, self._samples.request_cookie_exists (_cookie, _expected), "bool", None, None, None)
+	def query (self, _query, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.query (), "str", None, "eq", _query)
 	
-	def response_cookie_exists (self, _cookie, _expected = True) :
-		return self._context.acl_0 (None, self._samples.response_cookie_exists (_header, _expected), "bool", None, None, None)
-	
-	
-	def variable_bool (self, _variable, _expected = True) :
-		return self._context.acl_0 (None, self._samples.variable_bool (_variable, _expected), "bool", None, None, None)
-	
-	def variable_exists (self, _variable) :
-		return self._context.acl_0 (None, self._samples.variable (_variable), "found", None, None, None)
-	
-	def variable_equals (self, _variable, _value) :
-		return self._context.acl_0 (None, self._samples.variable (_variable), "str", None, "eq", _value)
-	
-	def variable_prefix (self, _variable, _value) :
-		return self._context.acl_0 (None, self._samples.variable (_variable), "beg", None, None, _value)
+	def query_prefix (self, _query, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.query (), "beg", None, None, _query)
 	
 	
-	def via_tls (self, _expected = True) :
-		return self._context.acl_0 (None, self._samples.via_tls (_expected), "bool", None, None, None)
+	def request_method (self, _method, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.request_method (), "str", ("-i",), "eq", (_method,))
+	
+	def response_status (self, _code, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.response_status (), "int", None, "eq", (_code,))
 	
 	
-	def authenticated (self, _credentials, _expected = True) :
-		return self._context.acl_0 (None, self._samples.authenticated (_credentials, _expected), "bool", None, None, None)
+	def request_header (self, _name, _value, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.request_header (_name), "str", None, "eq", (_value,))
+	
+	def request_header_exists (self, _header, _expected = True, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.request_header_exists (_header, _expected), "bool", None, None, None)
+	
+	def response_header (self, _name, _value, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.response_header (_name), "str", None, "eq", (_value,))
+	
+	def response_header_exists (self, _header, _expected = True, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.response_header_exists (_header, _expected), "bool", None, None, None)
 	
 	
-	def backend_active (self, _backend, _expected = True) :
-		return self._context.acl_0 (None, self._samples.backend_active (_backend, _expected), "bool", None, None, None)
+	def request_cookie_exists (self, _cookie, _expected = True, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.request_cookie_exists (_cookie, _expected), "bool", None, None, None)
+	
+	def response_cookie_exists (self, _cookie, _expected = True, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.response_cookie_exists (_header, _expected), "bool", None, None, None)
 	
 	
-	def geoip_country_extracted (self, _country, _expected = True) :
-		return self._context.acl_0 (None, self._samples.geoip_country_extracted (), "str", None, "eq", _country)
+	def variable_bool (self, _variable, _expected = True, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.variable_bool (_variable, _expected), "bool", None, None, None)
 	
-	def geoip_country_captured (self, _country, _expected = True) :
-		return self._context.acl_0 (None, self._samples.geoip_country_captured (), "str", None, "eq", _country)
+	def variable_exists (self, _variable, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.variable (_variable), "found", None, None, None)
+	
+	def variable_equals (self, _variable, _value, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.variable (_variable), "str", None, "eq", _value)
+	
+	def variable_prefix (self, _variable, _value, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.variable (_variable), "beg", None, None, _value)
 	
 	
-	def bot (self) :
-		return self._context.acl_0 (None, self._samples.request_header ("User-Agent", ("lower",)), "str", ("-i", "-f"), "sub", "$'bots_acl")
+	def via_tls (self, _expected = True, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.via_tls (_expected), "bool", None, None, None)
+	
+	
+	def authenticated (self, _credentials, _expected = True, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.authenticated (_credentials, _expected), "bool", None, None, None)
+	
+	
+	def backend_active (self, _backend, _expected = True, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.backend_active (_backend, _expected), "bool", None, None, None)
+	
+	
+	def geoip_country_extracted (self, _country, _expected = True, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.geoip_country_extracted (), "str", None, "eq", _country)
+	
+	def geoip_country_captured (self, _country, _expected = True, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.geoip_country_captured (), "str", None, "eq", _country)
+	
+	
+	def bot (self, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.request_header ("User-Agent", ("lower",)), "str", ("-i", "-f"), "sub", "$'bots_acl")
 
 
 
