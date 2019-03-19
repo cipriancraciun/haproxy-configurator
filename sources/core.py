@@ -1048,14 +1048,38 @@ class HaStatementGroup (HaStatement) :
 	
 	def __init__ (self, _parameters, _heading, **_options) :
 		HaStatement.__init__ (self, _parameters, **_options)
-		self._heading = _heading
+		if _heading is None :
+			self._heading = None
+		elif isinstance (_heading, basestring) :
+			self._heading = (_heading,)
+		elif isinstance (_heading, tuple) :
+			self._heading = _heading
+		else :
+			raise_error ("7f294bbf", _heading)
 		self._statements = list ()
+		self._substatements_comment = None
+		self._substatements_for_comment = None
 	
 	def declare (self, *_tokens, **_options) :
 		while isinstance (_tokens, tuple) and len (_tokens) == 1 and isinstance (_tokens[0], tuple) :
 			_tokens = _tokens[0]
+		_comment = _options.get ("comment", None)
+		if _comment is not None :
+			_options = dict (_options)
+			del _options["comment"]
+			if "order" in _options :
+				raise_error ("b01caf2b", _options)
 		_statement = HaGenericStatement (self._parameters, _tokens, **_options)
-		self._statements.append (_statement)
+		if _comment is not None :
+			if _comment != self._substatements_comment :
+				self._substatements_comment = _comment
+				self._substatements_for_comment = HaStatementGroup (self._parameters, tuple (list (self._heading) + [_comment]))
+				self._statements.append (self._substatements_for_comment)
+			self._substatements_for_comment._statements.append (_statement)
+		else :
+			self._substatements_comment = None
+			self._substatements_for_comment = None
+			self._statements.append (_statement)
 		return _statement
 	
 	def declare_group (self, _heading, *_statements, **_options) :
