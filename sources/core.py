@@ -472,31 +472,31 @@ class HaWorker (HaSection) :
 		return default_builders.HaHttpSampleBuilder (self, self._parameters)
 	
 	
-	def declare_http_request_rule_if (self, _action, _acl, order = None) :
+	def declare_http_request_rule_if (self, _action, _acl, **_overrides) :
 		_condition = ("if", _acl, "TRUE")
-		self.declare_http_request_rule_0 ((_action, _condition), order = order)
+		self.declare_http_request_rule_0 ((_action, _condition), **_overrides)
 	
-	def declare_http_request_rule_unless (self, _action, _acl, order = None) :
+	def declare_http_request_rule_unless (self, _action, _acl, **_overrides) :
 		_condition = ("unless", _acl, "TRUE")
-		self.declare_http_request_rule_0 ((_action, _condition), order = order)
+		self.declare_http_request_rule_0 ((_action, _condition), **_overrides)
 	
-	def declare_http_request_rule_0 (self, _rule, order = None) :
-		self._http_request_rule_statements.declare (("http-request", _rule), order = order)
+	def declare_http_request_rule_0 (self, _rule, **_overrides) :
+		self._http_request_rule_statements.declare (("http-request", _rule), **_overrides)
 	
 	def http_request_rule_builder (self) :
 		return default_builders.HaHttpRequestRuleBuilder (self, self._parameters)
 	
 	
-	def declare_http_response_rule_if (self, _action, _acl, order = None) :
+	def declare_http_response_rule_if (self, _action, _acl, **_overrides) :
 		_condition = ("if", _acl, "TRUE")
-		self.declare_http_response_rule_0 ((_action, _condition), order = order)
+		self.declare_http_response_rule_0 ((_action, _condition), **_overrides)
 	
-	def declare_http_response_rule_unless (self, _action, _acl, order = None) :
+	def declare_http_response_rule_unless (self, _action, _acl, **_overrides) :
 		_condition = ("unless", _acl, "TRUE")
-		self.declare_http_response_rule_0 ((_action, _condition), order = order)
+		self.declare_http_response_rule_0 ((_action, _condition), **_overrides)
 	
-	def declare_http_response_rule_0 (self, _rule, order = None) :
-		self._http_response_rule_statements.declare (("http-response", _rule), order = order)
+	def declare_http_response_rule_0 (self, _rule, **_overrides) :
+		self._http_response_rule_statements.declare (("http-response", _rule), **_overrides)
 	
 	def http_response_rule_builder (self) :
 		return default_builders.HaHttpResponseRuleBuilder (self, self._parameters)
@@ -566,28 +566,28 @@ class HaFrontend (HaWorker) :
 		self._bind_statements.declare (("bind", statement_quote ("\'", _endpoint), _name, _tls_options, _options), order = order, overrides = overrides)
 	
 	
-	def declare_route_if_0 (self, _backend, _acl, order = None) :
+	def declare_route_if_0 (self, _backend, _acl, **_overrides) :
 		_condition = ("if", _acl, "TRUE")
-		self._route_statements.declare (("use_backend", _backend, _condition), order = order)
+		self._route_statements.declare (("use_backend", _backend, _condition), **_overrides)
 	
-	def declare_route_unless_0 (self, _backend, _acl, order = None) :
+	def declare_route_unless_0 (self, _backend, _acl, **_overrides) :
 		_condition = ("unless", _acl, "TRUE")
-		self._route_statements.declare (("use_backend", _backend, _condition), order = order)
+		self._route_statements.declare (("use_backend", _backend, _condition), **_overrides)
 	
 	def http_route_builder (self, **_overrides) :
 		return default_builders.HaHttpRouteBuilder (self, self._parameters, **_overrides)
 	
 	
-	def _declare_request_capture (self, _length = "$+frontend_capture_length") :
+	def _declare_request_capture (self, _length = "$+frontend_capture_length", **_overrides) :
 		_index = self._request_captures_count
 		self._request_captures_count += 1
-		self._request_capture_statements.declare (("declare", "capture", "request", "len", statement_enforce_int (_length)))
+		self._request_capture_statements.declare (("declare", "capture", "request", "len", statement_enforce_int (_length)), **_overrides)
 		return _index
 	
-	def _declare_response_capture (self, _length = "$+frontend_capture_length") :
+	def _declare_response_capture (self, _length = "$+frontend_capture_length", **_overrides) :
 		_index = self._response_captures_count
 		self._response_captures_count += 1
-		self._response_capture_statements.declare (("declare", "capture", "response", "len", statement_enforce_int (_length)))
+		self._response_capture_statements.declare (("declare", "capture", "response", "len", statement_enforce_int (_length)), **_overrides)
 		return _index
 	
 	
@@ -623,12 +623,12 @@ class HaBackend (HaWorker) :
 		self._server_statements = HaStatementGroup (self._parameters, "Servers", order = 5000 + 800)
 	
 	
-	def declare_server (self, _identifier, _endpoint, _options = "$server_options", _acl = None, order = None, **_overrides) :
+	def declare_server (self, _identifier, _endpoint, _options = "$server_options", _acl = None, **_overrides) :
 		_identifier = enforce_identifier (self._parameters, _identifier)
 		_options = statement_overrides (_options, **_overrides)
 		if _acl is not None :
-			self._server_statements.declare (("use-server", statement_quote ("\'", _identifier), "if", _acl), order = order)
-		self._server_statements.declare (("server", statement_quote ("\'", _identifier), statement_quote ("\'", _endpoint), _options), order = order)
+			self._server_statements.declare (("use-server", statement_quote ("\'", _identifier), "if", _acl), **_overrides)
+		self._server_statements.declare (("server", statement_quote ("\'", _identifier), statement_quote ("\'", _endpoint), _options), **_overrides)
 	
 	
 	def _generate_header (self) :
