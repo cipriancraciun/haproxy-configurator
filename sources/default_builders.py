@@ -887,6 +887,7 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 	
 	
 	def set_debug_headers (self, _acl = None, **_overrides) :
+		self.set_header ("$logging_http_header_action", statement_format ("%%[%s]", self._samples.variable ("$logging_http_variable_action")), False, _acl, **_overrides)
 		self.set_header ("$http_debug_timestamp_header", "%[date(),http_date()]", False, _acl, **_overrides)
 		self.append_header ("$http_debug_frontend_header", "%f", _acl, **_overrides)
 		self.append_header ("$http_debug_backend_header", "%b", _acl, **_overrides)
@@ -1140,7 +1141,6 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		self.set_variable ("$logging_http_variable_content_length", self._samples.response_header ("Content-Length"), _acl, **_overrides)
 		self.set_variable ("$logging_http_variable_cache_control", self._samples.response_header ("Cache-Control"), _acl, **_overrides)
 		self.set_variable ("$logging_http_variable_cache_etag", self._samples.response_header ("ETag"), _acl, **_overrides)
-		self.set_header ("$logging_http_header_action", statement_format ("%%[%s]", self._samples.variable ("$logging_http_variable_action")), False, _acl, **_overrides)
 	
 	
 	def authenticate_trigger (self, _credentials, _acl = None, **_overrides) :
@@ -1153,6 +1153,7 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 	
 	
 	def set_debug_headers (self, _acl = None, **_overrides) :
+		self.set_header ("$logging_http_header_action", statement_format ("%%[%s]", self._samples.variable ("$logging_http_variable_action")), False, _acl, **_overrides)
 		self.set_header ("$http_debug_timestamp_header", "%[date(),http_date()]", False, _acl, **_overrides)
 		self.append_header ("$http_debug_frontend_header", "%f", _acl, **_overrides)
 		self.append_header ("$http_debug_backend_header", "%b", _acl, **_overrides)
