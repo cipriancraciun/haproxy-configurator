@@ -775,6 +775,7 @@ parameters = {
 		"haproxy_internals_path_prefix" : parameters_format ("%s%s", parameters_get ("internals_path_prefix"), "haproxy/"),
 		"heartbeat_server_path" : parameters_format ("%s%s", parameters_get ("internals_path_prefix"), "heartbeat"),
 		"heartbeat_proxy_path" : parameters_format ("%s%s", parameters_get ("internals_path_prefix"), "heartbeat-proxy"),
+		"heartbeat_self_path" : parameters_format ("%s%s", parameters_get ("internals_path_prefix"), "heartbeat-haproxy"),
 		"authenticate_path" : parameters_format ("%s%s", parameters_get ("internals_path_prefix"), "authenticate"),
 		"error_pages_path_prefix" : parameters_format ("%s%s", parameters_get ("internals_path_prefix"), "errors/"),
 		

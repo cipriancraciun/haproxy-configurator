@@ -682,6 +682,7 @@ class HaHttpFrontend (HaFrontend) :
 		self.routes = self.http_route_builder ()
 	
 	def _declare_implicit (self, **_options) :
+		self.declare_http_request_rule_if (("deny", "deny_status", "200"), self.acls.path ("$heartbeat_self_path"), order = 0)
 		default_declares.declare_http_frontend (self, **_options)
 
 
