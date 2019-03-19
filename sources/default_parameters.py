@@ -587,6 +587,7 @@ parameters = {
 		"defaults_server_check_interval_failed" : parameters_math ("//", parameters_get ("defaults_server_check_interval_normal"), 3),
 		"defaults_server_check_count_rising" : 8,
 		"defaults_server_check_count_failed" : 4,
+		"defaults_server_check_count_errors" : parameters_get ("defaults_server_check_count_failed"),
 		
 		"defaults_server_resolvers" : None,
 		

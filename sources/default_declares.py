@@ -209,8 +209,8 @@ def declare_defaults_servers (_configuration) :
 			("default-server", "downinter", statement_seconds ("$+defaults_server_check_interval_failed")),
 			("default-server", "rise", "$+defaults_server_check_count_rising"),
 			("default-server", "fall", "$+defaults_server_check_count_failed"),
-			("default-server", "on-error", "fail-check"),
-			("default-server", "error-limit", "128"),
+			("default-server", "on-error", "fastinter"),
+			("default-server", "error-limit", "$+defaults_server_check_count_errors"),
 	)
 
 
