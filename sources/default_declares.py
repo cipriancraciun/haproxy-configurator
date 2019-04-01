@@ -352,7 +352,7 @@ def declare_http_frontend_stick (_configuration) :
 						))
 			),
 			("http-request", "track-sc0", "src"),
-			order = 7000 + 300,
+			order = 5000 + 290,
 		)
 
 
