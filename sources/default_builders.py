@@ -1301,6 +1301,8 @@ class HaHttpBackendBuilder (HaBuilder) :
 				"fallback-http",
 				"ipv4@127.255.255.254:8080",
 				backend_check_enabled = True,
+				backend_http_keep_alive_reuse = "never",
+				backend_http_keep_alive_mode = "close",
 			)
 
 

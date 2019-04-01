@@ -29,6 +29,7 @@ def declare_defaults (_configuration) :
 
 def declare_http_frontend (_configuration) :
 	declare_http_frontend_connections (_configuration)
+	declare_http_frontend_timeouts (_configuration)
 	declare_http_frontend_monitor (_configuration)
 	declare_http_frontend_stats (_configuration)
 	declare_http_frontend_logging (_configuration)
@@ -281,11 +282,26 @@ def declare_http_frontend_connections (_configuration) :
 	_configuration.declare_group (
 			"Connections",
 			statement_choose_if ("$?frontend_enabled", "enabled", "disabled"),
-			("mode", "http"),
 			("maxconn", "$+frontend_max_connections_active_count"),
 			("backlog", "$+frontend_max_connections_backlog_count"),
-			("option", "http-keep-alive"),
+			("mode", "http"),
+			statement_choose_match ("$frontend_http_keep_alive_reuse",
+					("safe", ("http-reuse", "safe")),
+					("aggressive", ("http-reuse", "aggressive")),
+					("always", ("http-reuse", "always")),
+					("never", ("http-reuse", "never"))),
+			statement_choose_match ("$frontend_http_keep_alive_mode",
+					("keep-alive", ("option", "http-keep-alive")),
+					("close", ("option", "forceclose"))),
 			order = 2000 + 100,
+	)
+
+
+def declare_http_frontend_timeouts (_configuration) :
+	_configuration.declare_group (
+			"Timeouts",
+			statement_choose_if_non_null ("$frontend_http_keep_alive_timeout", ("timeout", "http-keep-alive", statement_seconds ("$+frontend_http_keep_alive_timeout"))),
+			order = 2000 + 101,
 	)
 
 
@@ -363,7 +379,15 @@ def declare_http_backend_connections (_configuration) :
 			"Connections",
 			statement_choose_if ("$?backend_enabled", "enabled", "disabled"),
 			("mode", "http"),
-			("option", "http-server-close"),
+			statement_choose_match ("$backend_http_keep_alive_reuse",
+					("safe", ("http-reuse", "safe")),
+					("aggressive", ("http-reuse", "aggressive")),
+					("always", ("http-reuse", "always")),
+					("never", ("http-reuse", "never"))),
+			statement_choose_match ("$backend_http_keep_alive_mode",
+					("keep-alive", ("option", "http-keep-alive")),
+					("server-close", ("option", "http-server-close")),
+					("close", ("option", "forceclose"))),
 			# FIXME:  Make this configurable!
 			("option", "forwardfor", "header", "$logging_http_header_forwarded_for", "if-none"),
 	)
@@ -385,6 +409,7 @@ def declare_http_backend_server_timeouts (_configuration) :
 	declare_backend_server_timeouts (_configuration, [
 			statement_choose_if_non_null ("$backend_server_timeout_request", ("timeout", "http-request", statement_seconds ("$+backend_server_timeout_request"))),
 			statement_choose_if_non_null ("$backend_server_timeout_keep_alive", ("timeout", "http-keep-alive", statement_seconds ("$+backend_server_timeout_keep_alive"))),
+			statement_choose_if_non_null ("$backend_http_keep_alive_timeout", ("timeout", "http-keep-alive", statement_seconds ("$+backend_http_keep_alive_timeout"))),
 	])
 
 

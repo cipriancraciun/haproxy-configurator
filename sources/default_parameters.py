@@ -420,6 +420,10 @@ parameters = {
 		"frontend_accept_proxy_enabled" : False,
 		"frontend_capture_length" : 256,
 		
+		"frontend_http_keep_alive_mode" : "keep-alive",
+		"frontend_http_keep_alive_reuse" : "safe",
+		"frontend_http_keep_alive_timeout" : None,
+		
 		
 		
 		
@@ -462,6 +466,10 @@ parameters = {
 		"backend_server_timeout_tarpit" : None,
 		"backend_server_timeout_request" : None,
 		"backend_server_timeout_keep_alive" : None,
+		
+		"backend_http_keep_alive_mode" : "server-close",
+		"backend_http_keep_alive_reuse" : "safe",
+		"backend_http_keep_alive_timeout" : None,
 		
 		
 		
@@ -602,7 +610,7 @@ parameters = {
 		"defaults_timeout_check" : 6,
 		"defaults_timeout_tarpit" : parameters_get ("defaults_timeout_queue"),
 		"defaults_timeout_request" : 30,
-		"defaults_timeout_keep_alive" : 180,
+		"defaults_timeout_keep_alive" : 60,
 		
 		"defaults_compression_content_types" : compression_content_types,
 		
