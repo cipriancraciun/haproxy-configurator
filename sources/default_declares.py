@@ -379,6 +379,11 @@ def declare_http_backend_connections (_configuration) :
 			"Connections",
 			statement_choose_if ("$?backend_enabled", "enabled", "disabled"),
 			("mode", "http"),
+			# FIXME:  Extract this into common function!
+			statement_choose_match ("$backend_balance",
+					("round-robin", ("balance", "roundrobin")),
+					("first", ("balance", "first")),
+					(None, None)),
 			statement_choose_match ("$backend_http_keep_alive_reuse",
 					("safe", ("http-reuse", "safe")),
 					("aggressive", ("http-reuse", "aggressive")),
@@ -420,6 +425,11 @@ def declare_tcp_backend_connections (_configuration) :
 			"Connections",
 			statement_choose_if ("$?backend_enabled", "enabled", "disabled"),
 			("mode", "tcp"),
+			# FIXME:  Extract this into common function!
+			statement_choose_match ("$backend_balance",
+					("round-robin", ("balance", "roundrobin")),
+					("first", ("balance", "first")),
+					(None, None)),
 	)
 
 def declare_tcp_backend_check (_configuration) :

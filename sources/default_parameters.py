@@ -471,6 +471,8 @@ parameters = {
 		"backend_http_keep_alive_reuse" : "safe",
 		"backend_http_keep_alive_timeout" : None,
 		
+		"backend_balance" : None,
+		
 		
 		
 		
