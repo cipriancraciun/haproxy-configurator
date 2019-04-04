@@ -418,7 +418,7 @@ parameters = {
 		"frontend_stats_refresh" : 6,
 		
 		"frontend_accept_proxy_enabled" : False,
-		"frontend_capture_length" : 256,
+		"frontend_capture_length" : 1024,
 		
 		"frontend_http_keep_alive_mode" : "keep-alive",
 		"frontend_http_keep_alive_reuse" : "safe",
