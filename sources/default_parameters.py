@@ -211,7 +211,7 @@ logging_tcp_format_json = None
 
 logging_http_format_json_template = [
 		
-		("s", "''20190327:01"),
+		("s", "''20190405:01"),
 		("ss", "'$logging_http_format_subschema"),
 		("t", "=%Ts.%ms"),
 		
@@ -304,19 +304,19 @@ logging_http_format_json_template = [
 		]),
 		
 		("stick", [
-				"+@sc0_conn_cur()",
-				"+@sc0_conn_cnt()",
-				"+@sc0_conn_rate()",
-				"+@sc0_sess_cnt()",
-				"+@sc0_sess_rate()",
-				"+@sc0_http_req_cnt()",
-				"+@sc0_http_req_rate()",
-				"+@sc0_http_err_cnt()",
-				"+@sc0_http_err_rate()",
-				"+@sc0_kbytes_in()",
-				"+@sc0_bytes_in_rate()",
-				"+@sc0_kbytes_out()",
-				"+@sc0_bytes_out_rate()",
+				"'@sc0_conn_cur()",
+				"'@sc0_conn_cnt()",
+				"'@sc0_conn_rate()",
+				"'@sc0_sess_cnt()",
+				"'@sc0_sess_rate()",
+				"'@sc0_http_req_cnt()",
+				"'@sc0_http_req_rate()",
+				"'@sc0_http_err_cnt()",
+				"'@sc0_http_err_rate()",
+				"'@sc0_kbytes_in()",
+				"'@sc0_bytes_in_rate()",
+				"'@sc0_kbytes_out()",
+				"'@sc0_bytes_out_rate()",
 		]),
 		
 	]
