@@ -367,7 +367,14 @@ def declare_http_frontend_stick (_configuration) :
 							"bytes_out_rate(60s)",
 						))
 			),
-			("http-request", "track-sc0", "src"),
+			statement_choose_if ("$?frontend_http_stick_track",
+				("http-request", "track-sc0",
+						statement_choose_match ("$frontend_http_stick_source",
+								("source", "src"),
+								("X-Forwarded-For", statement_format ("req.hdr(%s,1)", "$logging_http_header_forwarded_for")),
+						)
+				),
+			),
 			order = 5000 + 290,
 		)
 

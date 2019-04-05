@@ -424,6 +424,9 @@ parameters = {
 		"frontend_http_keep_alive_reuse" : "safe",
 		"frontend_http_keep_alive_timeout" : None,
 		
+		"frontend_http_stick_source" : "source",
+		"frontend_http_stick_track" : False,
+		
 		
 		
 		

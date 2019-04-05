@@ -452,6 +452,18 @@ class HaHttpRuleBuilder (HaBuilder) :
 		_rule_condition = ("if", _acl, "TRUE")
 		_rule = ("redirect", "prefix", statement_quote ("\"", _target), "code", _code)
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
+	
+	
+	def track_stick (self, _source = None, _acl = None, **_overrides) :
+		if _source is None :
+			_source = "$frontend_http_stick_source"
+		_source = statement_choose_match (_source,
+					("source", "src"),
+					("X-Forwarded-For", statement_format ("req.hdr(%s,1)", "$logging_http_header_forwarded_for")),
+			)
+		_rule_condition = ("if", _acl, "TRUE")
+		_rule = ("track-sc0", _source)
+		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 
 
 
