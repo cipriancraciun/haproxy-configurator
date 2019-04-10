@@ -96,16 +96,66 @@ tls_options_backdoor = tls_options_normal
 
 
 http_status_codes = {
-		"content" : (200, 201, 202, 204, 206),
-		"redirect" : (301, 302, 303, 307, 308),
+		
+		"content_standard" : (200, 201, 202, 204, 206,),
+		"content_strict" : (200, 204,),
+		"redirect" : (301, 302, 303, 307, 308,),
 		"caching" : (304,),
+		
+		"get_standard" : (200, 204, 206,),
+		"get_strict" : (200, 304,),
+		"get_redirect" : (301, 302,),
+		"get_caching" : (304,),
+		
+		"post_strict" : (200, 201, 202, 204,),
+		"post_standard" : (200, 201, 202, 204,),
+		"post_redirect" : (303,),
+		"post_caching" : (),
 	}
 
-http_status_codes["harden_allowed"] = \
+
+http_status_codes["harden_allowed_strict"] = \
 	tuple (
-		list (http_status_codes["content"]) +
+		list (http_status_codes["content_strict"]) +
 		list (http_status_codes["redirect"]) +
 		list (http_status_codes["caching"])
+	)
+
+http_status_codes["harden_allowed_standard"] = \
+	tuple (
+		list (http_status_codes["content_standard"]) +
+		list (http_status_codes["redirect"]) +
+		list (http_status_codes["caching"])
+	)
+
+
+http_status_codes["harden_allowed_get_strict"] = \
+	tuple (
+		list (http_status_codes["get_strict"]) +
+		list (http_status_codes["get_redirect"]) +
+		list (http_status_codes["get_caching"])
+	)
+
+http_status_codes["harden_allowed_get_standard"] = \
+	tuple (
+		list (http_status_codes["get_standard"]) +
+		list (http_status_codes["get_redirect"]) +
+		list (http_status_codes["get_caching"])
+	)
+
+
+http_status_codes["harden_allowed_post_strict"] = \
+	tuple (
+		list (http_status_codes["post_strict"]) +
+		list (http_status_codes["post_redirect"]) +
+		list (http_status_codes["post_caching"])
+	)
+
+http_status_codes["harden_allowed_post_standard"] = \
+	tuple (
+		list (http_status_codes["post_standard"]) +
+		list (http_status_codes["post_redirect"]) +
+		list (http_status_codes["post_caching"])
 	)
 
 
@@ -832,10 +882,46 @@ parameters = {
 		
 		
 		
-		"http_harden_allowed_methods" : ('head', 'get', 'options'),
-		"http_harden_allowed_status_codes" : http_status_codes["harden_allowed"],
+		"http_harden_level" : "standard",
+		
+		"http_harden_allowed_methods_strict" : ('get'),
+		"http_harden_allowed_methods_standard" : ('head', 'get', 'options'),
+		"http_harden_allowed_methods" : parameters_choose_match (
+				parameters_get ("http_harden_level"),
+				("strict", parameters_get ("http_harden_allowed_methods_strict")),
+				("standard", parameters_get ("http_harden_allowed_methods_standard")),
+		),
+		
+		"http_harden_allowed_status_codes_strict" : http_status_codes["harden_allowed_strict"],
+		"http_harden_allowed_status_codes_standard" : http_status_codes["harden_allowed_standard"],
+		"http_harden_allowed_status_codes" : parameters_choose_match (
+				parameters_get ("http_harden_level"),
+				("strict", parameters_get ("http_harden_allowed_status_codes_strict")),
+				("standard", parameters_get ("http_harden_allowed_status_codes_standard")),
+		),
+		
+		"http_harden_allowed_get_status_codes_strict" : http_status_codes["harden_allowed_get_strict"],
+		"http_harden_allowed_get_status_codes_standard" : http_status_codes["harden_allowed_get_standard"],
+		"http_harden_allowed_get_status_codes" : parameters_choose_match (
+				parameters_get ("http_harden_level"),
+				("strict", parameters_get ("http_harden_allowed_get_status_codes_strict")),
+				("standard", parameters_get ("http_harden_allowed_get_status_codes_standard")),
+		),
+		
+		"http_harden_allowed_post_status_codes_strict" : http_status_codes["harden_allowed_post_strict"],
+		"http_harden_allowed_post_status_codes_standard" : http_status_codes["harden_allowed_post_standard"],
+		"http_harden_allowed_post_status_codes" : parameters_choose_match (
+				parameters_get ("http_harden_level"),
+				("strict", parameters_get ("http_harden_allowed_post_status_codes_strict")),
+				("standard", parameters_get ("http_harden_allowed_post_status_codes_standard")),
+		),
+		
 		"http_harden_hsts_enabled" : True,
-		"http_harden_hsts_interval" : (24 * 3600),
+		"http_harden_hsts_interval" : parameters_choose_match (
+				parameters_get ("http_harden_level"),
+				("strict", 4 * 365 * 24 * 3600),
+				("standard", 28 * 24 * 3600),
+		),
 		"http_harden_hsts_descriptor" : parameters_format ("max-age=%d", parameters_get ("http_harden_hsts_interval")),
 		"http_harden_csp_descriptor" : "upgrade-insecure-requests",
 		"http_harden_referrer_descriptor" : "strict-origin-when-cross-origin",

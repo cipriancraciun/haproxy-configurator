@@ -979,12 +979,35 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 	
 	
 	def harden_http (self, _acl = None, _force = False, _mark_denied = None, **_overrides) :
+		self.harden_http_all (_acl, _force, _mark_denied, **_overrides)
+		self.harden_http_get (_acl, _force, _mark_denied, **_overrides)
+		self.harden_http_post (_acl, _force, _mark_denied, **_overrides)
+	
+	def harden_http_all (self, _acl = None, _force = False, _mark_denied = None, **_overrides) :
 		_mark_denied = self._value_or_parameters_get_and_expand (_mark_denied, "http_harden_netfilter_mark_denied")
 		_status_acl = self._acl.response_status ("$http_harden_allowed_status_codes")
 		_status_acl = _status_acl.negate ()
 		_acl_handled = self._acl.response_header_exists ("$http_hardened_header", False) if not _force else None
 		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
 		self.deny ((_acl, _status_acl, _acl_enabled, _acl_handled), None, _mark_denied, **_overrides)
+	
+	def harden_http_get (self, _acl = None, _force = False, _mark_denied = None, **_overrides) :
+		_mark_denied = self._value_or_parameters_get_and_expand (_mark_denied, "http_harden_netfilter_mark_denied")
+		_method_acl = self._acl.variable_equals ("$logging_http_variable_method", ("GET", "HEAD"))
+		_status_acl = self._acl.response_status ("$http_harden_allowed_get_status_codes")
+		_status_acl = _status_acl.negate ()
+		_acl_handled = self._acl.response_header_exists ("$http_hardened_header", False) if not _force else None
+		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
+		self.deny ((_acl, _method_acl, _status_acl, _acl_enabled, _acl_handled), None, _mark_denied, **_overrides)
+	
+	def harden_http_post (self, _acl = None, _force = False, _mark_denied = None, **_overrides) :
+		_mark_denied = self._value_or_parameters_get_and_expand (_mark_denied, "http_harden_netfilter_mark_denied")
+		_method_acl = self._acl.variable_equals ("$logging_http_variable_method", ("POST", "PUT"))
+		_status_acl = self._acl.response_status ("$http_harden_allowed_post_status_codes")
+		_status_acl = _status_acl.negate ()
+		_acl_handled = self._acl.response_header_exists ("$http_hardened_header", False) if not _force else None
+		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
+		self.deny ((_acl, _method_acl, _status_acl, _acl_enabled, _acl_handled), None, _mark_denied, **_overrides)
 	
 	def harden_headers (self, _acl = None, _force = False, **_overrides) :
 		_acl_tls = self._acl.via_tls ()
@@ -1032,7 +1055,8 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		self.harden_headers (_acl, _force, **_overrides)
 		self.harden_via (_acl, _force, **_overrides)
 		self.harden_ranges (_acl, _force, **_overrides)
-		self.harden_redirects (_acl, _force, **_overrides)
+		# FIXME:  Make this configurable!
+		# self.harden_redirects (_acl, _force, **_overrides)
 		self.harden_tls (_acl, _force, **_overrides)
 		# FIXME:  Make this deferable!
 		_acl_handled = self._acl.response_header_exists ("$http_hardened_header", False) if not _force else None
