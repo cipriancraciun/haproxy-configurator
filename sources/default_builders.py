@@ -86,6 +86,12 @@ class HaHttpAclBuilder (HaBuilder) :
 	def host (self, _host, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.host (), "str", ("-i",), "eq", _host)
 	
+	def host_prefix (self, _host, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.host (), "beg", ("-i",), None, _host)
+	
+	def host_suffix (self, _host, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.host (), "end", ("-i",), None, _host)
+	
 	
 	def path (self, _path, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.path (), "str", None, "eq", _path)
@@ -224,6 +230,8 @@ class HaHttpSampleBuilder (HaBuilder) :
 	
 	
 	def request_method (self, _transforms = None) :
+		if _transforms is None :
+			_transforms = ("upper",)
 		return self._context.sample_0 ("method", None, _transforms)
 	
 	def response_status (self, _transforms = None) :
@@ -451,6 +459,13 @@ class HaHttpRuleBuilder (HaBuilder) :
 	def redirect_prefix (self, _target, _code = 307, _acl = None, **_overrides) :
 		_rule_condition = ("if", _acl, "TRUE")
 		_rule = ("redirect", "prefix", statement_quote ("\"", _target), "code", _code)
+		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
+	
+	def redirect_via_tls (self, _code = 307, _acl = None, **_overrides) :
+		if _acl is None :
+			_acl = self._acl.via_tls (False)
+		_rule_condition = ("if", _acl, "TRUE")
+		_rule = ("redirect", "scheme", "https", "code", _code)
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
 	
@@ -846,6 +861,7 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 	
 	
 	def capture_logging (self, _acl = None, **_overrides) :
+		self.set_variable ("$logging_http_variable_method", self._samples.request_method (), _acl, **_overrides)
 		self.set_variable ("$logging_http_variable_host", self._samples.host (), _acl, **_overrides)
 		self.set_variable ("$logging_http_variable_forwarded_host", self._samples.forwarded_host (), _acl, **_overrides)
 		self.set_variable ("$logging_http_variable_forwarded_for", self._samples.forwarded_for (), _acl, **_overrides)

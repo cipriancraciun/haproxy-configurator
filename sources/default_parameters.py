@@ -425,7 +425,7 @@ parameters = {
 		"frontend_http_keep_alive_timeout" : None,
 		
 		"frontend_http_stick_source" : "source",
-		"frontend_http_stick_track" : False,
+		"frontend_http_stick_track" : True,
 		
 		
 		
@@ -750,6 +750,7 @@ parameters = {
 				("text", parameters_get ("logging_http_format_text")),
 				("json", parameters_get ("logging_http_format_json"))
 		),
+		"logging_http_variable_method" : "txn.logging_http_method",
 		"logging_http_variable_host" : "txn.logging_http_host",
 		"logging_http_variable_forwarded_host" : "txn.logging_http_forwarded_host",
 		"logging_http_variable_forwarded_for" : "txn.logging_http_forwarded_for",
@@ -838,7 +839,7 @@ parameters = {
 		"http_harden_hsts_descriptor" : parameters_format ("max-age=%d", parameters_get ("http_harden_hsts_interval")),
 		"http_harden_csp_descriptor" : "upgrade-insecure-requests",
 		"http_harden_referrer_descriptor" : "strict-origin-when-cross-origin",
-		"http_harden_frames_descriptor" : "SAMEORIGIN",
+		"http_harden_frames_descriptor" : "sameorigin",
 		"http_harden_cto_descriptor" : "nosniff",
 		"http_harden_xss_descriptor" : "1; mode=block",
 		"http_harden_netfilter_mark_allowed" : None,
