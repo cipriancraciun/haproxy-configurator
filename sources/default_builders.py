@@ -435,6 +435,9 @@ class HaHttpRuleBuilder (HaBuilder) :
 	def harden_enable (self, _acl = None, **_overrides) :
 		self.set_enabled ("$http_harden_enabled_variable", _acl, **_overrides)
 	
+	def harden_exclude (self, _acl = None, **_overrides) :
+		self.set_enabled ("$http_harden_excluded_variable", _acl, **_overrides)
+	
 	def drop_caching_enable (self, _acl = None, **_overrides) :
 		self.set_enabled ("$http_drop_caching_enabled_variable", _acl, **_overrides)
 	
@@ -748,7 +751,8 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		_acl_methods = self._acl.request_method ("$http_harden_allowed_methods")
 		_acl_methods = _acl_methods.negate ()
 		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
-		self.deny ((_acl, _acl_methods, _acl_enabled), None, _mark_denied, **_overrides)
+		_acl_included = self._acl.variable_bool ("$http_harden_excluded_variable", True) .negate ()
+		self.deny ((_acl, _acl_methods, _acl_enabled, _acl_included), None, _mark_denied, **_overrides)
 	
 	def harden_authorization (self, _acl = None, _force = False, **_overrides) :
 		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
@@ -989,7 +993,8 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		_status_acl = _status_acl.negate ()
 		_acl_handled = self._acl.response_header_exists ("$http_hardened_header", False) if not _force else None
 		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
-		self.deny ((_acl, _status_acl, _acl_enabled, _acl_handled), None, _mark_denied, **_overrides)
+		_acl_included = self._acl.variable_bool ("$http_harden_excluded_variable", True) .negate ()
+		self.deny ((_acl, _status_acl, _acl_enabled, _acl_handled, _acl_included), None, _mark_denied, **_overrides)
 	
 	def harden_http_get (self, _acl = None, _force = False, _mark_denied = None, **_overrides) :
 		_mark_denied = self._value_or_parameters_get_and_expand (_mark_denied, "http_harden_netfilter_mark_denied")

@@ -884,8 +884,8 @@ parameters = {
 		
 		"http_harden_level" : "standard",
 		
-		"http_harden_allowed_methods_strict" : ('get'),
-		"http_harden_allowed_methods_standard" : ('head', 'get', 'options'),
+		"http_harden_allowed_methods_strict" : ("GET"),
+		"http_harden_allowed_methods_standard" : ("HEAD", "GET", "OPTIONS"),
 		"http_harden_allowed_methods" : parameters_choose_match (
 				parameters_get ("http_harden_level"),
 				("strict", parameters_get ("http_harden_allowed_methods_strict")),
@@ -931,6 +931,7 @@ parameters = {
 		"http_harden_netfilter_mark_allowed" : None,
 		"http_harden_netfilter_mark_denied" : None,
 		"http_harden_enabled_variable" : "txn.http_harden_enabled",
+		"http_harden_excluded_variable" : "txn.http_harden_excluded",
 		"http_hardened_header" : "X-HA-Hardened",
 		
 		# FIXME:  Implement:  "http_drop_caching_forced" : False,
