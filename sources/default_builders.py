@@ -1033,11 +1033,11 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		self.set_header ("Accept-Ranges", "none", False, (_acl, _acl_enabled, _acl_handled, _acl_forbidden), **_overrides)
 	
 	def harden_redirects (self, _acl = None, _force = False, **_overrides) :
-		# _status_acl = self._acl.response_status ((301, 302, 303, 307, 308))
-		_status_acl = self._acl.response_status ((303, 307, 308))
+		# FIXME:  Perhaps make configurable the source redirect status code!
+		_status_acl = self._acl.response_status ((301, 302, 303, 307, 308))
 		_acl_handled = self._acl.response_header_exists ("$http_hardened_header", False) if not _force else None
 		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
-		# FIXME:  Perhaps make configurable the redirect status code!
+		# FIXME:  Perhaps make configurable the target redirect status code!
 		self.set_status (307, (_acl, _status_acl, _acl_enabled, _acl_handled), **_overrides)
 	
 	def harden_tls (self, _acl = None, _force = False, **_overrides) :
