@@ -1228,7 +1228,8 @@ class HaHttpBackendBuilder (HaBuilder) :
 		_route_order = route_order
 		
 		_backend = self._context.http_backend_create (_identifier, **_parameters)
-		_backend.declare_server ("default", _endpoint)
+		if _endpoint is not None :
+			_backend.declare_server ("default", _endpoint)
 		
 		def _frontend_configure (_routes, _requests, _responses) :
 			_routes.route (_backend, _acl, order = _route_order)
@@ -1348,6 +1349,7 @@ class HaHttpBackendBuilder (HaBuilder) :
 			_frontend_http_responses = _frontend.http_response_rule_builder ()
 			_callable (_frontend_routes, _frontend_http_requests, _frontend_http_responses)
 	
+	
 	def fallback (self) :
 		return self.basic (
 				"fallback-http",
@@ -1356,6 +1358,17 @@ class HaHttpBackendBuilder (HaBuilder) :
 				backend_http_keep_alive_reuse = "never",
 				backend_http_keep_alive_mode = "close",
 			)
+	
+	def fallback_deny (self, _code = 403, _mark = None) :
+		_backend = self.basic (
+				"fallback-http",
+				None,
+				backend_check_enabled = False,
+				backend_http_keep_alive_reuse = "never",
+				backend_http_keep_alive_mode = "close",
+			)
+		_backend.requests.deny (None, _code = _code, _mark = _mark)
+		return _backend
 
 
 
