@@ -446,6 +446,9 @@ class HaHttpRuleBuilder (HaBuilder) :
 	def set_enabled (self, _variable, _acl = None, **_overrides) :
 		self.set_variable (_variable, "bool(true)", _acl, **_overrides)
 	
+	def set_disabled (self, _variable, _acl = None, **_overrides) :
+		self.set_variable (_variable, "bool(false)", _acl, **_overrides)
+	
 	
 	def track_enable (self, _acl = None, **_overrides) :
 		self.set_enabled ("$http_tracking_enabled_variable", _acl, **_overrides)
