@@ -237,9 +237,10 @@ def declare_defaults_http (_configuration) :
 def declare_defaults_logging (_configuration) :
 	_configuration.declare_group (
 			"Logging",
-			statement_choose_if ("$?syslog_p_enabled",
-					("log", "$\'syslog_p_endpoint", "len", 65535, "format", "$\'syslog_p_protocol", "daemon", "info", "err"),
+			statement_choose_if ("$?syslog_pg_enabled",
 					("log", "global")),
+			statement_choose_if ("$?syslog_p_enabled",
+					("log", "$\'syslog_p_endpoint", "len", 65535, "format", "$\'syslog_p_protocol", "daemon", "info", "err")),
 			("option", "log-separate-errors"),
 			("option", "log-health-checks"),
 			("no", "option", "checkcache"),

@@ -772,6 +772,7 @@ parameters = {
 		"syslog_p_enabled" : False,
 		"syslog_p_endpoint" : "127.0.0.1:514",
 		"syslog_p_protocol" : parameters_get ("syslog_protocol"),
+		"syslog_pg_enabled" : parameters_choose_if (parameters_get ("syslog_p_enabled"), False, True),
 		
 		# NOTE:  Preferred protocol should be `rfc5424`!
 		#        If there are issues, use `rfc3164` and set `syslog_source_node` to `None`.
