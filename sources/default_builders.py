@@ -496,6 +496,23 @@ class HaHttpRuleBuilder (HaBuilder) :
 		_rule = ("redirect", "location", statement_quote ("\"", _target), "code", _code)
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
+	def redirect_with_path (self, _path, _code = 307, _acl = None, _include_scheme = True, _include_host = True, **_overrides) :
+		if _include_scheme and _include_host :
+			_target = statement_format ("%%[%s]://%%[%s]%s", self._samples.forwarded_proto (), self._samples.forwarded_host (), _path)
+		elif _include_host :
+			_target = statement_format ("//%%[%s]%s", self._samples.forwarded_host (), _path)
+		else :
+			_target = _path
+		self.redirect (_target, _code = _code, _acl = _acl, **_overrides)
+	
+	def redirect_with_path_prefix (self, _path_prefix, _code = 307, _acl = None, _include_scheme = True, _include_host = True, **_overrides) :
+		_path = statement_format ("%s%%[%s]", _path_prefix, self._samples.path ())
+		self.redirect_with_path (_path, _code = _code, _acl = _acl, _include_scheme = _include_scheme, _include_host = _include_host, **_overrides)
+	
+	def redirect_with_path_suffix (self, _path_suffix, _code = 307, _acl = None, _include_scheme = True, _include_host = True, **_overrides) :
+		_path = statement_format ("%%[%s]%s", self._samples.path (), _path_suffix)
+		self.redirect_with_path (_path, _code = _code, _acl = _acl, _include_scheme = _include_scheme, _include_host = _include_host, **_overrides)
+	
 	def redirect_prefix (self, _target, _code = 307, _acl = None, **_overrides) :
 		_rule_condition = ("if", _acl, "TRUE")
 		_rule = ("redirect", "prefix", statement_quote ("\"", _target), "code", _code)
