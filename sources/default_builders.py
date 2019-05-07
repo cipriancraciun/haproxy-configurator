@@ -1430,7 +1430,7 @@ class HaHttpBackendBuilder (HaBuilder) :
 		if not isinstance (_frontend, tuple) and not isinstance (_frontend, list) :
 			_frontend = (_frontend,)
 		for _frontend in _frontend :
-			_frontend_routes = _frontend.route_builder ()
+			_frontend_routes = _frontend.routes
 			_frontend_http_requests = _frontend.http_request_rule_builder ()
 			_frontend_http_responses = _frontend.http_response_rule_builder ()
 			_callable (_frontend_routes, _frontend_http_requests, _frontend_http_responses)
