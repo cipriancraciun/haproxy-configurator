@@ -1171,6 +1171,9 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 			self.set_header ("Vary", "Cookie", False, (_acl, _acl_enabled, _acl_included), **_overrides)
 		else :
 			self.delete_header ("Set-Cookie", (_acl, _acl_enabled, _acl_included), **_overrides)
+		if _vary is not None :
+			for _vary in _vary :
+				self.set_header ("Vary", _vary, False, (_acl, _acl_enabled, _acl_included), **_overrides)
 	
 	def force_caching_control (self, _max_age = 3600, _public = True, _no_cache = False, _must_revalidate = False, _immutable = None, _acl = None, _force = False, _store_max_age = None, **_overrides) :
 		_private = not _public
