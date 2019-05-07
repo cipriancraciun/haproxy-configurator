@@ -103,7 +103,7 @@ http_status_codes = {
 		"caching" : (304,),
 		
 		"get_standard" : (200, 204, 206,),
-		"get_strict" : (200, 304,),
+		"get_strict" : (200,),
 		"get_redirect" : (301, 302,),
 		"get_caching" : (304,),
 		
@@ -887,34 +887,38 @@ parameters = {
 		
 		"http_harden_allowed_methods_strict" : ("GET"),
 		"http_harden_allowed_methods_standard" : ("HEAD", "GET", "OPTIONS"),
+		"http_harden_allowed_methods_extra" : None,
 		"http_harden_allowed_methods" : parameters_choose_match (
 				parameters_get ("http_harden_level"),
-				("strict", parameters_get ("http_harden_allowed_methods_strict")),
-				("standard", parameters_get ("http_harden_allowed_methods_standard")),
+				("strict", (parameters_get ("http_harden_allowed_methods_strict"), parameters_get ("http_harden_allowed_methods_extra"))),
+				("standard", (parameters_get ("http_harden_allowed_methods_standard"), parameters_get ("http_harden_allowed_methods_extra"))),
 		),
 		
 		"http_harden_allowed_status_codes_strict" : http_status_codes["harden_allowed_strict"],
 		"http_harden_allowed_status_codes_standard" : http_status_codes["harden_allowed_standard"],
+		"http_harden_allowed_status_codes_extra" : None,
 		"http_harden_allowed_status_codes" : parameters_choose_match (
 				parameters_get ("http_harden_level"),
-				("strict", parameters_get ("http_harden_allowed_status_codes_strict")),
-				("standard", parameters_get ("http_harden_allowed_status_codes_standard")),
+				("strict", (parameters_get ("http_harden_allowed_status_codes_strict"), parameters_get ("http_harden_allowed_status_codes_extra"))),
+				("standard", (parameters_get ("http_harden_allowed_status_codes_standard"), parameters_get ("http_harden_allowed_status_codes_extra"))),
 		),
 		
 		"http_harden_allowed_get_status_codes_strict" : http_status_codes["harden_allowed_get_strict"],
 		"http_harden_allowed_get_status_codes_standard" : http_status_codes["harden_allowed_get_standard"],
+		"http_harden_allowed_get_status_codes_extra" : None,
 		"http_harden_allowed_get_status_codes" : parameters_choose_match (
 				parameters_get ("http_harden_level"),
-				("strict", parameters_get ("http_harden_allowed_get_status_codes_strict")),
-				("standard", parameters_get ("http_harden_allowed_get_status_codes_standard")),
+				("strict", (parameters_get ("http_harden_allowed_get_status_codes_strict"), parameters_get ("http_harden_allowed_get_status_codes_extra"))),
+				("standard", (parameters_get ("http_harden_allowed_get_status_codes_standard"), parameters_get ("http_harden_allowed_get_status_codes_extra"))),
 		),
 		
 		"http_harden_allowed_post_status_codes_strict" : http_status_codes["harden_allowed_post_strict"],
 		"http_harden_allowed_post_status_codes_standard" : http_status_codes["harden_allowed_post_standard"],
+		"http_harden_allowed_post_status_codes_extra" : None,
 		"http_harden_allowed_post_status_codes" : parameters_choose_match (
 				parameters_get ("http_harden_level"),
-				("strict", parameters_get ("http_harden_allowed_post_status_codes_strict")),
-				("standard", parameters_get ("http_harden_allowed_post_status_codes_standard")),
+				("strict", (parameters_get ("http_harden_allowed_post_status_codes_strict"), parameters_get ("http_harden_allowed_post_status_codes_extra"))),
+				("standard", (parameters_get ("http_harden_allowed_post_status_codes_standard"), parameters_get ("http_harden_allowed_post_status_codes_extra"))),
 		),
 		
 		"http_harden_hsts_enabled" : True,
