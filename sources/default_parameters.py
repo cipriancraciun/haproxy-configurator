@@ -862,6 +862,7 @@ parameters = {
 		"http_tracking_request_header" : "X-HA-Request-Id",
 		"http_tracking_request_variable" : "txn.http_tracking_request",
 		"http_tracking_enabled_variable" : "txn.http_tracking_enabled",
+		"http_tracking_excluded_variable" : "txn.http_tracking_excluded",
 		
 		"http_authenticated_header" : "X-HA-Authenticated",
 		"http_authenticated_cookie" : "X-HA-Authenticated",
@@ -934,12 +935,14 @@ parameters = {
 		"http_harden_excluded_variable" : "txn.http_harden_excluded",
 		"http_hardened_header" : "X-HA-Hardened",
 		
-		# FIXME:  Implement:  "http_drop_caching_forced" : False,
 		"http_drop_caching_enabled_variable" : "txn.http_drop_caching_enabled",
-		"http_force_caching_enabled_variable" : "txn.http_force_caching_enabled",
+		"http_drop_caching_excluded_variable" : "txn.http_drop_caching_excluded",
 		
-		# FIXME:  Implement: "http_drop_cookies_forced" : False,
+		"http_force_caching_enabled_variable" : "txn.http_force_caching_enabled",
+		"http_force_caching_excluded_variable" : "txn.http_force_caching_excluded",
+		
 		"http_drop_cookies_enabled_variable" : "txn.http_drop_cookies_enabled",
+		"http_drop_cookies_excluded_variable" : "txn.http_drop_cookies_excluded",
 		
 		"http_ranges_allowed_variable" : "txn.http_ranges_allowed",
 		
