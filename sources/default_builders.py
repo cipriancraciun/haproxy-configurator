@@ -99,6 +99,9 @@ class HaHttpAclBuilder (HaBuilder) :
 	def path_prefix (self, _path, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.path (), "beg", None, None, _path)
 	
+	def path_suffix (self, _path, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.path (), "end", None, None, _path)
+	
 	def path_substring (self, _path, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.path (), "sub", None, None, _path)
 	
@@ -114,6 +117,10 @@ class HaHttpAclBuilder (HaBuilder) :
 	
 	def query_prefix (self, _query, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.query (), "beg", None, None, _query)
+	
+	
+	def query_parameter (self, _parameter, _value, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.query_parameter (_parameter), "str", None, "eq", _value)
 	
 	
 	def request_method (self, _method, _identifier = None) :
@@ -228,6 +235,9 @@ class HaHttpSampleBuilder (HaBuilder) :
 	def query (self, _transforms = None) :
 		return self._context.sample_0 ("query", None, _transforms)
 	
+	def query_parameter (self, _parameter, _transforms = None) :
+		return self._context.sample_0 ("url_param", (_parameter,), _transforms)
+	
 	
 	def request_method (self, _transforms = None) :
 		if _transforms is None :
@@ -338,6 +348,10 @@ class HaHttpRuleBuilder (HaBuilder) :
 		_acl_path = self._acl.path_prefix (_path)
 		self.allow ((_acl, _acl_path), **_overrides)
 	
+	def allow_path_suffix (self, _path, _acl = None, **_overrides) :
+		_acl_path = self._acl.path_suffix (_path)
+		self.allow ((_acl, _acl_path), **_overrides)
+	
 	def allow_path_substring (self, _path, _acl = None, **_overrides) :
 		_acl_path = self._acl.path_substring (_path)
 		self.allow ((_acl, _acl_path), **_overrides)
@@ -365,6 +379,10 @@ class HaHttpRuleBuilder (HaBuilder) :
 	
 	def deny_path_prefix (self, _path, _acl = None, _code = None, _mark = None, **_overrides) :
 		_acl_path = self._acl.path_prefix (_path)
+		self.deny ((_acl, _acl_path), _code, _mark, **_overrides)
+	
+	def deny_path_suffix (self, _path, _acl = None, _code = None, _mark = None, **_overrides) :
+		_acl_path = self._acl.path_suffix (_path)
 		self.deny ((_acl, _acl_path), _code, _mark, **_overrides)
 	
 	def deny_path_substring (self, _path, _acl = None, _code = None, _mark = None, **_overrides) :
@@ -505,6 +523,11 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 	def set_path_prefix (self, _path_prefix, _acl = None, **_overrides) :
 		_rule_condition = ("if", _acl, "TRUE")
 		_rule = ("set-path", statement_quote ("\"", statement_format ("%s%%[%s]", _path_prefix, self._samples.path ())))
+		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
+	
+	def set_path_suffix (self, _path_suffix, _acl = None, **_overrides) :
+		_rule_condition = ("if", _acl, "TRUE")
+		_rule = ("set-path", statement_quote ("\"", statement_format ("%%[%s]%s", self._samples.path (), _path_suffix)))
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
 	def set_query (self, _query, _acl = None, **_overrides) :
@@ -1405,6 +1428,10 @@ class HaHttpRouteBuilder (HaBuilder) :
 	
 	def route_path_prefix (self, _backend, _path, _acl = None, **_overrides) :
 		_acl_path = self._acl.path_prefix (_path)
+		self.route (_backend, (_acl_path, _acl), **_overrides)
+	
+	def route_path_suffix (self, _backend, _path, _acl = None, **_overrides) :
+		_acl_path = self._acl.path_suffix (_path)
 		self.route (_backend, (_acl_path, _acl), **_overrides)
 	
 	def route_subpath (self, _backend, _path, _acl = None, **_overrides) :
