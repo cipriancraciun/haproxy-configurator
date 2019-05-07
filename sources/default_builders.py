@@ -184,6 +184,20 @@ class HaHttpAclBuilder (HaBuilder) :
 	
 	def bot (self, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.request_header ("User-Agent", ("lower",)), "str", ("-i", "-f"), "sub", "$'bots_acl")
+	
+	
+	def ab_in_bucket (self, _expected, _count, _criteria = None, _identifier = None) :
+		if _criteria == "session" :
+			_sample = self._samples.variable ("$http_tracking_session_variable", (("wt6", 1), ("mod", _count)))
+		elif _criteria == "request" :
+			_sample = self._samples.variable ("$http_tracking_request_variable", (("wt6", 1), ("mod", _count)))
+		elif _criteria == "agent" :
+			_sample = self._samples.variable ("$logging_http_variable_agent", (("wt6", 1), ("mod", _count)))
+		elif _criteria == "ip" :
+			_sample = self._samples.variable ("$logging_http_variable_forwarded_for", (("wt6", 1), ("mod", _count)))
+		else :
+			raise_error ("34cca11c", _criteria)
+		return self._context.acl_0 (_identifier, _sample, "int", None, "eq", (_expected,))
 
 
 
