@@ -118,9 +118,15 @@ class HaHttpAclBuilder (HaBuilder) :
 	def query_prefix (self, _query, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.query (), "beg", None, None, _query)
 	
+	def query_exists (self, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.query (), "found", None, None, None)
+	
 	
 	def query_parameter (self, _parameter, _value, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.query_parameter (_parameter), "str", None, "eq", _value)
+	
+	def query_parameter_exists (self, _parameter, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.query_parameter (_parameter), "found", None, None, None)
 	
 	
 	def request_method (self, _method, _identifier = None) :
