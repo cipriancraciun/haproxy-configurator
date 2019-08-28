@@ -449,6 +449,8 @@ class HaWorker (HaSection) :
 		self.identifier = enforce_identifier (self._parameters, _identifier)
 		self._acl = list ()
 		self._samples = list ()
+		self._tcp_request_rule_statements = HaStatementGroup (self._parameters, "TCP Request Rules", order = 5000 + 300 - 1)
+		self._tcp_response_rule_statements = HaStatementGroup (self._parameters, "TCP Response Rules", order = 5000 + 400 - 1)
 		self._http_request_rule_statements = HaStatementGroup (self._parameters, "HTTP Request Rules", order = 5000 + 300)
 		self._http_response_rule_statements = HaStatementGroup (self._parameters, "HTTP Response Rules", order = 5000 + 400)
 	
@@ -507,6 +509,30 @@ class HaWorker (HaSection) :
 		return default_builders.HaHttpResponseRuleBuilder (self, self._parameters)
 	
 	
+	def declare_tcp_request_rule_if (self, _action, _acl, **_overrides) :
+		_condition = ("if", _acl, "TRUE") if _acl is not None else None
+		self.declare_tcp_request_rule_0 ((_action, _condition), **_overrides)
+	
+	def declare_tcp_request_rule_unless (self, _action, _acl, **_overrides) :
+		_condition = ("unless", _acl, "TRUE") if _acl is not None else None
+		self.declare_tcp_request_rule_0 ((_action, _condition), **_overrides)
+	
+	def declare_tcp_request_rule_0 (self, _rule, **_overrides) :
+		self._tcp_request_rule_statements.declare (("tcp-request", _rule), **_overrides)
+	
+	
+	def declare_tcp_response_rule_if (self, _action, _acl, **_overrides) :
+		_condition = ("if", _acl, "TRUE") if _acl is not None else None
+		self.declare_tcp_response_rule_0 ((_action, _condition), **_overrides)
+	
+	def declare_tcp_response_rule_unless (self, _action, _acl, **_overrides) :
+		_condition = ("unless", _acl, "TRUE") if _acl is not None else None
+		self.declare_tcp_response_rule_0 ((_action, _condition), **_overrides)
+	
+	def declare_tcp_response_rule_0 (self, _rule, **_overrides) :
+		self._tcp_response_rule_statements.declare (("tcp-response", _rule), **_overrides)
+	
+	
 	def _generate_statements_for_acl (self, _scroll) :
 		if len (self._acl) > 0 :
 			_acl_uniques = set ()
@@ -531,6 +557,8 @@ class HaWorker (HaSection) :
 			_statements.generate (_scroll)
 	
 	def _generate_statements_for_http_rules (self, _scroll) :
+		self._tcp_request_rule_statements.generate (_scroll)
+		self._tcp_response_rule_statements.generate (_scroll)
 		self._http_request_rule_statements.generate (_scroll)
 		self._http_response_rule_statements.generate (_scroll)
 	
