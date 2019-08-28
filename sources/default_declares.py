@@ -213,6 +213,8 @@ def declare_defaults_timeouts (_configuration) :
 def declare_defaults_servers (_configuration) :
 	_configuration.declare_group (
 			"Servers",
+			("fullconn", "$+defaults_server_max_connections_full_count"),
+			("default-server", "minconn", "$+defaults_server_min_connections_active_count"),
 			("default-server", "maxconn", "$+defaults_server_max_connections_active_count"),
 			("default-server", "maxqueue", "$+defaults_server_max_connections_queue_count"),
 			("default-server", "inter", statement_seconds ("$+defaults_server_check_interval_normal")),
@@ -530,6 +532,8 @@ def declare_tcp_backend_server_timeouts (_configuration) :
 def declare_backend_server_defaults (_configuration, _extra_statements = None) :
 	_configuration.declare_group (
 			"Servers",
+			statement_choose_if_non_null ("$backend_server_max_connections_full_count", ("fullconn", "$+backend_server_max_connections_full_count")),
+			statement_choose_if_non_null ("$backend_server_min_connections_active_count", ("default-server", "minconn", "$+backend_server_min_connections_active_count")),
 			statement_choose_if_non_null ("$backend_server_max_connections_active_count", ("default-server", "maxconn", "$+backend_server_max_connections_active_count")),
 			statement_choose_if_non_null ("$backend_server_max_connections_queue_count", ("default-server", "maxqueue", "$+backend_server_max_connections_queue_count")),
 			statement_choose_if_non_null ("$backend_server_check_interval_normal", ("default-server", "inter", statement_seconds ("$+backend_server_check_interval_normal"))),
