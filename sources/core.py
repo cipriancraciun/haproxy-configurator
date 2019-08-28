@@ -114,6 +114,7 @@ class HaProxy (HaBase) :
 		_frontend = _type (_identifier, _parameters)
 		self._frontends[_identifier] = _frontend
 		self._frontends_ordered.append (_frontend)
+		self._frontends_ordered.sort (key = lambda _section : _section._order)
 		
 		return _frontend
 	
@@ -131,6 +132,7 @@ class HaProxy (HaBase) :
 		_backend = _type (_identifier, _parameters)
 		self._backends[_identifier] = _backend
 		self._backends_ordered.append (_backend)
+		self._backends_ordered.sort (key = lambda _section : _section._order)
 		
 		return _backend
 	
@@ -147,6 +149,7 @@ class HaProxy (HaBase) :
 		_resolvers = HaResolvers (_identifier, _parameters)
 		self._resolvers[_identifier] = _resolvers
 		self._resolvers_ordered.append (_resolvers)
+		self._resolvers_ordered.sort (key = lambda _section : _section._order)
 		
 		return _resolvers
 	
@@ -163,6 +166,7 @@ class HaProxy (HaBase) :
 		_credentials = HaCredentials (_identifier, _parameters)
 		self._credentials[_identifier] = _credentials
 		self._credentials_ordered.append (_credentials)
+		self._credentials_ordered.sort (key = lambda _section : _section._order)
 		
 		return _credentials
 	
@@ -241,6 +245,7 @@ class HaSection (HaBase) :
 		self._custom_statements = HaStatementGroup (self._parameters, "Custom", order = 6000)
 		self._declare_implicit_if = declare_implicit_if
 		self._declare_implicit_done = False
+		self._order = self._parameters._get ("order", 999999)
 	
 	
 	def declare (self, *_tokens, **_options) :
