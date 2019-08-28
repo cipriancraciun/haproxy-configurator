@@ -215,25 +215,6 @@ def declare_defaults_servers (_configuration) :
 	)
 
 
-def declare_defaults_http (_configuration) :
-	_configuration.declare_group (
-			"HTTP",
-			("http-reuse", "safe"),
-			("http-check", "disable-on-404"),
-			("http-check", "send-state"),
-			("timeout", "http-request", statement_seconds ("$+defaults_timeout_request")),
-			("timeout", "http-keep-alive", statement_seconds ("$+defaults_timeout_keep_alive")),
-			("unique-id-format", "#\"%[req.hdr(X-HA-Request-Id)]"),
-			("unique-id-header", "#\'X-HA-Request-Id-2"),
-	)
-	_configuration.declare_group (
-			"HTTP compression",
-			("compression", "algo", "gzip", "deflate"),
-			("compression", "type", "$\'defaults_compression_content_types"),
-			("compression", "offload"),
-	)
-
-
 def declare_defaults_logging (_configuration) :
 	_configuration.declare_group (
 			"Logging",
@@ -281,6 +262,28 @@ def declare_defaults_miscellaneous (_configuration) :
 
 
 
+def declare_defaults_http (_configuration) :
+	_configuration.declare_group (
+			"HTTP",
+			("http-reuse", "safe"),
+			("http-check", "disable-on-404"),
+			("http-check", "send-state"),
+			("option", "http-keep-alive"),
+			("max-keep-alive-queue", 0),
+			("timeout", "http-request", statement_seconds ("$+defaults_timeout_request")),
+			("timeout", "http-keep-alive", statement_seconds ("$+defaults_timeout_keep_alive")),
+			("unique-id-format", "#\"%[req.hdr(X-HA-Request-Id)]"),
+			("unique-id-header", "#\'X-HA-Request-Id-2"),
+	)
+	_configuration.declare_group (
+			"HTTP compression",
+			("compression", "algo", "gzip"),
+			("compression", "type", "$\'defaults_compression_content_types"),
+			statement_choose_if ("$?defaults_compression_offload",
+				("compression", "offload")),
+	)
+
+
 def declare_http_frontend_connections (_configuration) :
 	_configuration.declare_group (
 			"Connections",
@@ -299,14 +302,12 @@ def declare_http_frontend_connections (_configuration) :
 			order = 2000 + 100,
 	)
 
-
 def declare_http_frontend_timeouts (_configuration) :
 	_configuration.declare_group (
 			"Timeouts",
 			statement_choose_if_non_null ("$frontend_http_keep_alive_timeout", ("timeout", "http-keep-alive", statement_seconds ("$+frontend_http_keep_alive_timeout"))),
 			order = 2000 + 101,
 	)
-
 
 def declare_http_frontend_monitor (_configuration) :
 	_configuration.declare_group (
@@ -317,7 +318,6 @@ def declare_http_frontend_monitor (_configuration) :
 			enabled_if = statement_and ("$?frontend_monitor_enabled", "$?!frontend_minimal"),
 			order = 7000 + 100,
 	)
-
 
 def declare_http_frontend_stats (_configuration) :
 	_configuration.declare_group (
@@ -336,7 +336,6 @@ def declare_http_frontend_stats (_configuration) :
 			order = 7000 + 200,
 	)
 
-
 def declare_http_frontend_logging (_configuration) :
 	_configuration.declare_group (
 			"Logging",
@@ -344,7 +343,6 @@ def declare_http_frontend_logging (_configuration) :
 			("log-format", "$\"logging_http_format"),
 			order = 7000 + 400,
 	)
-
 
 def declare_http_frontend_stick (_configuration) :
 	# FIXME:  Make this configurable!
@@ -380,8 +378,6 @@ def declare_http_frontend_stick (_configuration) :
 			),
 			order = 5000 + 290,
 		)
-
-
 
 
 def declare_http_backend_connections (_configuration) :
@@ -484,7 +480,4 @@ def declare_backend_server_timeouts (_configuration, _extra_statements = None) :
 			statement_choose_if_non_null ("$backend_server_timeout_tarpit", ("timeout", "tarpit", statement_seconds ("$+backend_server_timeout_tarpit"))),
 			_extra_statements,
 	)
-
-
-
 
