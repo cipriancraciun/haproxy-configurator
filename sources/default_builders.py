@@ -1270,7 +1270,7 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		self.delete_header ("Date", (_acl, _acl_enabled, _acl_included), **_overrides)
 		if _keep_etag_acl is None or _keep_etag_acl is not True :
 			self.delete_header ("ETag", (_acl, _acl_enabled, _acl_included), **_overrides)
-		self.delete_header ("Vary", (_acl, _acl_enabled, _acl_included), **_overrides)
+	#!	self.delete_header ("Vary", (_acl, _acl_enabled, _acl_included), **_overrides)
 		self.delete_header ("Age", (_acl, _acl_enabled, _acl_included), **_overrides)
 		self.delete_header ("Pragma", (_acl, _acl_enabled, _acl_included), **_overrides)
 	
@@ -1324,7 +1324,7 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		_acl_enabled = self._acl.variable_bool ("$http_force_caching_enabled_variable", True) .negate () if not _force else None
 		_acl_included = self._acl.variable_bool ("$http_force_caching_excluded_variable", True) .negate () if not _force else None
 		self.set_header ("Cache-Control", "no-cache, no-store, must-revalidate", False, (_acl, _acl_enabled, _acl_included), **_overrides)
-		self.force_caching_maxage (0, (_acl, _acl_enabled, _acl_included), **_overrides)
+#!		self.force_caching_maxage (0, (_acl, _acl_enabled, _acl_included), **_overrides)
 	
 	def force_caching_maxage (self, _max_age, _acl, **_overrides) :
 		if _max_age is not None :
