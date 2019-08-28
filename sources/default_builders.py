@@ -63,8 +63,8 @@ class HaHttpAclBuilder (HaBuilder) :
 		self._samples = HaHttpSampleBuilder (_context, _parameters)
 	
 	
-	def client_ip (self, _ip, _identifier = None) :
-		return self._context.acl_0 (_identifier, self._samples.client_ip (), "ip", None, None, _ip)
+	def client_ip (self, _ip, _method = None, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.client_ip (_method), "ip", None, None, _ip)
 	
 	def frontend_port (self, _port, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.frontend_port (), "int", None, "eq", (_port,))
@@ -114,6 +114,9 @@ class HaHttpAclBuilder (HaBuilder) :
 	
 	def query (self, _query, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.query (), "str", None, "eq", _query)
+	
+	def query_empty (self, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.query (), "len", None, None, (0,))
 	
 	def query_prefix (self, _query, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.query (), "beg", None, None, _query)
@@ -169,8 +172,11 @@ class HaHttpAclBuilder (HaBuilder) :
 		return self._context.acl_0 (_identifier, self._samples.variable (_variable), "beg", None, None, _value)
 	
 	
-	def via_tls (self, _expected = True, _identifier = None) :
-		return self._context.acl_0 (_identifier, self._samples.via_tls (_expected), "bool", None, None, None)
+	def via_tls (self, _expected = True, _method = None, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.via_tls (_expected, _method), "bool", None, None, None)
+	
+	def tls_client_certificate (self, _fingerprint, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.tls_client_certificate (), "str", ("-i",), "eq", (_fingerprint,))
 	
 	
 	def authenticated (self, _credentials, _expected = True, _identifier = None) :
@@ -214,8 +220,15 @@ class HaHttpSampleBuilder (HaBuilder) :
 		HaBuilder.__init__ (self, _context, _parameters)
 	
 	
-	def client_ip (self, _transforms = None) :
-		return self._context.sample_0 ("src", None, _transforms)
+	def client_ip (self, _method = None, _transforms = None) :
+		if _method is None :
+			_method = self._parameters._get_and_expand ("samples_client_ip_method")
+		if _method == "src" :
+			return self._context.sample_0 ("src", None, _transforms)
+		elif _method == "X-Forwarded-For" :
+			return self._context.sample_0 ("req.hdr", ("$logging_http_header_forwarded_for", 1), _transforms)
+		else :
+			raise_error ("fd58dd1e", _method)
 	
 	def frontend_port (self, _transforms = None) :
 		return self._context.sample_0 ("dst_port", None, _transforms)
@@ -307,14 +320,20 @@ class HaHttpSampleBuilder (HaBuilder) :
 		return self._context.sample_0 ("var", (_variable,), ("bool" if _expected else ("bool", "not")))
 	
 	
-	def via_tls (self, _expected = True) :
-		_method = self._parameters._get_and_expand ("samples_via_tls_method")
+	def via_tls (self, _expected = True, _method = None) :
+		if _method is None :
+			_method = self._parameters._get_and_expand ("samples_via_tls_method")
 		if _method == "ssl_fc" :
 			return self._context.sample_0 ("ssl_fc", None, (None if _expected else "not"))
 		elif _method == "dst_port_443" :
 			return self._context.sample_0 ("dst_port", None, (("xor", 443), "bool", ("not" if _expected else None)))
+		elif _method == "X-Forwarded-Port-443" :
+			return self._context.sample_0 ("req.hdr", ("$logging_http_header_forwarded_port", 1), (("xor", 443), "bool", ("not" if _expected else None)))
 		else :
 			raise_error ("fd58dd1e", self)
+	
+	def tls_client_certificate (self) :
+		return self._context.sample_0 ("ssl_c_sha1", None, "hex")
 	
 	
 	def authenticated (self, _credentials, _expected = True) :
@@ -328,10 +347,8 @@ class HaHttpSampleBuilder (HaBuilder) :
 		return self._context.sample_0 ("nbsrv", (_backend,), ("bool" if _expected else ("bool", "not")))
 	
 	
-	def geoip_country_extracted (self) :
-		# FIXME:  Refactor this!
-		# return self._context.sample_0 ("src", None, (("map_ip", "$'geoip_map"),))
-		return self.forwarded_for ((("map_ip", "$geoip_map"),))
+	def geoip_country_extracted (self, _method = None) :
+		return self.client_ip (_method, (("map_ip", "$geoip_map"),))
 	
 	def geoip_country_captured (self) :
 		return self.variable ("$logging_geoip_country_variable")
@@ -460,14 +477,16 @@ class HaHttpRuleBuilder (HaBuilder) :
 	
 	def set_variable (self, _variable, _value, _acl = None, **_overrides) :
 		_rule_condition = ("if", _acl, "TRUE")
+		if isinstance (_value, basestring) :
+			_value = "str(%s)" % quote_token ("\'", _value)
 		_rule = (statement_format ("set-var(%s)", _variable), _value)
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
 	def set_enabled (self, _variable, _acl = None, **_overrides) :
-		self.set_variable (_variable, "bool(true)", _acl, **_overrides)
+		self.set_variable (_variable, ("bool(true)",), _acl, **_overrides)
 	
 	def set_disabled (self, _variable, _acl = None, **_overrides) :
-		self.set_variable (_variable, "bool(false)", _acl, **_overrides)
+		self.set_variable (_variable, ("bool(false)",), _acl, **_overrides)
 	
 	
 	def track_enable (self, _acl = None, **_overrides) :
@@ -539,9 +558,8 @@ class HaHttpRuleBuilder (HaBuilder) :
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
 	def redirect_via_tls (self, _code = 307, _acl = None, **_overrides) :
-		if _acl is None :
-			_acl = self._acl.via_tls (False)
-		_rule_condition = ("if", _acl, "TRUE")
+		_acl_non_tls = self._acl.via_tls (False)
+		_rule_condition = ("if", _acl, _acl_non_tls, "TRUE")
 		_rule = ("redirect", "scheme", "https", "code", _code)
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
@@ -550,7 +568,7 @@ class HaHttpRuleBuilder (HaBuilder) :
 		if _source is None :
 			_source = "$frontend_http_stick_source"
 		_source = statement_choose_match (_source,
-					("source", "src"),
+					("src", "src"),
 					("X-Forwarded-For", statement_format ("req.hdr(%s,1)", "$logging_http_header_forwarded_for")),
 			)
 		_rule_condition = ("if", _acl, "TRUE")
@@ -602,16 +620,16 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		self.set_enabled (_variable, (_acl, _acl_host), **_overrides)
 	
 	
-	def redirect_domain_via_tls (self, _domain, _only_root = False, _acl = None, **_overrides) :
+	def redirect_domain_via_tls (self, _domain, _only_root = False, _code = 307, _acl = None, **_overrides) :
 		for _domain in sorted (self._one_or_many (_domain)) :
 			_acl_host = self._acl.host (_domain)
 			_acl_non_tls = self._acl.via_tls (False)
 			_acl_path = self._acl.path ("/") if _only_root else None
 			_rule_condition = ("if", _acl, _acl_host, _acl_path, _acl_non_tls)
-			_rule = ("redirect", "scheme", "https", "code", 307)
+			_rule = ("redirect", "scheme", "https", "code", _code)
 			self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
-	def redirect_domain_with_www (self, _domain, _only_root = False, _force_tls = False, _acl = None, **_overrides) :
+	def redirect_domain_with_www (self, _domain, _only_root = False, _force_tls = False, _code = 307, _acl = None, **_overrides) :
 		for _domain in sorted (self._one_or_many (_domain)) :
 			if _domain.startswith ("www.") :
 				_domain = _domain[4:]
@@ -623,12 +641,12 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 			_acl_tls = self._acl.via_tls (True)
 			_rule_non_tls_condition = ("if", _acl, _acl_host, _acl_path, _acl_non_tls)
 			_rule_tls_condition = ("if", _acl, _acl_host, _acl_path, _acl_tls)
-			_rule_non_tls = ("redirect", "prefix", _redirect_non_tls, "code", 307)
-			_rule_tls = ("redirect", "prefix", _redirect_tls, "code", 307)
+			_rule_non_tls = ("redirect", "prefix", _redirect_non_tls, "code", _code)
+			_rule_tls = ("redirect", "prefix", _redirect_tls, "code", _code)
 			self._declare_http_rule_0 (_rule_non_tls, _rule_non_tls_condition, **_overrides)
 			self._declare_http_rule_0 (_rule_tls, _rule_tls_condition, **_overrides)
 	
-	def redirect_domain_without_www (self, _domain, _only_root = False, _force_tls = False, _acl = None, **_overrides) :
+	def redirect_domain_without_www (self, _domain, _only_root = False, _force_tls = False, _code = 307, _acl = None, **_overrides) :
 		for _domain in sorted (self._one_or_many (_domain)) :
 			if _domain.startswith ("www.") :
 				_domain = _domain[4:]
@@ -640,8 +658,8 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 			_acl_tls = self._acl.via_tls (True)
 			_rule_non_tls_condition = ("if", _acl, _acl_host, _acl_path, _acl_non_tls)
 			_rule_tls_condition = ("if", _acl, _acl_host, _acl_path, _acl_tls)
-			_rule_non_tls = ("redirect", "prefix", _redirect_non_tls, "code", 307)
-			_rule_tls = ("redirect", "prefix", _redirect_tls, "code", 307)
+			_rule_non_tls = ("redirect", "prefix", _redirect_non_tls, "code", _code)
+			_rule_tls = ("redirect", "prefix", _redirect_tls, "code", _code)
 			self._declare_http_rule_0 (_rule_non_tls, _rule_non_tls_condition, **_overrides)
 			self._declare_http_rule_0 (_rule_tls, _rule_tls_condition, **_overrides)
 	
@@ -717,9 +735,12 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 			self.redirect_domain_and_path (_source, _target, _force_tls, _acl, **_overrides)
 	
 	
-	def redirect_favicon (self, _redirect = "$favicon_redirect_url", _acl = None, **_overrides) :
+	def redirect_favicon (self, _redirect = "$favicon_redirect_url", _internal = True, _code = 307, _acl = None, **_overrides) :
 		_acl_path = self._acl.path ("/favicon.ico")
-		self.redirect (_redirect, 307, (_acl, _acl_path), **_overrides)
+		if _internal :
+			self.set_path (_redirect, (_acl, _acl_path), **_overrides)
+		else :
+			self.redirect (_redirect, _code, (_acl, _acl_path), **_overrides)
 	
 	
 	def expose_internals_0 (self, _acl_internals, _credentials = None, _acl = None, _mark_allowed = None, **_overrides) :
@@ -777,8 +798,9 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 	
 	
 	def set_forwarded_headers (self, _ignore_if_exists = False, _acl = None, **_overrides) :
-		_acl_with_tls = self._acl.via_tls (True)
-		_acl_without_tls = self._acl.via_tls (False)
+		_via_tls_method = self._parameters._get_and_expand ("logging_http_header_forwarded_proto_method")
+		_acl_with_tls = self._acl.via_tls (True, _method = _via_tls_method)
+		_acl_without_tls = self._acl.via_tls (False, _method = _via_tls_method)
 		self.set_header ("$logging_http_header_forwarded_host", statement_format ("%%[%s]", self._samples.host ()), _ignore_if_exists, _acl, **_overrides)
 		self.set_header ("$logging_http_header_forwarded_for", "%ci", _ignore_if_exists, _acl, **_overrides)
 		self.set_header ("$logging_http_header_forwarded_proto", "http", _ignore_if_exists, (_acl_without_tls, _acl), **_overrides)
@@ -974,7 +996,8 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		self.set_variable ("$logging_http_variable_agent", self._samples.request_header ("User-Agent"), _acl, **_overrides)
 		self.set_variable ("$logging_http_variable_referrer", self._samples.request_header ("Referer"), _acl, **_overrides)
 		self.set_variable ("$logging_http_variable_session", self._samples.request_header ("$logging_http_header_session"), _acl, **_overrides)
-		self.set_header ("$logging_http_header_action", statement_format ("%%[%s]://%%[%s]%%[%s]?%%[%s]", self._samples.request_method (), self._samples.host (), self._samples.path (), self._samples.query ()), False, _acl, **_overrides)
+		self.set_header ("$logging_http_header_action", statement_format ("%%[%s]://%%[%s]%%[%s]", self._samples.request_method (), self._samples.host (), self._samples.path ()), False, (_acl, self._acl.query_exists () .negate ()), **_overrides)
+		self.set_header ("$logging_http_header_action", statement_format ("%%[%s]://%%[%s]%%[%s]?%%[%s]", self._samples.request_method (), self._samples.host (), self._samples.path (), self._samples.query ()), False, (_acl, self._acl.query_exists ()), **_overrides)
 		self.set_variable ("$logging_http_variable_action", self._samples.request_header ("$logging_http_header_action"), _acl, **_overrides)
 		_geoip_enabled = self._parameters._get_and_expand ("geoip_enabled")
 		if _geoip_enabled :
@@ -1423,11 +1446,16 @@ class HaHttpBackendBuilder (HaBuilder) :
 				_parameters,
 				backend_http_check_enabled = parameters_get ("varnish_heartbeat_enabled"),
 				backend_http_check_request_uri = parameters_get ("varnish_heartbeat_path"),
+				backend_server_min_connections_active_count = parameters_get ("varnish_min_connections_active_count"),
 				backend_server_max_connections_active_count = parameters_get ("varnish_max_connections_active_count"),
 				backend_server_max_connections_queue_count = parameters_get ("varnish_max_connections_queue_count"),
+				backend_server_max_connections_full_count = parameters_get ("varnish_max_connections_full_count"),
 				backend_server_check_interval_normal = parameters_get ("varnish_heartbeat_interval"),
 				backend_server_check_interval_rising = parameters_get ("varnish_heartbeat_interval"),
 				backend_server_check_interval_failed = parameters_get ("varnish_heartbeat_interval"),
+				backend_http_keep_alive_reuse = parameters_get ("varnish_keep_alive_reuse"),
+				backend_http_keep_alive_mode = parameters_get ("varnish_keep_alive_mode"),
+				backend_http_keep_alive_timeout = parameters_get ("varnish_keep_alive_timeout"),
 				server_http_send_proxy_enabled = parameters_get ("varnish_downstream_send_proxy_enabled"),
 			)
 		
