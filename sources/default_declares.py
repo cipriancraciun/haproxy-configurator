@@ -129,7 +129,9 @@ def declare_globals_tls (_configuration) :
 	_configuration.declare_group (
 			"TLS default certificates",
 			statement_choose_if_non_null ("$tls_ca_base", ("ca-base", "$\'tls_ca_base")),
+			statement_choose_if_non_null ("$tls_ca_file", ("ca-file", "$\'tls_ca_file")),
 			statement_choose_if_non_null ("$tls_crt_base", ("crt-base", "$\'tls_crt_base")),
+			statement_choose_if_non_null ("$tls_crt_file", ("crt", "$\'tls_crt_file")),
 	)
 	_configuration.declare_group (
 			"TLS default configuration",
@@ -144,7 +146,7 @@ def declare_globals_tls (_configuration) :
 			"TLS advanced configuration",
 			("tune.ssl.default-dh-param", 2048),
 			("tune.ssl.maxrecord", 16 * 1024),
-			("tune.ssl.cachesize", 262144),
+			("tune.ssl.cachesize", 128 * 1024),
 			("tune.ssl.lifetime", statement_seconds (3600)),
 	)
 
