@@ -337,6 +337,10 @@ def _quote_token (_token, _quote, _expand) :
 		return _quote_token (_token, _quote, _expand)
 
 
+def quote_token (_quote, _token) :
+	return _quote_token (_token, _quote, None)
+
+
 
 
 def hash_token (_token) :
