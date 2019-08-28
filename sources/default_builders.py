@@ -524,6 +524,13 @@ class HaHttpRuleBuilder (HaBuilder) :
 		self.set_enabled ("$http_drop_cookies_excluded_variable", _acl, **_overrides)
 	
 	
+	def force_cors_enable (self, _acl = None, **_overrides) :
+		self.set_enabled ("$http_force_cors_enabled_variable", _acl, **_overrides)
+	
+	def force_cors_exclude (self, _acl = None, **_overrides) :
+		self.set_enabled ("$http_force_cors_excluded_variable", _acl, **_overrides)
+	
+	
 	def set_mark (self, _mark, _acl = None, **_overrides) :
 		_rule_condition = ("if", _acl, "TRUE")
 		_mark_rule = ("set-mark", statement_format ("0x%08x", statement_enforce_int (_mark)))
@@ -930,6 +937,53 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		self.set_enabled_for_domain ("$http_drop_cookies_excluded_variable", _domain, _acl)
 	
 	
+	def force_cors (self, _acl = None, _force = False, **_overrides) :
+		self.force_cors_prepare ()
+		self.force_cors_unset ()
+	
+	def force_cors_prepare (self, _acl = None, _force = False, **_overrides) :
+		_acl_enabled = self._acl.variable_bool ("$http_force_cors_enabled_variable", True) if not _force else None
+		_acl_included = self._acl.variable_bool ("$http_force_cors_excluded_variable", True) .negate () if not _force else None
+		_acl_origin_present = self._acl.request_header_exists ("Origin")
+		_acl_options_present = self._acl.request_method ("OPTIONS")
+		self.set_enabled ("$http_force_cors_origin_present_variable", (_acl, _acl_enabled, _acl_included, _acl_origin_present), **_overrides)
+		self.set_enabled ("$http_force_cors_options_present_variable", (_acl, _acl_enabled, _acl_included, _acl_options_present), **_overrides)
+		self.set_variable ("$http_force_cors_origin_variable", self._samples.request_header ("Origin"), (_acl, _acl_enabled, _acl_included, _acl_origin_present), **_overrides)
+	
+	def force_cors_unset (self, _acl = None, _force = False, **_overrides) :
+		_acl_enabled = self._acl.variable_bool ("$http_force_cors_enabled_variable", True) if not _force else None
+		_acl_included = self._acl.variable_bool ("$http_force_cors_excluded_variable", True) .negate () if not _force else None
+		self.delete_header ("Origin", (_acl, _acl_enabled, _acl_included), **_overrides)
+		self.delete_header ("Access-Control-Request-Method", (_acl, _acl_enabled, _acl_included), **_overrides)
+		self.delete_header ("Access-Control-Request-Headers", (_acl, _acl_enabled, _acl_included), **_overrides)
+	
+	def force_cors_allow (self, _acl = None, _force = False, **_overrides) :
+		_acl_enabled = self._acl.variable_bool ("$http_force_cors_enabled_variable", True) if not _force else None
+		_acl_included = self._acl.variable_bool ("$http_force_cors_excluded_variable", True) .negate () if not _force else None
+		_acl_origin = self._acl.variable_bool ("$http_force_cors_origin_present_variable", True) if not _force else None
+		self.set_enabled ("$http_force_cors_allowed_variable", (_acl, _acl_enabled, _acl_included, _acl_origin), **_overrides)
+	
+	def force_cors_allow_origin (self, _origin, _acl = None, _force = False, **_overrides) :
+		_acl_origin = self._acl.variable_equals ("$http_force_cors_origin_variable", _origin)
+		self.force_cors_allow ((_acl, _acl_origin), _force, **_overrides)
+	
+	def force_cors_retarget_options (self, _method, _path, _acl = None, _force = False, **_overrides) :
+		_acl_enabled = self._acl.variable_bool ("$http_force_cors_enabled_variable", True) if not _force else None
+		_acl_included = self._acl.variable_bool ("$http_force_cors_excluded_variable", True) .negate () if not _force else None
+		_acl_allowed = self._acl.variable_bool ("$http_force_cors_allowed_variable", True) if not _force else None
+		_acl_origin = self._acl.variable_bool ("$http_force_cors_origin_present_variable", True) if not _force else None
+		_acl_options = self._acl.variable_bool ("$http_force_cors_options_present_variable", True) if not _force else None
+		self.set_method (_method, (_acl, _acl_enabled, _acl_included, _acl_origin, _acl_allowed, _acl_options), **_overrides)
+		self.set_path (_path, (_acl, _acl_enabled, _acl_included, _acl_origin, _acl_allowed, _acl_options), **_overrides)
+		self.deny ((_acl, _acl_enabled, _acl_included, _acl_origin, _acl_allowed.negate (), _acl_options), 403, **_overrides)
+	
+	def force_cors_enable_for_domain (self, _domain, _acl = None, **_overrides) :
+		self.set_enabled_for_domain ("$http_force_cors_enabled_variable", _domain, _acl)
+	
+	def force_cors_exclude_for_domain (self, _domain, _acl = None, **_overrides) :
+		self.set_enabled_for_domain ("$http_force_cors_excluded_variable", _domain, _acl)
+	
+	
 	def capture (self, _sample, _acl = None, **_overrides) :
 		_index = self._context._declare_request_capture (**_overrides)
 		_rule_condition = ("if", _acl, "TRUE")
@@ -1290,6 +1344,52 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		_acl_enabled = self._acl.variable_bool ("$http_drop_cookies_enabled_variable", True) if not _force else None
 		_acl_included = self._acl.variable_bool ("$http_drop_cookies_excluded_variable", True) .negate () if not _force else None
 		self.delete_header ("Set-Cookie", (_acl, _acl_enabled, _acl_included), **_overrides)
+	
+	
+	def force_cors (self, _origin = "origin", _methods = ["GET"], _headers = None, _max_age = 3600, _credentials = False, _acl = None, _force = False, **_overrides) :
+		self.force_cors_unset (_acl, _force, **_overrides)
+		self.force_cors_set (_origin, _methods, _headers, _max_age, _credentials, _acl, _force, **_overrides)
+		self.force_cors_vary (_acl, _force, **_overrides)
+	
+	def force_cors_unset (self, _acl = None, _force = False, **_overrides) :
+		_acl_enabled = self._acl.variable_bool ("$http_force_cors_enabled_variable", True) if not _force else None
+		_acl_included = self._acl.variable_bool ("$http_force_cors_excluded_variable", True) .negate () if not _force else None
+		self.delete_header ("Access-Control-Allow-Origin", (_acl, _acl_enabled, _acl_included), **_overrides)
+		self.delete_header ("Access-Control-Allow-Methods", (_acl, _acl_enabled, _acl_included), **_overrides)
+		self.delete_header ("Access-Control-Allow-Headers", (_acl, _acl_enabled, _acl_included), **_overrides)
+		self.delete_header ("Access-Control-Expose-Headers", (_acl, _acl_enabled, _acl_included), **_overrides)
+		self.delete_header ("Access-Control-Allow-Credentials", (_acl, _acl_enabled, _acl_included), **_overrides)
+		self.delete_header ("Access-Control-Max-Age", (_acl, _acl_enabled, _acl_included), **_overrides)
+	
+	def force_cors_set (self, _origin = "origin", _methods = ["GET"], _headers = None, _max_age = 3600, _credentials = False, _acl = None, _force = False, **_overrides) :
+		_acl_enabled = self._acl.variable_bool ("$http_force_cors_enabled_variable", True) if not _force else None
+		_acl_included = self._acl.variable_bool ("$http_force_cors_excluded_variable", True) .negate () if not _force else None
+		_acl_allowed = self._acl.variable_bool ("$http_force_cors_allowed_variable", True) if not _force else None
+		_acl_origin = self._acl.variable_bool ("$http_force_cors_origin_present_variable", True) if not _force else None
+		if _origin == "origin" :
+			_origin = self._samples.variable ("$http_force_cors_origin_variable") .statement_format ()
+		if _origin is not None :
+			self.set_header ("Access-Control-Allow-Origin", _origin, False, (_acl, _acl_enabled, _acl_included, _acl_origin, _acl_allowed), **_overrides)
+		if _methods is not None :
+			self.set_header ("Access-Control-Allow-Methods", ", ".join (_methods), False, (_acl, _acl_enabled, _acl_included, _acl_origin, _acl_allowed), **_overrides)
+		if _headers is not None :
+			self.set_header ("Access-Control-Allow-Headers", ", ".join (_headers), False, (_acl, _acl_enabled, _acl_included, _acl_origin, _acl_allowed), **_overrides)
+		if _credentials is True :
+			self.set_header ("Access-Control-Allow-Credentials", "true", False, (_acl, _acl_enabled, _acl_included, _acl_origin, _acl_allowed), **_overrides)
+		elif _credentials is False or _credentials is None :
+			pass
+		else :
+			raise_error ("b00395cd", _credentials)
+		if _max_age is not None :
+			self.set_header ("Access-Control-Max-Age", statement_enforce_int (_max_age), False, (_acl, _acl_enabled, _acl_included, _acl_origin, _acl_allowed), **_overrides)
+	
+	def force_cors_vary (self, _acl = None, _force = False, **_overrides) :
+		_acl_enabled = self._acl.variable_bool ("$http_force_cors_enabled_variable", True) if not _force else None
+		_acl_included = self._acl.variable_bool ("$http_force_cors_excluded_variable", True) .negate () if not _force else None
+		_acl_origin = self._acl.variable_bool ("$http_force_cors_origin_present_variable", True) if not _force else None
+		self.append_header ("Vary", "Origin", (_acl, _acl_enabled, _acl_included, _acl_origin), **_overrides)
+		self.append_header ("Vary", "Access-Control-Request-Method", (_acl, _acl_enabled, _acl_included, _acl_origin), **_overrides)
+		self.append_header ("Vary", "Access-Control-Request-Headers", (_acl, _acl_enabled, _acl_included, _acl_origin), **_overrides)
 	
 	
 	def capture (self, _sample, _acl = None, **_overrides) :
