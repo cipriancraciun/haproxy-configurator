@@ -478,11 +478,11 @@ class HaWorker (HaSection) :
 	
 	
 	def declare_http_request_rule_if (self, _action, _acl, **_overrides) :
-		_condition = ("if", _acl, "TRUE")
+		_condition = ("if", _acl, "TRUE") if _acl is not None else None
 		self.declare_http_request_rule_0 ((_action, _condition), **_overrides)
 	
 	def declare_http_request_rule_unless (self, _action, _acl, **_overrides) :
-		_condition = ("unless", _acl, "TRUE")
+		_condition = ("unless", _acl, "TRUE") if _acl is not None else None
 		self.declare_http_request_rule_0 ((_action, _condition), **_overrides)
 	
 	def declare_http_request_rule_0 (self, _rule, **_overrides) :
@@ -493,11 +493,11 @@ class HaWorker (HaSection) :
 	
 	
 	def declare_http_response_rule_if (self, _action, _acl, **_overrides) :
-		_condition = ("if", _acl, "TRUE")
+		_condition = ("if", _acl, "TRUE") if _acl is not None else None
 		self.declare_http_response_rule_0 ((_action, _condition), **_overrides)
 	
 	def declare_http_response_rule_unless (self, _action, _acl, **_overrides) :
-		_condition = ("unless", _acl, "TRUE")
+		_condition = ("unless", _acl, "TRUE") if _acl is not None else None
 		self.declare_http_response_rule_0 ((_action, _condition), **_overrides)
 	
 	def declare_http_response_rule_0 (self, _rule, **_overrides) :
@@ -572,11 +572,11 @@ class HaFrontend (HaWorker) :
 	
 	
 	def declare_route_if_0 (self, _backend, _acl, **_overrides) :
-		_condition = ("if", _acl, "TRUE")
+		_condition = ("if", _acl, "TRUE") if _acl is not None else None
 		self._route_statements.declare (("use_backend", _backend, _condition), **_overrides)
 	
 	def declare_route_unless_0 (self, _backend, _acl, **_overrides) :
-		_condition = ("unless", _acl, "TRUE")
+		_condition = ("unless", _acl, "TRUE") if _acl is not None else None
 		self._route_statements.declare (("use_backend", _backend, _condition), **_overrides)
 	
 	def http_route_builder (self, **_overrides) :
