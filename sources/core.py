@@ -550,7 +550,7 @@ class HaWorker (HaSection) :
 						_acl_statements.append ((_acl_identifier, _acl_tokens))
 				else :
 					_acl_statements.append ((_acl_identifier, _acl_tokens))
-			_acl_statements.sort (key = lambda _acl_statement : _acl_statement[1][2:])
+			_acl_statements.sort (key = lambda _acl_statement : (_acl_statement[1][2:], _acl_statement[0]))
 			_statements = HaStatementGroup (self._parameters, "ACL", order = 5000 + 200)
 			for _acl_statement in _acl_statements :
 				_statements.declare (_acl_statement[1])
