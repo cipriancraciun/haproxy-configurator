@@ -422,10 +422,17 @@ parameters = {
 		# FIXME:  Rename this!
 		"frontend_bind_tls_options_actual" : (
 				parameters_get ("frontend_tls_options"),
+				parameters_choose_match (
+						parameters_get ("tls_verify_client"),
+						(None, None),
+						("none", ("verify", "none")),
+						("optional", ("verify", "optional")),
+						("required", ("verify", "required"))),
 				parameters_choose_if_non_null (
 						parameters_get ("frontend_tls_ciphers_descriptor"),
 						("ciphers", parameters_get ("frontend_tls_ciphers_descriptor"))),
 			),
+		
 		"frontend_tls_mode" : None,
 		"frontend_tls_ciphers" : parameters_choose_match (
 				parameters_get ("frontend_tls_mode"),
@@ -441,14 +448,17 @@ parameters = {
 						parameters_get ("tls_options"))),
 				("normal", (
 						parameters_get ("tls_options_normal"),
+						parameters_get ("tls_pem_descriptor"),
 						parameters_get ("tls_alpn_descriptor"),
 						parameters_get ("tls_npn_descriptor"))),
 				("paranoid", (
 						parameters_get ("tls_options_paranoid"),
+						parameters_get ("tls_pem_descriptor"),
 						parameters_get ("tls_alpn_descriptor"),
 						parameters_get ("tls_npn_descriptor"))),
 				("backdoor", (
 						parameters_get ("tls_options_backdoor"),
+						parameters_get ("tls_pem_descriptor"),
 						parameters_get ("tls_alpn_descriptor"),
 						parameters_get ("tls_npn_descriptor"))),
 			),
@@ -474,8 +484,11 @@ parameters = {
 		"frontend_http_keep_alive_reuse" : "safe",
 		"frontend_http_keep_alive_timeout" : None,
 		
-		"frontend_http_stick_source" : "source",
+		"frontend_http_stick_source" : parameters_get ("samples_client_ip_method"),
 		"frontend_http_stick_track" : True,
+		
+		"frontend_tcp_stick_source" : parameters_get ("samples_client_ip_method"),
+		"frontend_tcp_stick_track" : True,
 		
 		
 		
@@ -501,8 +514,10 @@ parameters = {
 		"backend_http_check_expect_matcher" : "status",
 		"backend_http_check_expect_pattern" : "200",
 		
+		"backend_server_min_connections_active_count" : parameters_math ("//", parameters_get ("backend_server_max_connections_active_count"), 4, True),
 		"backend_server_max_connections_active_count" : None,
 		"backend_server_max_connections_queue_count" : parameters_math ("*", parameters_get ("backend_server_max_connections_active_count"), 4, True),
+		"backend_server_max_connections_full_count" : parameters_math ("//", parameters_get ("backend_server_max_connections_queue_count"), 8, True),
 		"backend_server_check_interval_normal" : None,
 		"backend_server_check_interval_rising" : None,
 		"backend_server_check_interval_failed" : None,
@@ -521,7 +536,7 @@ parameters = {
 		"backend_server_timeout_keep_alive" : None,
 		
 		"backend_http_keep_alive_mode" : "server-close",
-		"backend_http_keep_alive_reuse" : "safe",
+		"backend_http_keep_alive_reuse" : "never",
 		"backend_http_keep_alive_timeout" : None,
 		
 		"backend_balance" : None,
@@ -531,12 +546,14 @@ parameters = {
 		
 		"server_enabled" : True,
 		
+		"server_min_connections_active_count" : None, # parameters_get ("defaults_server_min_connections_active_count"),
 		"server_max_connections_active_count" : None, # parameters_get ("defaults_server_max_connections_active_count"),
 		"server_max_connections_queue_count" : None, # parameters_get ("defaults_server_max_connections_queue_count"),
 		"server_check_enabled" : parameters_get ("backend_check_enabled"),
 		"server_send_proxy_enabled" : False,
 		"server_send_proxy_version" : "v1",
 		
+		"server_tcp_min_connections_active_count" : parameters_get ("server_min_connections_active_count"),
 		"server_tcp_max_connections_active_count" : parameters_get ("server_max_connections_active_count"),
 		"server_tcp_max_connections_queue_count" : parameters_get ("server_max_connections_queue_count"),
 		"server_tcp_check_enabled" : parameters_get ("server_check_enabled"),
@@ -549,6 +566,9 @@ parameters = {
 				parameters_choose_if (
 						parameters_get ("server_tcp_check_enabled"),
 						("observe", "layer4")),
+				parameters_choose_if_non_null (
+						parameters_get ("server_tcp_min_connections_active_count"),
+						("minconn", parameters_get ("server_tcp_min_connections_active_count"))),
 				parameters_choose_if_non_null (
 						parameters_get ("server_tcp_max_connections_active_count"),
 						("maxconn", parameters_get ("server_tcp_max_connections_active_count"))),
@@ -569,6 +589,7 @@ parameters = {
 							parameters_choose_if (parameters_get ("server_tcp_check_enabled"), "check-send-proxy"))),
 			),
 		
+		"server_http_min_connections_active_count" : parameters_get ("server_min_connections_active_count"),
 		"server_http_max_connections_active_count" : parameters_get ("server_max_connections_active_count"),
 		"server_http_max_connections_queue_count" : parameters_get ("server_max_connections_queue_count"),
 		"server_http_check_enabled" : parameters_get ("server_check_enabled"),
@@ -581,6 +602,9 @@ parameters = {
 				parameters_choose_if (
 						parameters_get ("server_http_check_enabled"),
 						("observe", "layer7")),
+				parameters_choose_if_non_null (
+						parameters_get ("server_http_min_connections_active_count"),
+						("minconn", parameters_get ("server_http_min_connections_active_count"))),
 				parameters_choose_if_non_null (
 						parameters_get ("server_http_max_connections_active_count"),
 						("maxconn", parameters_get ("server_http_max_connections_active_count"))),
@@ -643,8 +667,10 @@ parameters = {
 		"defaults_frontend_max_connections_backlog_count" : parameters_math ("//", parameters_get ("defaults_frontend_max_connections_active_count"), 4),
 		"defaults_frontend_max_sessions_rate" : parameters_math ("*", parameters_get ("defaults_frontend_max_connections_active_count"), 4),
 		
+		"defaults_server_min_connections_active_count" : parameters_math ("//", parameters_get ("defaults_server_max_connections_active_count"), 4),
 		"defaults_server_max_connections_active_count" : 32,
 		"defaults_server_max_connections_queue_count" : parameters_math ("*", parameters_get ("defaults_server_max_connections_active_count"), 4),
+		"defaults_server_max_connections_full_count" : parameters_math ("//", parameters_get ("defaults_server_max_connections_queue_count"), 8),
 		
 		"defaults_server_check_interval_normal" : 60,
 		"defaults_server_check_interval_rising" : parameters_math ("//", parameters_get ("defaults_server_check_interval_normal"), 30),
@@ -668,6 +694,7 @@ parameters = {
 		"defaults_timeout_keep_alive" : 60,
 		
 		"defaults_compression_content_types" : compression_content_types,
+		"defaults_compression_offload" : True,
 		
 		
 		
@@ -681,10 +708,18 @@ parameters = {
 		
 		
 		
+		
 		"tls_enabled" : True,
-		"tls_ca_base" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (False, parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/ca"))),
-		"tls_crt_base" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (False, parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/certificates"))),
-		"tls_dh_params" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (True, parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/dh-params.pem"))),
+		"tls_ca_base" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (parameters_get ("tls_ca_base_enabled"), parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/ca"))),
+		"tls_ca_file" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (parameters_get ("tls_ca_file_enabled"), parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/ca.pem"))),
+		"tls_crt_base" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (parameters_get ("tls_crt_base_enabled"), parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/certificates"))),
+		"tls_crt_file" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (parameters_get ("tls_crt_file_enabled"), parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/certificates.pem"))),
+		"tls_dh_params" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (parameters_get ("tls_dh_params_enabled"), parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/dh-params.pem"))),
+		"tls_ca_base_enabled" : False,
+		"tls_ca_file_enabled" : False,
+		"tls_crt_base_enabled" : False,
+		"tls_crt_file_enabled" : False,
+		"tls_dh_params_enabled" : True,
 		
 		"tls_mode" : tls_mode,
 		"tls_ciphers" : parameters_choose_match (
@@ -701,26 +736,39 @@ parameters = {
 				parameters_get ("tls_mode"),
 				("normal", (
 						parameters_get ("tls_options_normal"),
+						parameters_get ("tls_pem_descriptor"),
 						parameters_get ("tls_alpn_descriptor"),
 						parameters_get ("tls_npn_descriptor"))),
 				("paranoid", (
 						parameters_get ("tls_options_paranoid"),
+						parameters_get ("tls_pem_descriptor"),
 						parameters_get ("tls_alpn_descriptor"),
 						parameters_get ("tls_npn_descriptor"))),
 				("backdoor", (
 						parameters_get ("tls_options_backdoor"),
+						parameters_get ("tls_pem_descriptor"),
 						parameters_get ("tls_alpn_descriptor"),
 						parameters_get ("tls_npn_descriptor"))),
 			),
 		"tls_options_normal" : tls_options_normal,
 		"tls_options_paranoid" : tls_options_paranoid,
 		"tls_options_backdoor" : tls_options_backdoor,
+		"tls_pem_enabled" : True,
+		"tls_pem_descriptor" : parameters_choose_if (
+				parameters_get ("tls_pem_enabled"),
+				(
+					parameters_choose_if_non_null (parameters_get ("tls_crt_file"), ("crt", parameters_get ("tls_crt_file"))),
+					parameters_choose_if_non_null (parameters_get ("tls_crt_base"), ("crt-base", parameters_get ("tls_crt_base"))),
+					parameters_choose_if_non_null (parameters_get ("tls_ca_file"), ("ca-file", parameters_get ("tls_ca_file"))),
+					parameters_choose_if_non_null (parameters_get ("tls_ca_base"), ("ca-base", parameters_get ("tls_ca_base"))),
+				)),
 		"tls_alpn_enabled" : False,
 		"tls_alpn_descriptor" : parameters_choose_if (parameters_get ("tls_alpn_enabled"), ("alpn", parameters_join (",", parameters_get ("tls_alpn_protocols")))),
 		"tls_alpn_protocols" : ("h2,http/1.1", "http/1.0"),
 		"tls_npn_enabled" : False,
 		"tls_npn_descriptor" : parameters_choose_if (parameters_get ("tls_npn_enabled"), ("npn", parameters_join (",", parameters_get ("tls_npn_protocols")))),
 		"tls_npn_protocols" : ("h2,http/1.1", "http/1.0"),
+		"tls_verify_client" : None,
 		
 		
 		
@@ -819,6 +867,7 @@ parameters = {
 		"logging_http_header_forwarded_host" : "X-Forwarded-Host",
 		"logging_http_header_forwarded_for" : "X-Forwarded-For",
 		"logging_http_header_forwarded_proto" : "X-Forwarded-Proto",
+		"logging_http_header_forwarded_proto_method" : "ssl_fc",
 		"logging_http_header_forwarded_port" : "X-Forwarded-Port",
 		"logging_http_header_forwarded_server_ip" : "X-Forwarded-Server-Ip",
 		"logging_http_header_forwarded_server_port" : "X-Forwarded-Server-Port",
@@ -949,6 +998,13 @@ parameters = {
 		"http_drop_cookies_enabled_variable" : "txn.http_drop_cookies_enabled",
 		"http_drop_cookies_excluded_variable" : "txn.http_drop_cookies_excluded",
 		
+		"http_force_cors_enabled_variable" : "txn.http_force_cors_enabled",
+		"http_force_cors_excluded_variable" : "txn.http_force_cors_excluded",
+		"http_force_cors_allowed_variable" : "txn.http_force_cors_allowed",
+		"http_force_cors_origin_variable" : "txn.http_force_cors_origin",
+		"http_force_cors_origin_present_variable" : "txn.http_force_cors_origin_present",
+		"http_force_cors_options_present_variable" : "txn.http_force_cors_options_present",
+		
 		"http_ranges_allowed_variable" : "txn.http_ranges_allowed",
 		
 		
@@ -987,14 +1043,20 @@ parameters = {
 		"varnish_heartbeat_enabled" : True,
 		"varnish_heartbeat_path" : parameters_format ("%s%s", parameters_get ("varnish_internals_path_prefix"), "heartbeat"),
 		"varnish_heartbeat_interval" : 1,
+		"varnish_min_connections_active_count" : parameters_math ("//", parameters_get ("varnish_max_connections_active_count"), 4, True),
 		"varnish_max_connections_active_count" : parameters_math ("//", parameters_get ("frontend_max_connections_active_count"), 4, True),
 		"varnish_max_connections_queue_count" : parameters_math ("*", parameters_get ("varnish_max_connections_active_count"), 4, True),
+		"varnish_max_connections_full_count" : parameters_math ("//", parameters_get ("varnish_max_connections_queue_count"), 8, True),
+		"varnish_keep_alive_reuse" : "always",
+		"varnish_keep_alive_mode" : "keep-alive",
+		"varnish_keep_alive_timeout" : 3600,
 		"varnish_send_proxy_enabled" : False,
 		
 		
 		
 		
 		"samples_via_tls_method" : "ssl_fc",
+		"samples_client_ip_method" : "src",
 		
 	}
 
