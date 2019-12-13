@@ -466,12 +466,21 @@ class HaHttpRuleBuilder (HaBuilder) :
 			raise_error ("b0203fc6", self)
 	
 	
-	def set_cookie (self, _name, _value, _path, _max_age, _acl = None, **_overrides) :
+	def set_cookie (self, _name, _value, _path, _max_age, _same_site, _secure, _http_only, _acl = None, **_overrides) :
 		# FIXME:  Make `Path` and `Max-Age` configurable!
 		_path = statement_choose_if (_path, statement_format ("Path=%s", statement_enforce_string (_path)))
 		_max_age = statement_choose_if (_max_age, statement_format ("Max-Age=%d", statement_enforce_int (_max_age)))
 		_cookie = statement_format ("%s=%s", statement_enforce_string (_name), statement_enforce_string (_value))
-		_cookie = statement_join ("; ", (_cookie, _path, _max_age))
+		_cookie = [_cookie, _path, _max_age]
+		if _same_site is not None :
+			if _same_site is True :
+				_same_site = "Strict"
+			elif _same_site is False :
+				_same_site = "None"
+			_cookie.append (statement_format ("SameSite=%s", statement_enforce_string (_same_site)))
+		_cookie.append (statement_choose_if (_secure, "Secure"))
+		_cookie.append (statement_choose_if (_http_only, "HttpOnly"))
+		_cookie = statement_join ("; ", tuple (_cookie))
 		self.append_header ("Set-Cookie", _cookie, _acl, **_overrides)
 	
 	
@@ -1158,7 +1167,7 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		self.set_header ("$http_tracking_request_header", statement_format ("%%[%s]", self._samples.variable ("$http_tracking_request_variable")), False, (_acl, _acl_enabled, _acl_included), **_overrides)
 		self.set_header ("$http_tracking_session_header", statement_format ("%%[%s]", self._samples.variable ("$http_tracking_session_variable")), False, (_acl, _acl_enabled, _acl_included), **_overrides)
 		if _set_cookie :
-			self.set_cookie ("$http_tracking_session_cookie", statement_format ("%%[%s]", self._samples.variable ("$http_tracking_session_variable")), "/", "$http_tracking_session_cookie_max_age", (_acl, _acl_enabled, _acl_included), **_overrides)
+			self.set_cookie ("$http_tracking_session_cookie", statement_format ("%%[%s]", self._samples.variable ("$http_tracking_session_variable")), "/", "$http_tracking_session_cookie_max_age", False, True, False, (_acl, _acl_enabled, _acl_included), **_overrides)
 	
 	
 	def harden_http (self, _acl = None, _force = False, _mark_denied = None, **_overrides) :
@@ -1444,7 +1453,7 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 	def authenticate_trigger (self, _credentials, _acl = None, **_overrides) :
 		_acl_authenticated = self._acl.variable_exists ("$http_authenticated_variable")
 		self.delete_header ("$http_authenticated_header", _acl, **_overrides)
-		self.set_cookie ("$http_authenticated_cookie", statement_format ("%%[%s]", self._samples.variable ("$http_authenticated_variable")), "/", "$http_authenticated_cookie_max_age", (_acl, _acl_authenticated), **_overrides)
+		self.set_cookie ("$http_authenticated_cookie", statement_format ("%%[%s]", self._samples.variable ("$http_authenticated_variable")), "/", "$http_authenticated_cookie_max_age", True, True, True, (_acl, _acl_authenticated), **_overrides)
 		# FIXME:  Make this configurable!
 		if False :
 			self.set_header ("$http_authenticated_header", statement_format ("%%[%s]", self._samples.variable ("$http_authenticated_variable")), False, (_acl, _acl_authenticated), **_overrides)
