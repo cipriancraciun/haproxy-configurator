@@ -398,7 +398,7 @@ class HaHttpRuleBuilder (HaBuilder) :
 		self.allow ((_acl, _acl_path), **_overrides)
 	
 	
-	def deny (self, _acl, _code = None, _mark = None, **_overrides) :
+	def deny (self, _code, _acl = None, _mark = None, **_overrides) :
 		# FIXME:  Make this configurable and deferable!
 		if _mark is not None and _mark != 0 :
 			self.set_mark (_mark, _acl, **_overrides)
@@ -408,37 +408,37 @@ class HaHttpRuleBuilder (HaBuilder) :
 	
 	def deny_host (self, _host, _acl = None, _code = None, _mark = None, **_overrides) :
 		_acl_host = self._acl.host (_host)
-		self.deny ((_acl, _acl_host), _code, _mark, **_overrides)
+		self.deny (_code, (_acl, _acl_host), _mark, **_overrides)
 	
 	def deny_path (self, _path, _acl = None, _code = None, _mark = None, **_overrides) :
 		_acl_path = self._acl.path (_path)
-		self.deny ((_acl, _acl_path), _code, _mark, **_overrides)
+		self.deny (_code, (_acl, _acl_path), _mark, **_overrides)
 	
 	def deny_path_prefix (self, _path, _acl = None, _code = None, _mark = None, **_overrides) :
 		_acl_path = self._acl.path_prefix (_path)
-		self.deny ((_acl, _acl_path), _code, _mark, **_overrides)
+		self.deny (_code, (_acl, _acl_path), _mark, **_overrides)
 	
 	def deny_path_suffix (self, _path, _acl = None, _code = None, _mark = None, **_overrides) :
 		_acl_path = self._acl.path_suffix (_path)
-		self.deny ((_acl, _acl_path), _code, _mark, **_overrides)
+		self.deny (_code, (_acl, _acl_path), _mark, **_overrides)
 	
 	def deny_path_substring (self, _path, _acl = None, _code = None, _mark = None, **_overrides) :
 		_acl_path = self._acl.path_substring (_path)
-		self.deny ((_acl, _acl_path), _code, _mark, **_overrides)
+		self.deny (_code, (_acl, _acl_path), _mark, **_overrides)
 	
 	def deny_subpath (self, _path, _acl = None, _code = None, _mark = None, **_overrides) :
 		_acl_path = self._acl.subpath (_path)
-		self.deny ((_acl, _acl_path), _code, _mark, **_overrides)
+		self.deny (_code, (_acl, _acl_path), _mark, **_overrides)
 	
 	def deny_geoip_country (self, _country, _negated = False, _acl = None, _code = None, _mark = None, **_overrides) :
 		_acl_country = self._acl.geoip_country_captured (_country)
 		if _negated :
 			_acl_country = _acl_country.negate ()
-		self.deny ((_acl, _acl_country), _code, _mark, **_overrides)
+		self.deny (_code, (_acl, _acl_country), _mark, **_overrides)
 	
 	def deny_bot (self, _acl = None, _code = None, _mark = None, **_overrides) :
 		_acl_bot = self._acl.bot ()
-		self.deny ((_acl, _acl_bot), _code, _mark, **_overrides)
+		self.deny (_code, (_acl, _acl_bot), _mark, **_overrides)
 	
 	
 	def set_header (self, _header, _value, _ignore_if_exists = False, _acl = None, **_overrides) :
@@ -773,7 +773,7 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		_acl_path = self._acl.path_prefix (_path)
 		if _credentials is not None :
 			self.authenticate (_credentials, None, (_acl, _acl_path), order = _order_deny, **_overrides)
-		self.deny ((_acl, _acl_path), None, _mark_denied, order = _order_deny, **_overrides)
+		self.deny (None, (_acl, _acl_path), _mark_denied, order = _order_deny, **_overrides)
 	
 	def expose_internals (self, _credentials = None, _acl = None, _mark_allowed = None, _mark_denied = None, **_overrides) :
 		self.expose_internals_path_prefix ("$haproxy_internals_path_prefix", _credentials, _acl, _mark_allowed, **_overrides)
@@ -790,8 +790,8 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		_acl_authenticated = self._acl.authenticated (_credentials) if _credentials is not None else None
 		for _code in _codes :
 			_acl_path = self._acl.path (statement_format ("%s%d", "$error_pages_path_prefix", _code))
-			self.deny ((_acl, _acl_authenticated, _acl_path), statement_enforce_int (_code), _mark_allowed, **parameters_overrides (_overrides, order = _order_allow))
-		self.deny ((_acl, self._acl.path_prefix ("$error_pages_path_prefix")), None, _mark_denied, order = _order_deny)
+			self.deny (statement_enforce_int (_code), (_acl, _acl_authenticated, _acl_path), _mark_allowed, **parameters_overrides (_overrides, order = _order_allow))
+		self.deny (None, (_acl, self._acl.path_prefix ("$error_pages_path_prefix")), _mark_denied, order = _order_deny)
 	
 	def expose_whitelist (self, _credentials = None, _acl = None, _mark_allowed = None, _mark_denied = None, **_overrides) :
 		_mark_allowed = self._value_or_parameters_get_and_expand (_mark_allowed, "whitelist_netfilter_mark_allowed")
@@ -800,8 +800,8 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		_order_deny = self._parameters._get_and_expand ("internals_rules_order_deny")
 		_acl_authenticated = self._acl.authenticated (_credentials) if _credentials is not None else None
 		_acl_path = self._acl.path ("$whitelist_path")
-		self.deny ((_acl, _acl_authenticated, _acl_path), 200, _mark_allowed, **parameters_overrides (_overrides, order = _order_allow))
-		self.deny ((_acl, _acl_path), None, _mark_denied, **parameters_overrides (_overrides, order = _order_deny))
+		self.deny (200, (_acl, _acl_authenticated, _acl_path), _mark_allowed, **parameters_overrides (_overrides, order = _order_allow))
+		self.deny (None, (_acl, _acl_path), _mark_denied, **parameters_overrides (_overrides, order = _order_deny))
 	
 	
 	def set_forwarded_headers (self, _ignore_if_exists = False, _acl = None, **_overrides) :
@@ -864,7 +864,7 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		_acl_methods = _acl_methods.negate ()
 		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
 		_acl_included = self._acl.variable_bool ("$http_harden_excluded_variable", True) .negate () if not _force else None
-		self.deny ((_acl, _acl_methods, _acl_enabled, _acl_included), None, _mark_denied, **_overrides)
+		self.deny (None, (_acl, _acl_methods, _acl_enabled, _acl_included), _mark_denied, **_overrides)
 	
 	def harden_authorization (self, _acl = None, _force = False, **_overrides) :
 		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
@@ -975,7 +975,7 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		_acl_options = self._acl.variable_bool ("$http_force_cors_options_present_variable", True) if not _force else None
 		self.set_method (_method, (_acl, _acl_enabled, _acl_included, _acl_origin, _acl_allowed, _acl_options), **_overrides)
 		self.set_path (_path, (_acl, _acl_enabled, _acl_included, _acl_origin, _acl_allowed, _acl_options), **_overrides)
-		self.deny ((_acl, _acl_enabled, _acl_included, _acl_origin, _acl_allowed.negate (), _acl_options), 403, **_overrides)
+		self.deny (403, (_acl, _acl_enabled, _acl_included, _acl_origin, _acl_allowed.negate (), _acl_options), **_overrides)
 	
 	def force_cors_enable_for_domain (self, _domain, _acl = None, **_overrides) :
 		self.set_enabled_for_domain ("$http_force_cors_enabled_variable", _domain, _acl)
@@ -1069,7 +1069,7 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		_acl_path = self._acl.path (_path)
 		_acl_query = self._acl.query (_query)
 		self.authenticate (_credentials, _realm, (_acl, _acl_path, _acl_query), **_overrides)
-		self.deny ((_acl, _acl_path, _acl_query, _acl_authenticated), 200, **_overrides)
+		self.deny (200, (_acl, _acl_path, _acl_query, _acl_authenticated), **_overrides)
 	
 	def authenticate_trigger (self, _credentials, _realm = None, _acl = None, **_overrides) :
 		_acl_authenticated = self._acl.authenticated (_credentials)
@@ -1083,8 +1083,8 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		self.delete_header ("$http_authenticated_header", _acl, **_overrides)
 		self.set_header ("$http_authenticated_header", statement_format ("%%[%s]", self._samples.authenticated_group (_credentials)), False, (_acl, _acl_authenticated), **_overrides)
 		self.set_variable ("$http_authenticated_variable", self._samples.request_header ("$http_authenticated_header"), (_acl, _acl_authenticated), **_overrides)
-		self.deny ((_acl, _acl_authenticated, _acl_path), 200, **_overrides)
-		self.deny ((_acl, _acl_authenticated, _acl_query), 200, **_overrides)
+		self.deny (200, (_acl, _acl_authenticated, _acl_path), **_overrides)
+		self.deny (200, (_acl, _acl_authenticated, _acl_query), **_overrides)
 	
 	def authenticated (self, _credentials, _variable = None, _cleanup = True, _acl = None, **_overrides) :
 		_variable = _variable if _variable is not None else "txn.authenticated_%s" % (_credentials.identifier,)
@@ -1119,7 +1119,7 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 	
 	def deny_status (self, _code, _acl = None, _mark = None, **_overrides) :
 		_acl_status = self._acl.response_status (_code)
-		self.deny ((_acl, _acl_status), None, _mark, **_overrides)
+		self.deny (None, (_acl, _acl_status), _mark, **_overrides)
 	
 	
 	def expose_internals_0 (self, _acl_internals, _acl = None, _mark_allowed = None, **_overrides) :
@@ -1142,7 +1142,7 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		_mark_denied = self._value_or_parameters_get_and_expand (_mark_denied, "internals_netfilter_mark_denied")
 		_order_deny = self._parameters._get_and_expand ("internals_rules_order_deny")
 		_acl_path = self._acl.path_prefix (_path)
-		self.deny ((_acl, _acl_path), None, _mark_denied, order = _order_deny, **_overrides)
+		self.deny (None, (_acl, _acl_path), _mark_denied, order = _order_deny, **_overrides)
 	
 	def expose_internals (self, _acl = None, _mark_allowed = None, _mark_denied = None, **_overrides) :
 		self.expose_internals_path_prefix ("$haproxy_internals_path_prefix", _acl, _mark_allowed, **_overrides)
@@ -1173,7 +1173,7 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		_acl_handled = self._acl.response_header_exists ("$http_hardened_header", False) if not _force else None
 		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
 		_acl_included = self._acl.variable_bool ("$http_harden_excluded_variable", True) .negate () if not _force else None
-		self.deny ((_acl, _status_acl, _acl_enabled, _acl_included, _acl_handled), None, _mark_denied, **_overrides)
+		self.deny (None, (_acl, _status_acl, _acl_enabled, _acl_included, _acl_handled), _mark_denied, **_overrides)
 	
 	def harden_http_get (self, _acl = None, _force = False, _mark_denied = None, **_overrides) :
 		_mark_denied = self._value_or_parameters_get_and_expand (_mark_denied, "http_harden_netfilter_mark_denied")
@@ -1183,7 +1183,7 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		_acl_handled = self._acl.response_header_exists ("$http_hardened_header", False) if not _force else None
 		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
 		_acl_included = self._acl.variable_bool ("$http_harden_excluded_variable", True) .negate () if not _force else None
-		self.deny ((_acl, _method_acl, _status_acl, _acl_enabled, _acl_included, _acl_handled), None, _mark_denied, **_overrides)
+		self.deny (None, (_acl, _method_acl, _status_acl, _acl_enabled, _acl_included, _acl_handled), _mark_denied, **_overrides)
 	
 	def harden_http_post (self, _acl = None, _force = False, _mark_denied = None, **_overrides) :
 		_mark_denied = self._value_or_parameters_get_and_expand (_mark_denied, "http_harden_netfilter_mark_denied")
@@ -1193,7 +1193,7 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		_acl_handled = self._acl.response_header_exists ("$http_hardened_header", False) if not _force else None
 		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
 		_acl_included = self._acl.variable_bool ("$http_harden_excluded_variable", True) .negate () if not _force else None
-		self.deny ((_acl, _method_acl, _status_acl, _acl_enabled, _acl_included, _acl_handled), None, _mark_denied, **_overrides)
+		self.deny (None, (_acl, _method_acl, _status_acl, _acl_enabled, _acl_included, _acl_handled), _mark_denied, **_overrides)
 	
 	def harden_headers (self, _acl = None, _force = False, **_overrides) :
 		_acl_tls = self._acl.via_tls ()
@@ -1618,7 +1618,7 @@ class HaHttpBackendBuilder (HaBuilder) :
 				backend_http_keep_alive_reuse = "never",
 				backend_http_keep_alive_mode = "close",
 			)
-		_backend.requests.deny (None, _code = _code, _mark = _mark)
+		_backend.requests.deny (_code, None, _mark)
 		return _backend
 
 
