@@ -65,6 +65,7 @@ def declare_globals_daemon (_configuration) :
 			"Identity",
 			("node", "$\'daemon_node"),
 			("description", "$\'daemon_description"),
+			enabled_if = "$?global_identity_configure",
 	)
 	_configuration.declare_group (
 			"Daemon",
@@ -76,8 +77,13 @@ def declare_globals_daemon (_configuration) :
 			("group", "$\'daemon_group"),
 			("pidfile", "$\'daemon_pid"),
 			statement_choose_if ("$?daemon_chroot_enabled", ("chroot", "$\'daemon_chroot")),
+			enabled_if = "$?global_daemon_configure",
+	)
+	_configuration.declare_group (
+			"State",
 			("server-state-base", "$\'daemon_paths_states_prefix"),
 			("server-state-file", "$\'daemon_paths_state_global"),
+			enabled_if = "$?global_state_configure",
 	)
 
 
@@ -90,11 +96,13 @@ def declare_globals_network (_configuration) :
 			("maxsslconn", "$+global_max_tls_connections_count"),
 			("maxsslrate", "$+global_max_tls_connections_rate"),
 			("maxpipes", "$+global_max_pipes"),
+			enabled_if = "$?global_connections_configure",
 	)
 	_configuration.declare_group (
 			"Checks",
 			("max-spread-checks", 6),
 			("spread-checks", 25),
+			enabled_if = "$?global_checks_configure",
 	)
 	_configuration.declare_group (
 			"Compression",
@@ -104,6 +112,7 @@ def declare_globals_network (_configuration) :
 			("tune.comp.maxlevel", 9),
 			("tune.zlib.memlevel", 9),
 			("tune.zlib.windowsize", 15),
+			enabled_if = "$?global_compression_configure",
 	)
 	_configuration.declare_group (
 			"Sockets",
@@ -116,12 +125,14 @@ def declare_globals_network (_configuration) :
 			#("tune.sndbuf.server", 128 * 1024),
 			#("tune.pipesize", 128 * 1024),
 			#("tune.idletimer", 1000),
+			enabled_if = "$?global_tune_sockets_configure",
 	)
 	_configuration.declare_group (
 			"HTTP/2",
 			("tune.h2.header-table-size", 16 * 1024),
 			("tune.h2.initial-window-size", 128 * 1024),
 			("tune.h2.max-concurrent-streams", "128"),
+			enabled_if = "$?global_tune_http2_configure",
 	)
 
 
@@ -132,6 +143,7 @@ def declare_globals_tls (_configuration) :
 			statement_choose_if_non_null ("$tls_ca_file", ("ca-file", "$\'tls_ca_file")),
 			statement_choose_if_non_null ("$tls_crt_base", ("crt-base", "$\'tls_crt_base")),
 			statement_choose_if_non_null ("$tls_crt_file", ("crt", "$\'tls_crt_file")),
+			enabled_if = "$?global_tls_configure",
 	)
 	_configuration.declare_group (
 			"TLS default configuration",
@@ -141,6 +153,7 @@ def declare_globals_tls (_configuration) :
 			("ssl-default-server-options", "$~tls_options"),
 			("ssl-server-verify", "required"),
 			statement_choose_if_non_null ("$tls_dh_params", ("ssl-dh-param-file", "$\'tls_dh_params")),
+			enabled_if = "$?global_tls_configure",
 	)
 	_configuration.declare_group (
 			"TLS advanced configuration",
@@ -148,6 +161,7 @@ def declare_globals_tls (_configuration) :
 			("tune.ssl.maxrecord", 16 * 1024),
 			("tune.ssl.cachesize", 128 * 1024),
 			("tune.ssl.lifetime", statement_seconds (3600)),
+			enabled_if = "$?global_tune_tls_configure",
 	)
 
 
@@ -159,6 +173,7 @@ def declare_globals_logging (_configuration) :
 			statement_choose_if ("$syslog_source_node", ("log-send-hostname", "$\'syslog_source_node")),
 			("log-tag", "$\'syslog_source_tag"),
 			("quiet"),
+			enabled_if = "$?global_logging_configure",
 	)
 
 
@@ -169,6 +184,7 @@ def declare_globals_stats (_configuration) :
 			("stats", "bind-process", "all"),
 			("stats", "maxconn", 4),
 			("stats", "timeout", statement_seconds (60)),
+			enabled_if = "$?global_stats_configure",
 	)
 
 
@@ -185,14 +201,21 @@ def declare_defaults_network (_configuration) :
 			("rate-limit", "sessions", "$+defaults_frontend_max_sessions_rate"),
 			("balance", "roundrobin"),
 			("retries", "4"),
+			enabled_if = "$?defaults_connections_configure",
 	)
-	if True :
-		_configuration.declare_group (
-				"Connections splicing",
-				("option", "splice-request"),
-				("option", "splice-response"),
-				("no", "option", "splice-auto"),
-		)
+	_configuration.declare_group (
+			"Connections TCP-Keep-Alive",
+			("option", "clitcpka"),
+			("option", "srvtcpka"),
+			enabled_if = "$?defaults_connections_configure",
+	)
+	_configuration.declare_group (
+			"Connections splicing",
+			("option", "splice-request"),
+			("option", "splice-response"),
+			("no", "option", "splice-auto"),
+			enabled_if = "$?defaults_connections_configure",
+	)
 
 
 def declare_defaults_timeouts (_configuration) :
@@ -207,6 +230,7 @@ def declare_defaults_timeouts (_configuration) :
 			("timeout", "queue", statement_seconds ("$+defaults_timeout_queue")),
 			("timeout", "check", statement_seconds ("$+defaults_timeout_check")),
 			("timeout", "tarpit", statement_seconds ("$+defaults_timeout_tarpit")),
+			enabled_if = "$?defaults_timeouts_configure",
 	)
 
 
@@ -224,6 +248,7 @@ def declare_defaults_servers (_configuration) :
 			("default-server", "fall", "$+defaults_server_check_count_failed"),
 			("default-server", "on-error", "fastinter"),
 			("default-server", "error-limit", "$+defaults_server_check_count_errors"),
+			enabled_if = "$?defaults_servers_configure",
 	)
 
 
@@ -238,6 +263,7 @@ def declare_defaults_logging (_configuration) :
 			("option", "log-health-checks"),
 			("no", "option", "checkcache"),
 			("no", "option", "dontlognull"),
+			enabled_if = "$?defaults_logging_configure",
 	)
 
 
@@ -246,6 +272,7 @@ def declare_defaults_stats (_configuration) :
 			"Stats",
 			("option", "contstats"),
 			("option", "socket-stats"),
+			enabled_if = "$?defaults_stats_configure",
 	)
 
 
@@ -258,17 +285,16 @@ def declare_defaults_error_pages (_configuration) :
 				("errorfile", statement_enforce_int (_code), statement_quote ("\'", statement_format ("%s/%d.http", "$error_pages_store", _code)))
 				for _code in _configuration._resolve_token ("$error_pages_codes")
 			],
-			enabled_if = "$?error_pages_enabled",
+			enabled_if = statement_and ("$?error_pages_enabled", "$?defaults_errors_configure"),
 	)
 
 
 def declare_defaults_miscellaneous (_configuration) :
 	_configuration.declare_group (
-			"Miscellaneous",
-			("option", "clitcpka"),
-			("option", "srvtcpka"),
-			("load-server-state-from-file", "global"),
+			"State",
 			# FIXME:  Add `server-state-file-name`!
+			("load-server-state-from-file", "global"),
+			enabled_if = "$?defaults_state_configure",
 	)
 
 
@@ -286,6 +312,7 @@ def declare_defaults_http (_configuration) :
 			("timeout", "http-keep-alive", statement_seconds ("$+defaults_timeout_keep_alive")),
 			("unique-id-format", "#\"%[req.hdr(X-HA-Request-Id)]"),
 			("unique-id-header", "#\'X-HA-Request-Id-2"),
+			enabled_if = "$?defaults_http_configure",
 	)
 	_configuration.declare_group (
 			"HTTP compression",
@@ -293,6 +320,7 @@ def declare_defaults_http (_configuration) :
 			("compression", "type", "$\'defaults_compression_content_types"),
 			statement_choose_if ("$?defaults_compression_offload",
 				("compression", "offload")),
+			enabled_if = statement_and ("$?defaults_http_configure", "$?defaults_compression_configure"),
 	)
 
 

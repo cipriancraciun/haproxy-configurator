@@ -405,7 +405,7 @@ parameters = {
 		
 		
 		"frontend_enabled" : True,
-		"frontend_minimal" : False,
+		"frontend_minimal" : parameters_get ("minimal_configure"),
 		
 		"frontend_http_bind_endpoint" : parameters_get ("defaults_frontend_http_bind_endpoint"),
 		"frontend_http_bind_endpoint_tls" : parameters_get ("defaults_frontend_http_bind_endpoint_tls"),
@@ -1084,6 +1084,42 @@ parameters = {
 		
 		"samples_via_tls_method" : "ssl_fc",
 		"samples_client_ip_method" : "src",
+		
+		
+		
+		
+		"minimal_configure" : False,
+		
+		
+		"global_configure" : parameters_not (parameters_get ("minimal_configure")),
+		"global_identity_configure" : parameters_get ("global_configure"),
+		"global_daemon_configure" : parameters_get ("global_configure"),
+		"global_connections_configure" : parameters_get ("global_configure"),
+		"global_checks_configure" : parameters_get ("global_configure"),
+		"global_compression_configure" : parameters_get ("global_configure"),
+		"global_tls_configure" : parameters_get ("global_configure"),
+		"global_tune_configure" : parameters_get ("global_configure"),
+		"global_tune_sockets_configure" : parameters_get ("global_tune_configure"),
+		"global_tune_tls_configure" : parameters_get ("global_tune_configure"),
+		"global_tune_http2_configure" : parameters_get ("global_tune_configure"),
+		"global_stats_configure" : parameters_get ("global_configure"),
+		"global_logging_configure" : parameters_get ("global_configure"),
+		"global_state_configure" : parameters_and (parameters_get ("global_configure"), parameters_get ("state_configure")),
+		
+		
+		"defaults_configure" : parameters_not (parameters_get ("minimal_configure")),
+		"defaults_connections_configure" : parameters_get ("defaults_configure"),
+		"defaults_timeouts_configure" : parameters_get ("defaults_configure"),
+		"defaults_servers_configure" : parameters_get ("defaults_configure"),
+		"defaults_http_configure" : parameters_get ("defaults_configure"),
+		"defaults_compression_configure" : parameters_get ("defaults_configure"),
+		"defaults_errors_configure" : parameters_get ("defaults_configure"),
+		"defaults_stats_configure" : parameters_get ("defaults_configure"),
+		"defaults_logging_configure" : parameters_get ("defaults_configure"),
+		"defaults_state_configure" : parameters_and (parameters_get ("defaults_configure"), parameters_get ("state_configure")),
+		
+		
+		"state_configure" : parameters_not (parameters_get ("minimal_configure")),
 		
 	}
 
