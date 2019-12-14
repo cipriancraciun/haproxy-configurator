@@ -1,0 +1,43 @@
+#!/dev/null
+
+
+::// *
+::// examples / run / ...
+
+
+--<<~~.. examples / list
+	find ./examples/ -type f -name '*.py' -printf '%f\n' \
+	| sed -r -e 's#\.py$##' \
+	| jq -R -s 'split ("\n") | map (select (. != ""))'
+!!
+
+&&__ ../examples
+
+
+--<< examples / run
+	test "${#}" -ge 1
+	_example="./examples/${1}.py"
+	_output="./examples/_configs/${1}.cfg"
+	shift -- 1
+	test "${#}" -eq 0
+	test -f "${_example}"
+	python2 -s -S -E -R -O -B -- "${_example}" "${@}" >| "${_output}.tmp"
+	mv -T -- "${_output}.tmp" "${_output}"
+	exec -- cat -- "${_output}"
+!!
+
+
+<<== examples / run / generate
+	#! {{}}
+	
+	{{ range $_, $_example := ZRUN ":: examples / list" | json_decode }}
+	:: examples / run / {{ $_example }} :: exec -- "${ZRUN[@]}" ':: examples / run' '{{ $_example }}' "${@}"
+	{{ end }}
+	
+	++<< examples / run / *
+		{{ range $_, $_example := ZRUN ":: examples / list" | json_decode }}
+		"${ZRUN[@]}" ':: examples / run' '{{ $_example }}' "${@}" > /dev/null
+		{{ end }}
+	!!
+!!
+
