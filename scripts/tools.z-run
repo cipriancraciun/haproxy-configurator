@@ -19,6 +19,15 @@
 
 
 
+<< tools / generate + less
+	test "${#}" -ge 2
+	_source="${1}"
+	_output="${2}"
+	shift -- 2
+	"${ZRUN[@]}" ':: tools / generate' "${_source}" "${_output}" "${@}"
+	exec -- less -S -- "${_output}"
+!!
+
 << tools / generate + diff-lines
 	test "${#}" -ge 2
 	_source="${1}"

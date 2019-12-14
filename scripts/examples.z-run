@@ -4,6 +4,7 @@
 ::// *
 ++::// examples / ...
 ++::// examples / generate / ...
+++::// examples / generate + less / ...
 ++::// examples / generate + diff-lines / ...
 ++::// examples / generate + diff-words / ...
 
@@ -16,11 +17,19 @@
 	_source="./examples/${_example}.py"
 	_output="./examples/_configs/${_example}.cfg"
 	shift -- 1
-	test "${#}" -eq 0
 	"${ZRUN[@]}" ':: tools / generate' "${_source}" "${_output}" "${@}"
 	exec -- cat -- "${_output}"
 !!
 
+
+--<< examples / generate + less
+	test "${#}" -ge 1
+	_example="${1}"
+	_source="./examples/${_example}.py"
+	_output="./examples/_configs/${_example}.cfg"
+	shift -- 1
+	exec -- "${ZRUN[@]}" ':: tools / generate + less' "${_source}" "${_output}" "${@}"
+!!
 
 --<< examples / generate + diff-lines
 	test "${#}" -ge 1
@@ -28,8 +37,7 @@
 	_source="./examples/${_example}.py"
 	_output="./examples/_configs/${_example}.cfg"
 	shift -- 1
-	"${ZRUN[@]}" ':: tools / generate' "${_source}" "${_output}" "${@}"
-	exec -- "${ZRUN[@]}" ':: tools / diff / lines' "${_output}"
+	exec -- "${ZRUN[@]}" ':: tools / generate + diff-lines' "${_source}" "${_output}" "${@}"
 !!
 
 --<< examples / generate + diff-words
@@ -38,8 +46,7 @@
 	_source="./examples/${_example}.py"
 	_output="./examples/_configs/${_example}.cfg"
 	shift -- 1
-	"${ZRUN[@]}" ':: tools / generate' "${_source}" "${_output}" "${@}"
-	exec -- "${ZRUN[@]}" ':: tools / diff / words' "${_output}"
+	exec -- "${ZRUN[@]}" ':: tools / generate + diff-words' "${_source}" "${_output}" "${@}"
 !!
 
 
@@ -57,6 +64,7 @@
 	
 	{{ range $_, $_example := ZRUN ":: examples / list" | json_decode }}
 	:: examples / generate / {{ $_example }} :: exec -- "${ZRUN[@]}" ':: examples / generate' '{{ $_example }}' "${@}"
+	:: examples / generate + less / {{ $_example }} :: exec -- "${ZRUN[@]}" ':: examples / generate + less' '{{ $_example }}' "${@}"
 	:: examples / generate + diff-lines / {{ $_example }} :: exec -- "${ZRUN[@]}" ':: examples / generate + diff-lines' '{{ $_example }}' "${@}"
 	:: examples / generate + diff-words / {{ $_example }} :: exec -- "${ZRUN[@]}" ':: examples / generate + diff-words' '{{ $_example }}' "${@}"
 	{{ end }}
