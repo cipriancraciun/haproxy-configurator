@@ -1,0 +1,73 @@
+#!/dev/null
+
+
+::// *
+++::// examples / ...
+++::// examples / generate / ...
+++::// examples / generate + diff-lines / ...
+++::// examples / generate + diff-words / ...
+
+
+
+
+--<< examples / generate
+	test "${#}" -ge 1
+	_example="${1}"
+	_source="./examples/${_example}.py"
+	_output="./examples/_configs/${_example}.cfg"
+	shift -- 1
+	test "${#}" -eq 0
+	"${ZRUN[@]}" ':: tools / generate' "${_source}" "${_output}" "${@}"
+	exec -- cat -- "${_output}"
+!!
+
+
+--<< examples / generate + diff-lines
+	test "${#}" -ge 1
+	_example="${1}"
+	_source="./examples/${_example}.py"
+	_output="./examples/_configs/${_example}.cfg"
+	shift -- 1
+	"${ZRUN[@]}" ':: tools / generate' "${_source}" "${_output}" "${@}"
+	exec -- "${ZRUN[@]}" ':: tools / diff / lines' "${_output}"
+!!
+
+--<< examples / generate + diff-words
+	test "${#}" -ge 1
+	_example="${1}"
+	_source="./examples/${_example}.py"
+	_output="./examples/_configs/${_example}.cfg"
+	shift -- 1
+	"${ZRUN[@]}" ':: tools / generate' "${_source}" "${_output}" "${@}"
+	exec -- "${ZRUN[@]}" ':: tools / diff / words' "${_output}"
+!!
+
+
+
+
+--<<~~.. examples / list
+	find ./examples/ -type f -name '*.py' -printf '%f\n' \
+	| sed -r -e 's#\.py$##' \
+	| jq -R -s 'split ("\n") | map (select (. != ""))'
+!!
+
+
+<<== examples / 970dea4688212c2d196b0aa3156e07a3
+	#! {{}}
+	
+	{{ range $_, $_example := ZRUN ":: examples / list" | json_decode }}
+	:: examples / generate / {{ $_example }} :: exec -- "${ZRUN[@]}" ':: examples / generate' '{{ $_example }}' "${@}"
+	:: examples / generate + diff-lines / {{ $_example }} :: exec -- "${ZRUN[@]}" ':: examples / generate + diff-lines' '{{ $_example }}' "${@}"
+	:: examples / generate + diff-words / {{ $_example }} :: exec -- "${ZRUN[@]}" ':: examples / generate + diff-words' '{{ $_example }}' "${@}"
+	{{ end }}
+	
+	++<< examples / generate / *
+		{{ range $_, $_example := ZRUN ":: examples / list" | json_decode }}
+		"${ZRUN[@]}" ':: examples / generate' '{{ $_example }}' "${@}" > /dev/null
+		{{ end }}
+	!!
+!!
+
+
+&&__ ../examples
+
