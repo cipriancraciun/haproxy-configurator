@@ -620,6 +620,46 @@ def parameters_choose_match (_condition, *_cases) :
 
 
 
+def parameters_and (*_conditions) :
+	def _function (_parameters) :
+		for _condition in _conditions :
+			_actual = _parameters._expand (_condition)
+			if _actual is False :
+				return False
+			elif _actual is True :
+				continue
+			else :
+				raise_error ("8452916f", _condition, _actual)
+		return True
+	return _function
+
+def parameters_or (*_conditions) :
+	def _function (_parameters) :
+		for _condition in _conditions :
+			_actual = _parameters._expand (_condition)
+			if _actual is True :
+				return True
+			elif _actual is False :
+				continue
+			else :
+				raise_error ("e7881123", _condition, _actual)
+		return False
+	return _function
+
+def parameters_not (_condition) :
+	def _function (_parameters) :
+		_actual = _parameters._expand (_condition)
+		if _actual is True :
+			return False
+		elif _actual is False :
+			return True
+		else :
+			raise_error ("3a6787ec", _condition, _actual)
+	return _function
+
+
+
+
 def parameters_overrides (_fallback, **_overrides) :
 	_parameters = dict (_fallback)
 	_parameters.update (_overrides)
