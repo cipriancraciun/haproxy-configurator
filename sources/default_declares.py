@@ -192,9 +192,12 @@ def declare_globals_stats (_configuration) :
 
 def declare_defaults_network (_configuration) :
 	_configuration.declare_group (
-			"Connections",
-			("disabled"),
+			"Protocol",
 			("mode", "tcp"),
+			statement_choose_if_false ("$?minimal_configure", "disabled"),
+		)
+	_configuration.declare_group (
+			"Connections",
 			("bind-process", "all"),
 			("maxconn", "$+defaults_frontend_max_connections_active_count"),
 			("backlog", "$+defaults_frontend_max_connections_backlog_count"),
@@ -326,11 +329,15 @@ def declare_defaults_http (_configuration) :
 
 def declare_http_frontend_connections (_configuration) :
 	_configuration.declare_group (
-			"Connections",
+			"Protocol",
+			("mode", "http"),
 			statement_choose_if ("$?frontend_enabled", "enabled", "disabled"),
+			order = 2000 + 100,
+		)
+	_configuration.declare_group (
+			"Connections",
 			("maxconn", "$+frontend_max_connections_active_count"),
 			("backlog", "$+frontend_max_connections_backlog_count"),
-			("mode", "http"),
 			statement_choose_match ("$frontend_http_keep_alive_reuse",
 					("safe", ("http-reuse", "safe")),
 					("aggressive", ("http-reuse", "aggressive")),
@@ -426,9 +433,12 @@ def declare_http_frontend_stick (_configuration) :
 
 def declare_http_backend_connections (_configuration) :
 	_configuration.declare_group (
-			"Connections",
-			statement_choose_if ("$?backend_enabled", "enabled", "disabled"),
+			"Protocol",
 			("mode", "http"),
+			statement_choose_if ("$?backend_enabled", "enabled", "disabled"),
+		)
+	_configuration.declare_group (
+			"Connections",
 			# FIXME:  Extract this into common function!
 			statement_choose_match ("$backend_balance",
 					("round-robin", ("balance", "roundrobin")),
@@ -480,11 +490,15 @@ def declare_defaults_tcp (_configuration) :
 
 def declare_tcp_frontend_connections (_configuration) :
 	_configuration.declare_group (
-			"Connections",
+			"Protocol",
+			("mode", "tcp"),
 			statement_choose_if ("$?frontend_enabled", "enabled", "disabled"),
+			order = 2000 + 100,
+		)
+	_configuration.declare_group (
+			"Connections",
 			("maxconn", "$+frontend_max_connections_active_count"),
 			("backlog", "$+frontend_max_connections_backlog_count"),
-			("mode", "tcp"),
 			enabled_if = "$?frontend_connections_configure",
 			order = 2000 + 100,
 	)
@@ -539,9 +553,12 @@ def declare_tcp_frontend_stick (_configuration) :
 
 def declare_tcp_backend_connections (_configuration) :
 	_configuration.declare_group (
-			"Connections",
-			statement_choose_if ("$?backend_enabled", "enabled", "disabled"),
+			"Protocol",
 			("mode", "tcp"),
+			statement_choose_if ("$?backend_enabled", "enabled", "disabled"),
+		)
+	_configuration.declare_group (
+			"Connections",
 			# FIXME:  Extract this into common function!
 			statement_choose_match ("$backend_balance",
 					("round-robin", ("balance", "roundrobin")),
