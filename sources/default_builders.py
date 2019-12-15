@@ -1474,12 +1474,15 @@ class HaHttpFrontendBuilder (HaBuilder) :
 		HaBuilder.__init__ (self, _context, _parameters)
 	
 	
-	def basic (self, _identifier, tls = True, **_parameters) :
+	def basic (self, identifier = None, tls = None, **_parameters) :
+		
+		_identifier = identifier if identifier is not None else "http"
+		_tls = tls if tls is not None else True
 		
 		_frontend = self._context.http_frontend_create (_identifier, **_parameters)
 		
 		_frontend.declare_bind (**_parameters)
-		if tls :
+		if _tls :
 			_frontend.declare_bind_tls (**_parameters)
 		
 		return _frontend
@@ -1493,8 +1496,10 @@ class HaHttpBackendBuilder (HaBuilder) :
 		HaBuilder.__init__ (self, _context, _parameters)
 	
 	
-	def basic (self, _identifier, _endpoint, frontend = None, acl = None, route_order = None, **_parameters) :
+	def basic (self, identifier = None, endpoint = None, frontend = None, acl = None, route_order = None, **_parameters) :
 		
+		_identifier = identifier if identifier is not None else "http-backend"
+		_endpoint = endpoint if endpoint is not None else "ipv4@127.0.0.1:8080"
 		_frontend = frontend
 		_acl = acl
 		_route_order = route_order
@@ -1510,8 +1515,9 @@ class HaHttpBackendBuilder (HaBuilder) :
 		return _backend
 	
 	
-	def for_domain (self, _domain, _endpoint, identifier = None, frontend = None, acl = None, **_parameters) :
+	def for_domain (self, _domain, _endpoint = None, identifier = None, frontend = None, acl = None, **_parameters) :
 		
+		_endpoint = endpoint if endpoint is not None else "ipv4@127.0.0.1:8080"
 		_backend_identifier = parameters_coalesce (identifier, _domain)
 		_frontend = frontend
 		_acl = acl
@@ -1664,7 +1670,7 @@ class HaHttpRouteBuilder (HaBuilder) :
 		self._context.declare_route_unless_0 (_backend, _acl, **_overrides)
 	
 	
-	def route (self, _backend, _acl, **_overrides) :
+	def route (self, _backend, _acl = None, **_overrides) :
 		self._declare_route_if_0 (_backend, _acl, **_overrides)
 	
 	def route_host (self, _backend, _host, _acl = None, **_overrides) :
