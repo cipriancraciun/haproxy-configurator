@@ -1477,7 +1477,7 @@ class HaHttpFrontendBuilder (HaBuilder) :
 	def basic (self, identifier = None, tls = None, **_parameters) :
 		
 		_identifier = identifier if identifier is not None else "http"
-		_tls = tls if tls is not None else True
+		_tls = tls if tls is not None else False
 		
 		_frontend = self._context.http_frontend_create (_identifier, **_parameters)
 		
