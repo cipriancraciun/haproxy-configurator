@@ -409,12 +409,18 @@ parameters = {
 		"frontend_http_bind_endpoint" : parameters_get ("defaults_frontend_http_bind_endpoint"),
 		"frontend_http_bind_endpoint_tls" : parameters_get ("defaults_frontend_http_bind_endpoint_tls"),
 		
-		"frontend_max_connections_active_count" : parameters_get ("defaults_frontend_max_connections_active_count"),
-		"frontend_max_connections_backlog_count" : parameters_get ("defaults_frontend_max_connections_backlog_count"),
+		"frontend_max_connections_active_count" : parameters_choose_if_false (parameters_get ("frontend_bind_minimal"),
+				parameters_get ("defaults_frontend_max_connections_active_count")),
+		"frontend_max_connections_backlog_count" : parameters_choose_if_false (parameters_get ("frontend_bind_minimal"),
+				parameters_get ("defaults_frontend_max_connections_backlog_count")),
 		
 		"frontend_bind_options" : (
-				"defer-accept",
-				"mss", 1400,
+				parameters_choose_if (
+						parameters_get ("frontend_bind_defer_accept"),
+						"defer-accept"),
+				parameters_choose_if_non_null (
+						parameters_get ("frontend_bind_mss"),
+						("mss", parameters_get ("frontend_bind_mss"))),
 				parameters_choose_if_non_null (
 						parameters_get ("frontend_max_connections_active_count"),
 						("maxconn", parameters_get ("frontend_max_connections_active_count"))),
@@ -428,12 +434,16 @@ parameters = {
 						parameters_get ("frontend_bind_interface"),
 						("interface", parameters_get ("frontend_bind_interface"))),
 			),
-		"frontend_bind_tls_certificate" : parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/default.pem"),
-		"frontend_bind_tls_certificate_rules" : parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/default.conf"),
-		"frontend_bind_tls_options" : (
+		"frontend_bind_mss" : parameters_choose_if_false (parameters_get ("frontend_bind_minimal"), 1400),
+		"frontend_bind_defer_accept" : parameters_not (parameters_get ("frontend_bind_minimal")),
+		"frontend_bind_tls_certificate" : parameters_choose_if_false (parameters_get ("frontend_bind_minimal"),
+				parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/default.pem")),
+		"frontend_bind_tls_certificate_rules" : parameters_choose_if_false (parameters_get ("frontend_bind_minimal"),
+				parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/default.conf")),
+		"frontend_bind_tls_options" :  parameters_choose_if_false (parameters_get ("frontend_bind_minimal"), (
 				parameters_get ("frontend_bind_options"),
 				parameters_get ("frontend_bind_tls_options_actual"),
-			),
+			)),
 		"frontend_bind_interface" : None,
 		
 		# FIXME:  Rename this!
@@ -1124,6 +1134,7 @@ parameters = {
 		
 		
 		"frontend_minimal" : parameters_get ("minimal_configure"),
+		"frontend_bind_minimal" : parameters_get ("frontend_minimal"),
 		"frontend_configure" : parameters_not (parameters_get ("frontend_minimal")),
 		"frontend_connections_configure" : parameters_get ("frontend_configure"),
 		"frontend_timeouts_configure" : parameters_get ("frontend_configure"),

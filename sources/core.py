@@ -609,9 +609,9 @@ class HaFrontend (HaWorker) :
 	def declare_bind_tls (self, _endpoint = "$frontend_bind_tls_endpoint", _name = None, _certificate = "$\'frontend_bind_tls_certificate", _certificate_rules = "$\'frontend_bind_tls_certificate_rules", _options = "$frontend_bind_tls_options", order = None, overrides = None) :
 		_tls_options = ["ssl"]
 		if _certificate is not None :
-			_tls_options.append (("crt", _certificate))
+			_tls_options.append (statement_choose_if_non_null (_certificate, ("crt", _certificate)))
 		if _certificate_rules is not None :
-			_tls_options.append (("crt-list", _certificate_rules))
+			_tls_options.append (statement_choose_if_non_null (_certificate_rules, ("crt-list", _certificate_rules)))
 		_tls_options = tuple (_tls_options)
 		_name = statement_choose_if (_name, ("name", statement_quote ("\'", _name)))
 		self._bind_statements.declare (("bind", statement_quote ("\'", _endpoint), _name, _tls_options, _options), order = order, overrides = overrides)
