@@ -1140,6 +1140,8 @@ parameters = {
 		
 		"state_configure" : parameters_not (parameters_get ("minimal_configure")),
 		
+		"sections_extra_separation" : parameters_not (parameters_get ("minimal_configure")),
+		
 	}
 
 

@@ -209,28 +209,30 @@ class HaProxy (HaBase) :
 		
 		self._declare_implicit_auto ()
 		
+		_empty_lines = 8 if self._expand_token ("$?sections_extra_separation") else 2
+		
 		_scroll = Scroll ()
-		_scroll.include_empty_line (99, 0, 8)
+		_scroll.include_empty_line (99, 0, _empty_lines)
 		
 		if self.globals is not None :
 			_scroll.include_normal_line (100, 0, self.globals.generate ())
-			_scroll.include_empty_line (100, 0, 8)
+			_scroll.include_empty_line (100, 0, _empty_lines)
 		
 		if self.defaults is not None :
 			_scroll.include_normal_line (200, 0, self.defaults.generate ())
-			_scroll.include_empty_line (200, 0, 8)
+			_scroll.include_empty_line (200, 0, _empty_lines)
 		
 		_scroll.include_normal_line (300, 0, [_frontend.generate () for _frontend in self._frontends_ordered])
-		_scroll.include_empty_line (300, 0, 8)
+		_scroll.include_empty_line (300, 0, _empty_lines)
 		
 		_scroll.include_normal_line (400, 0, [_backend.generate () for _backend in self._backends_ordered])
-		_scroll.include_empty_line (400, 0, 8)
+		_scroll.include_empty_line (400, 0, _empty_lines)
 		
 		_scroll.include_normal_line (500, 0, [_resolvers.generate () for _resolvers in self._resolvers_ordered])
-		_scroll.include_empty_line (500, 0, 8)
+		_scroll.include_empty_line (500, 0, _empty_lines)
 		
 		_scroll.include_normal_line (600, 0, [_credentials.generate () for _credentials in self._credentials_ordered])
-		_scroll.include_empty_line (600, 0, 8)
+		_scroll.include_empty_line (600, 0, _empty_lines)
 		
 		return _scroll
 	
@@ -300,13 +302,14 @@ class HaSection (HaBase) :
 	def generate (self) :
 		self._declare_implicit_auto ()
 		_scroll = Scroll ()
-		_scroll.include_empty_line (99, 0, 4)
+		_empty_lines = 4 if self._expand_token ("$?sections_extra_separation") else 2
+		_scroll.include_empty_line (99, 0, _empty_lines)
 		_scroll.include_normal_line (100, 0, self._generate_header ())
 		_scroll.include_empty_line (199, 0, 1)
 		_scroll.include_normal_line (200, 0, self._generate_statements ())
 		_scroll.include_empty_line (299, 0, 1)
 		_scroll.include_normal_line (300, 0, self._generate_trailer ())
-		_scroll.include_empty_line (399, 0, 4)
+		_scroll.include_empty_line (399, 0, _empty_lines)
 		return _scroll
 	
 	def _generate_header (self) :
