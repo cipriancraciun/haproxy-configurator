@@ -485,12 +485,14 @@ def declare_tcp_frontend_connections (_configuration) :
 			("maxconn", "$+frontend_max_connections_active_count"),
 			("backlog", "$+frontend_max_connections_backlog_count"),
 			("mode", "tcp"),
+			enabled_if = "$?frontend_connections_configure",
 			order = 2000 + 100,
 	)
 
 def declare_tcp_frontend_timeouts (_configuration) :
 	_configuration.declare_group (
 			"Timeouts",
+			enabled_if = "$?frontend_timeouts_configure",
 			order = 2000 + 101,
 	)
 
@@ -499,6 +501,7 @@ def declare_tcp_frontend_logging (_configuration) :
 			"Logging",
 			("option", "tcplog"),
 			("log-format", "$\"logging_tcp_format"),
+			enabled_if = "$?frontend_logging_configure",
 			order = 7000 + 400,
 	)
 
@@ -529,6 +532,7 @@ def declare_tcp_frontend_stick (_configuration) :
 						)
 				),
 			),
+			enabled_if = "$?frontend_stick_configure",
 			order = 5000 + 290,
 		)
 
@@ -543,6 +547,7 @@ def declare_tcp_backend_connections (_configuration) :
 					("round-robin", ("balance", "roundrobin")),
 					("first", ("balance", "first")),
 					(None, None)),
+			enabled_if = "$?backend_connections_configure",
 	)
 
 def declare_tcp_backend_check (_configuration) :
@@ -572,7 +577,8 @@ def declare_backend_server_defaults (_configuration, _extra_statements = None) :
 			statement_choose_if_non_null ("$backend_server_check_interval_normal", ("default-server", "inter", statement_seconds ("$+backend_server_check_interval_normal"))),
 			statement_choose_if_non_null ("$backend_server_check_interval_rising", ("default-server", "fastinter", statement_seconds ("$+backend_server_check_interval_rising"))),
 			statement_choose_if_non_null ("$backend_server_check_interval_failed", ("default-server", "downinter", statement_seconds ("$+backend_server_check_interval_failed"))),
-			_extra_statements
+			_extra_statements,
+			enabled_if = "$?backend_servers_configure",
 	)
 
 def declare_backend_server_timeouts (_configuration, _extra_statements = None) :
@@ -588,5 +594,6 @@ def declare_backend_server_timeouts (_configuration, _extra_statements = None) :
 			statement_choose_if_non_null ("$backend_server_timeout_check", ("timeout", "check", statement_seconds ("$+backend_server_timeout_check"))),
 			statement_choose_if_non_null ("$backend_server_timeout_tarpit", ("timeout", "tarpit", statement_seconds ("$+backend_server_timeout_tarpit"))),
 			_extra_statements,
+			enabled_if = "$?backend_timeouts_configure",
 	)
 

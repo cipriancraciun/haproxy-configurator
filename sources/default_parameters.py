@@ -1146,6 +1146,8 @@ parameters = {
 		"backend_minimal" : parameters_get ("minimal_configure"),
 		"backend_configure" : parameters_not (parameters_get ("backend_minimal")),
 		"backend_connections_configure" : parameters_get ("backend_configure"),
+		"backend_timeouts_configure" : parameters_get ("backend_configure"),
+		"backend_servers_configure" : parameters_get ("backend_configure"),
 		"backend_check_configure" : parameters_get ("backend_configure"),
 		
 		
