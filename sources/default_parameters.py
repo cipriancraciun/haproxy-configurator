@@ -511,7 +511,7 @@ parameters = {
 		
 		
 		"backend_enabled" : True,
-		"backend_check_enabled" : True,
+		"backend_check_enabled" : parameters_get ("backend_check_configure"),
 		
 		"backend_http_host" : None,
 		
