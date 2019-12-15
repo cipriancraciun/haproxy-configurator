@@ -339,6 +339,7 @@ def declare_http_frontend_connections (_configuration) :
 			statement_choose_match ("$frontend_http_keep_alive_mode",
 					("keep-alive", ("option", "http-keep-alive")),
 					("close", ("option", "forceclose"))),
+			enabled_if = "$?frontend_connections_configure",
 			order = 2000 + 100,
 	)
 
@@ -346,6 +347,7 @@ def declare_http_frontend_timeouts (_configuration) :
 	_configuration.declare_group (
 			"Timeouts",
 			statement_choose_if_non_null ("$frontend_http_keep_alive_timeout", ("timeout", "http-keep-alive", statement_seconds ("$+frontend_http_keep_alive_timeout"))),
+			enabled_if = "$?frontend_timeouts_configure",
 			order = 2000 + 101,
 	)
 
@@ -355,7 +357,7 @@ def declare_http_frontend_monitor (_configuration) :
 			("monitor-uri", "$\'frontend_monitor_path"),
 			("monitor-net", "$\'frontend_monitor_network"),
 			("monitor", "fail", "if", "$~frontend_monitor_fail_acl"),
-			enabled_if = statement_and ("$?frontend_monitor_enabled", "$?!frontend_minimal"),
+			enabled_if = statement_and ("$?frontend_monitor_enabled", "$?frontend_monitor_configure"),
 			order = 7000 + 100,
 	)
 
@@ -372,7 +374,7 @@ def declare_http_frontend_stats (_configuration) :
 			("stats", "show-legends"),
 			statement_choose_if_false ("$?frontend_stats_version", ("stats", "hide-version")),
 			("stats", "refresh", statement_seconds ("$+frontend_stats_refresh")),
-			enabled_if = statement_and ("$?frontend_stats_enabled", "$?!frontend_minimal"),
+			enabled_if = statement_and ("$?frontend_stats_enabled", "$?frontend_stats_configure"),
 			order = 7000 + 200,
 	)
 
@@ -381,6 +383,7 @@ def declare_http_frontend_logging (_configuration) :
 			"Logging",
 			("option", "httplog"),
 			("log-format", "$\"logging_http_format"),
+			enabled_if = "$?frontend_logging_configure",
 			order = 7000 + 400,
 	)
 
@@ -416,6 +419,7 @@ def declare_http_frontend_stick (_configuration) :
 						)
 				),
 			),
+			enabled_if = "$?frontend_stick_configure",
 			order = 5000 + 290,
 		)
 
@@ -441,6 +445,7 @@ def declare_http_backend_connections (_configuration) :
 					("close", ("option", "forceclose"))),
 			# FIXME:  Make this configurable!
 			("option", "forwardfor", "header", "$logging_http_header_forwarded_for", "if-none"),
+			enabled_if = "$?backend_connections_configure",
 	)
 
 def declare_http_backend_check (_configuration) :
@@ -448,7 +453,7 @@ def declare_http_backend_check (_configuration) :
 			"Check",
 			("option", "httpchk", "$\'backend_http_check_request_method", "$\'backend_http_check_request_uri", "$\'backend_http_check_request_extra"),
 			("http-check", "expect", "$~backend_http_check_expect_matcher", "$\'backend_http_check_expect_pattern"),
-			enabled_if = "$?backend_http_check_enabled",
+			enabled_if = statement_and ("$?backend_http_check_enabled", "$?backend_check_configure"),
 	)
 
 def declare_http_backend_server_defaults (_configuration) :

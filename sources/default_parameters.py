@@ -405,7 +405,6 @@ parameters = {
 		
 		
 		"frontend_enabled" : True,
-		"frontend_minimal" : parameters_get ("minimal_configure"),
 		
 		"frontend_http_bind_endpoint" : parameters_get ("defaults_frontend_http_bind_endpoint"),
 		"frontend_http_bind_endpoint_tls" : parameters_get ("defaults_frontend_http_bind_endpoint_tls"),
@@ -1089,7 +1088,7 @@ parameters = {
 		
 		
 		"minimal_configure" : False,
-		"only_frontends_and_backends" : False,
+		"only_frontends_and_backends" : parameters_get ("minimal_configure"),
 		
 		
 		"global_configure" : parameters_and (
@@ -1122,6 +1121,21 @@ parameters = {
 		"defaults_stats_configure" : parameters_get ("defaults_configure"),
 		"defaults_logging_configure" : parameters_get ("defaults_configure"),
 		"defaults_state_configure" : parameters_and (parameters_get ("defaults_configure"), parameters_get ("state_configure")),
+		
+		
+		"frontend_minimal" : parameters_get ("minimal_configure"),
+		"frontend_configure" : parameters_not (parameters_get ("frontend_minimal")),
+		"frontend_connections_configure" : parameters_get ("frontend_configure"),
+		"frontend_timeouts_configure" : parameters_get ("frontend_configure"),
+		"frontend_logging_configure" : parameters_get ("frontend_configure"),
+		"frontend_stick_configure" : parameters_get ("frontend_configure"),
+		"frontend_monitor_configure" : parameters_get ("frontend_configure"),
+		"frontend_stats_configure" : parameters_get ("frontend_configure"),
+		
+		"backend_minimal" : parameters_get ("minimal_configure"),
+		"backend_configure" : parameters_not (parameters_get ("backend_minimal")),
+		"backend_connections_configure" : parameters_get ("backend_configure"),
+		"backend_check_configure" : parameters_get ("backend_configure"),
 		
 		
 		"state_configure" : parameters_not (parameters_get ("minimal_configure")),
