@@ -1633,19 +1633,19 @@ class HaHttpBackendBuilder (HaBuilder) :
 			_callable (_frontend_routes, _frontend_http_requests, _frontend_http_responses)
 	
 	
-	def fallback (self) :
-		return self.basic (
-				"fallback-http",
-				"ipv4@127.255.255.254:8080",
+	def fallback (self, _identifier = "http-fallback") :
+		_backend = self._context.http_backend_create (
+				_identifier,
 				backend_check_enabled = True,
 				backend_http_keep_alive_reuse = "never",
 				backend_http_keep_alive_mode = "close",
 			)
+		_backend.declare_server ("default", "ipv4@127.255.255.254:8080")
+		return _backend
 	
-	def fallback_deny (self, _code = 403, _mark = None) :
-		_backend = self.basic (
-				"fallback-http",
-				None,
+	def fallback_deny (self, _identifier = "http-fallback", _code = 403, _mark = None) :
+		_backend = self._context.http_backend_create (
+				_identifier,
 				backend_check_enabled = False,
 				backend_http_keep_alive_reuse = "never",
 				backend_http_keep_alive_mode = "close",
