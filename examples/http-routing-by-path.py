@@ -27,9 +27,13 @@ _be_media = _ha.http_backends.basic (
 	)
 
 
+
+
 _fe.routes.route_path_prefix (_be_static, ("/assets/", "/public/"))
 _fe.routes.route_path_prefix (_be_media, "/media/")
 _fe.routes.route (_be_flask)
+
+
 
 
 _ha.output_stdout ()
