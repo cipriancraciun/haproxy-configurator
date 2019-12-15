@@ -4,8 +4,7 @@ import ha
 
 
 _ha = ha.haproxy (
-		daemon_node = "haproxy-sandbox-1.servers.example.com",
-		only_frontends_and_backends = True,
+		minimal_configure = True,
 	)
 
 
