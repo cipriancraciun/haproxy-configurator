@@ -1089,9 +1089,12 @@ parameters = {
 		
 		
 		"minimal_configure" : False,
+		"only_frontends_and_backends" : False,
 		
 		
-		"global_configure" : parameters_not (parameters_get ("minimal_configure")),
+		"global_configure" : parameters_and (
+				parameters_not (parameters_get ("only_frontends_and_backends")),
+				parameters_not (parameters_get ("minimal_configure"))),
 		"global_identity_configure" : parameters_get ("global_configure"),
 		"global_daemon_configure" : parameters_get ("global_configure"),
 		"global_connections_configure" : parameters_get ("global_configure"),
@@ -1107,7 +1110,9 @@ parameters = {
 		"global_state_configure" : parameters_and (parameters_get ("global_configure"), parameters_get ("state_configure")),
 		
 		
-		"defaults_configure" : parameters_not (parameters_get ("minimal_configure")),
+		"defaults_configure" : parameters_and (
+				parameters_not (parameters_get ("only_frontends_and_backends")),
+				parameters_not (parameters_get ("minimal_configure"))),
 		"defaults_connections_configure" : parameters_get ("defaults_configure"),
 		"defaults_timeouts_configure" : parameters_get ("defaults_configure"),
 		"defaults_servers_configure" : parameters_get ("defaults_configure"),
