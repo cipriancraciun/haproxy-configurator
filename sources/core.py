@@ -58,8 +58,15 @@ class HaProxy (HaBase) :
 		self.identifier = _identifier
 		self._parameters = _parameters
 		
-		self.globals = HaGlobals (self._parameters._fork ())
-		self.defaults = HaDefaults (self._parameters._fork ())
+		if self._expand_token ("$?global_configure") :
+			self.globals = HaGlobals (self._parameters._fork ())
+		else :
+			self.globals = None
+		
+		if self._expand_token ("$?defaults_configure") :
+			self.defaults = HaDefaults (self._parameters._fork ())
+		else :
+			self.defaults = None
 		
 		self._frontends = dict ()
 		self._frontends_ordered = list ()
@@ -205,11 +212,13 @@ class HaProxy (HaBase) :
 		_scroll = Scroll ()
 		_scroll.include_empty_line (99, 0, 8)
 		
-		_scroll.include_normal_line (100, 0, self.globals.generate ())
-		_scroll.include_empty_line (100, 0, 8)
+		if self.globals is not None :
+			_scroll.include_normal_line (100, 0, self.globals.generate ())
+			_scroll.include_empty_line (100, 0, 8)
 		
-		_scroll.include_normal_line (200, 0, self.defaults.generate ())
-		_scroll.include_empty_line (200, 0, 8)
+		if self.defaults is not None :
+			_scroll.include_normal_line (200, 0, self.defaults.generate ())
+			_scroll.include_empty_line (200, 0, 8)
 		
 		_scroll.include_normal_line (300, 0, [_frontend.generate () for _frontend in self._frontends_ordered])
 		_scroll.include_empty_line (300, 0, 8)
@@ -228,8 +237,10 @@ class HaProxy (HaBase) :
 	
 	def _declare_implicit_auto (self) :
 		
-		self.globals._declare_implicit_auto ()
-		self.defaults._declare_implicit_auto ()
+		if self.globals is not None :
+			self.globals._declare_implicit_auto ()
+		if self.defaults is not None :
+			self.defaults._declare_implicit_auto ()
 		
 		for _frontend in self._frontends_ordered :
 			_frontend._declare_implicit_auto ()
