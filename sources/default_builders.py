@@ -1468,12 +1468,29 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 
 
 
+class HaHttpFrontendBuilder (HaBuilder) :
+	
+	def __init__ (self, _context, _parameters) :
+		HaBuilder.__init__ (self, _context, _parameters)
+	
+	
+	def basic (self, _identifier, tls = True, **_parameters) :
+		
+		_frontend = self._context.http_frontend_create (_identifier, **_parameters)
+		
+		_frontend.declare_bind (**_parameters)
+		if tls :
+			_frontend.declare_bind_tls (**_parameters)
+		
+		return _frontend
+
+
+
+
 class HaHttpBackendBuilder (HaBuilder) :
 	
 	def __init__ (self, _context, _parameters) :
 		HaBuilder.__init__ (self, _context, _parameters)
-		self._acl = HaHttpAclBuilder (_context, _parameters)
-		self._samples = HaHttpSampleBuilder (_context, _parameters)
 	
 	
 	def basic (self, _identifier, _endpoint, frontend = None, acl = None, route_order = None, **_parameters) :

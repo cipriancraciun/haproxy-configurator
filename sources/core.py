@@ -73,6 +73,7 @@ class HaProxy (HaBase) :
 		self._credentials = dict ()
 		self._credentials_ordered = list ()
 		
+		self.http_frontends = self.http_frontend_builder ()
 		self.http_backends = self.http_backend_builder ()
 	
 	
@@ -184,6 +185,9 @@ class HaProxy (HaBase) :
 	def http_backend_create (self, _identifier, **_overrides) :
 		return self.backend_create (_identifier, _type = HaHttpBackend, backend_mode = "http", **_overrides)
 	
+	
+	def http_frontend_builder (self) :
+		return default_builders.HaHttpFrontendBuilder (self, self._parameters)
 	
 	def http_backend_builder (self) :
 		return default_builders.HaHttpBackendBuilder (self, self._parameters)

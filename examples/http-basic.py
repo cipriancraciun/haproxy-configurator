@@ -8,10 +8,7 @@ _ha = ha.haproxy (
 	)
 
 
-_fe = _ha.http_frontend_create ("http")
-
-_fe.declare_bind ()
-_fe.declare_bind_tls ()
+_fe = _ha.http_frontends.basic ("http")
 
 _fe.requests.redirect_domain_with_www ("site-with-www.example.com")
 _fe.requests.redirect_domain_without_www ("site-without-www.example.com")
