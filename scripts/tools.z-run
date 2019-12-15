@@ -46,6 +46,30 @@
 	exec -- "${ZRUN[@]}" ':: tools / diff / words' "${_output}"
 !!
 
+<< tools / generate + verify
+	test "${#}" -ge 2
+	_source="${1}"
+	_output="${2}"
+	shift -- 2
+	"${ZRUN[@]}" ':: tools / generate' "${_source}" "${_output}" "${@}"
+	exec -- "${ZRUN[@]}" ':: tools / verify' "${_output}"
+!!
+
+
+
+
+<< tools / verify
+	test "${#}" -eq 1
+	_output="${1}"
+	test -f "${_output}"
+	exec -- haproxy \
+			-f "${_output}" \
+			-c \
+		< /dev/null \
+		2>&1 \
+	#
+!!
+
 
 
 

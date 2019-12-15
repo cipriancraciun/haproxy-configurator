@@ -7,6 +7,7 @@
 ++::// examples / generate + less / ...
 ++::// examples / generate + diff-lines / ...
 ++::// examples / generate + diff-words / ...
+++::// examples / generate + verify / ...
 
 
 
@@ -49,6 +50,15 @@
 	exec -- "${ZRUN[@]}" ':: tools / generate + diff-words' "${_source}" "${_output}" "${@}"
 !!
 
+--<< examples / generate + verify
+	test "${#}" -ge 1
+	_example="${1}"
+	_source="./examples/${_example}.py"
+	_output="./examples/_configs/${_example}.cfg"
+	shift -- 1
+	exec -- "${ZRUN[@]}" ':: tools / generate + verify' "${_source}" "${_output}" "${@}"
+!!
+
 
 
 
@@ -67,11 +77,19 @@
 	:: examples / generate + less / {{ $_example }} :: exec -- "${ZRUN[@]}" ':: examples / generate + less' '{{ $_example }}' "${@}"
 	:: examples / generate + diff-lines / {{ $_example }} :: exec -- "${ZRUN[@]}" ':: examples / generate + diff-lines' '{{ $_example }}' "${@}"
 	:: examples / generate + diff-words / {{ $_example }} :: exec -- "${ZRUN[@]}" ':: examples / generate + diff-words' '{{ $_example }}' "${@}"
+	:: examples / generate + verify / {{ $_example }} :: exec -- "${ZRUN[@]}" ':: examples / generate + verify' '{{ $_example }}' "${@}"
 	{{ end }}
 	
 	++<< examples / generate / *
 		{{ range $_, $_example := ZRUN ":: examples / list" | json_decode }}
+		printf -- '[ii]  processing `%s`...\n' '{{ $_example }}' >&2
 		"${ZRUN[@]}" ':: examples / generate' '{{ $_example }}' "${@}" > /dev/null
+		{{ end }}
+	!!
+	++<< examples / generate + verify / *
+		{{ range $_, $_example := ZRUN ":: examples / list" | json_decode }}
+		printf -- '[ii]  processing `%s`...\n' '{{ $_example }}' >&2
+		"${ZRUN[@]}" ':: examples / generate + verify' '{{ $_example }}' "${@}"
 		{{ end }}
 	!!
 !!
