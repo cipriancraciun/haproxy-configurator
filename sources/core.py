@@ -591,7 +591,7 @@ class HaFrontend (HaWorker) :
 	
 	def __init__ (self, _identifier, _parameters) :
 		HaWorker.__init__ (self, _identifier, _parameters)
-		self._bind_statements = HaStatementGroup (self._parameters, "Sockets", order = 5000 + 120)
+		self._bind_statements = HaStatementGroup (self._parameters, "Bind", order = 5000 + 120)
 		self._route_statements = HaStatementGroup (self._parameters, "Routes", order = 5000 + 500)
 		self._request_capture_statements = HaStatementGroup (self._parameters, "Captures for requests", order = 8000 + 830)
 		self._request_captures_count = 0
