@@ -555,14 +555,21 @@ class HaWorker (HaSection) :
 		if len (self._acl) > 0 :
 			_acl_uniques = set ()
 			_acl_statements = list ()
+			_acl_expanded = set ()
+			for _acl in self._acl :
+				if _acl._expanded :
+					_acl_tokens = _acl.generate ()
+					_acl_identifier = _acl._generated_identifier
+					_acl_expanded.add (_acl_identifier)
 			for _acl in self._acl :
 				_acl_tokens = _acl.generate ()
 				_acl_identifier = _acl._generated_identifier
+				if _acl_identifier not in _acl_expanded :
+					continue
 				if (_acl_identifier, _acl._generated_fingerprint) in _acl_uniques :
 					continue
 				else :
 					_acl_uniques.add ((_acl_identifier, _acl._generated_fingerprint))
-				# print _acl_tokens
 				if isinstance (_acl_tokens, list) :
 					for _acl_tokens in _acl_tokens :
 						_acl_statements.append ((_acl_identifier, _acl_tokens))
@@ -648,11 +655,19 @@ class HaFrontend (HaWorker) :
 		return _scroll
 	
 	def _generate_statements_extra (self, _scroll) :
+		
 		self._generate_statements_for_binds (_scroll)
 		self._generate_statements_for_captures (_scroll)
-		self._generate_statements_for_acl (_scroll)
-		self._generate_statements_for_http_rules (_scroll)
-		self._generate_statements_for_routes (_scroll)
+		
+		_after_acl_scroll = Scroll ()
+		self._generate_statements_for_http_rules (_after_acl_scroll)
+		self._generate_statements_for_routes (_after_acl_scroll)
+		
+		_acl_scroll = Scroll ()
+		self._generate_statements_for_acl (_acl_scroll)
+		
+		_scroll.include_scroll_lines (None, 0, _acl_scroll, False)
+		_scroll.include_scroll_lines (None, 0, _after_acl_scroll, False)
 	
 	def _generate_statements_for_binds (self, _scroll) :
 		self._bind_statements.generate (_scroll)
@@ -688,9 +703,16 @@ class HaBackend (HaWorker) :
 		return _scroll
 	
 	def _generate_statements_extra (self, _scroll) :
-		self._generate_statements_for_acl (_scroll)
-		self._generate_statements_for_http_rules (_scroll)
-		self._generate_statements_for_servers (_scroll)
+		
+		_after_acl_scroll = Scroll ()
+		self._generate_statements_for_http_rules (_after_acl_scroll)
+		self._generate_statements_for_servers (_after_acl_scroll)
+		
+		_acl_scroll = Scroll ()
+		self._generate_statements_for_acl (_acl_scroll)
+		
+		_scroll.include_scroll_lines (None, 0, _acl_scroll, False)
+		_scroll.include_scroll_lines (None, 0, _after_acl_scroll, False)
 	
 	def _generate_statements_for_servers (self, _scroll) :
 		self._server_statements.generate (_scroll)
@@ -770,6 +792,7 @@ class HaAcl (HaBase) :
 		self._operator = _operator
 		self._patterns = _patterns
 		self._generated = None
+		self._expanded = False
 	
 	
 	def identifier (self) :
@@ -905,9 +928,11 @@ class HaAcl (HaBase) :
 	
 	
 	def _self_expand_token (self) :
+		self._expanded = True
 		return self.identifier ()
 	
 	def _self_resolve_token (self) :
+		self._expanded = True
 		return self.identifier ()
 	
 	
@@ -941,9 +966,11 @@ class HaAclNegation (object) :
 		return self._acl
 	
 	def _self_expand_token (self) :
+		self._acl._expanded = True
 		return self.identifier ()
 	
 	def _self_resolve_token (self) :
+		self._acl._expanded = True
 		return self.identifier ()
 
 

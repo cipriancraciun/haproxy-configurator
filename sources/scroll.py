@@ -41,7 +41,7 @@ class Scroll (object) :
 				self._contents.append ((_line_order, _line_indent, _line_contents))
 			elif isinstance (_line_contents, Scroll) :
 				if _recurse :
-					self.include_scroll_lines (_line_order, _line_indent, _line_contents)
+					self.include_scroll_lines (_line_order, _line_indent, _line_contents, True)
 				else :
 					self._contents.append ((_line_order, _line_indent, _line_contents))
 			else :
