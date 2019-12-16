@@ -5,9 +5,9 @@
 from parameters import Parameters
 from scroll import Scroll
 
-import default_parameters
-import default_declares
-import default_builders
+import defaults
+import declares
+import builders
 
 from errors import *
 from tools import *
@@ -16,11 +16,11 @@ from tools import *
 
 
 def haproxy (_parameters = None, **_overrides) :
-	_parameters = Parameters (_parameters, _overrides, default_parameters.parameters)
+	_parameters = Parameters (_parameters, _overrides, defaults.parameters)
 	return HaProxy (_parameters)
 
 def parameters (_parameters = None, **_overrides) :
-	return Parameters (_parameters, _overrides, default_parameters.parameters)
+	return Parameters (_parameters, _overrides, defaults.parameters)
 
 def overrides (**_overrides) :
 	return _overrides
@@ -194,10 +194,10 @@ class HaProxy (HaBase) :
 	
 	
 	def http_frontend_builder (self) :
-		return default_builders.HaHttpFrontendBuilder (self, self._parameters)
+		return builders.HaHttpFrontendBuilder (self, self._parameters)
 	
 	def http_backend_builder (self) :
-		return default_builders.HaHttpBackendBuilder (self, self._parameters)
+		return builders.HaHttpBackendBuilder (self, self._parameters)
 	
 	
 	def output_stdout (self) :
@@ -337,7 +337,7 @@ class HaGlobals (HaSection) :
 		HaSection.__init__ (self, _parameters)
 	
 	def _declare_implicit (self) :
-		default_declares.declare_globals (self)
+		declares.declare_globals (self)
 	
 	def _generate_header (self) :
 		_scroll = Scroll ()
@@ -353,7 +353,7 @@ class HaDefaults (HaSection) :
 		HaSection.__init__ (self, _parameters)
 	
 	def _declare_implicit (self) :
-		default_declares.declare_defaults (self)
+		declares.declare_defaults (self)
 	
 	def _generate_header (self) :
 		_scroll = Scroll ()
@@ -482,7 +482,7 @@ class HaWorker (HaSection) :
 		return _acl
 	
 	def http_acl_builder (self) :
-		return default_builders.HaHttpAclBuilder (self, self._parameters)
+		return builders.HaHttpAclBuilder (self, self._parameters)
 	
 	def _condition_if (self, _acl) :
 		return ("if", _acl) if _acl is not None else None
@@ -500,7 +500,7 @@ class HaWorker (HaSection) :
 		return _sample
 	
 	def http_sample_builder (self) :
-		return default_builders.HaHttpSampleBuilder (self, self._parameters)
+		return builders.HaHttpSampleBuilder (self, self._parameters)
 	
 	
 	def declare_http_request_rule_if (self, _action, _acl, **_overrides) :
@@ -515,7 +515,7 @@ class HaWorker (HaSection) :
 		self._http_request_rule_statements.declare (("http-request", _rule), **_overrides)
 	
 	def http_request_rule_builder (self) :
-		return default_builders.HaHttpRequestRuleBuilder (self, self._parameters)
+		return builders.HaHttpRequestRuleBuilder (self, self._parameters)
 	
 	
 	def declare_http_response_rule_if (self, _action, _acl, **_overrides) :
@@ -530,7 +530,7 @@ class HaWorker (HaSection) :
 		self._http_response_rule_statements.declare (("http-response", _rule), **_overrides)
 	
 	def http_response_rule_builder (self) :
-		return default_builders.HaHttpResponseRuleBuilder (self, self._parameters)
+		return builders.HaHttpResponseRuleBuilder (self, self._parameters)
 	
 	
 	def declare_tcp_request_rule_if (self, _action, _acl, **_overrides) :
@@ -639,7 +639,7 @@ class HaFrontend (HaWorker) :
 		self._route_statements.declare (("use_backend", _backend, _condition), **_overrides)
 	
 	def http_route_builder (self, **_overrides) :
-		return default_builders.HaHttpRouteBuilder (self, self._parameters, **_overrides)
+		return builders.HaHttpRouteBuilder (self, self._parameters, **_overrides)
 	
 	
 	def _declare_request_capture (self, _length = "$+frontend_capture_length", **_overrides) :
@@ -733,7 +733,7 @@ class HaTcpFrontend (HaFrontend) :
 		HaFrontend.__init__ (self, _identifier, _parameters, **_options)
 	
 	def _declare_implicit (self, **_options) :
-		default_declares.declare_tcp_frontend (self, **_options)
+		declares.declare_tcp_frontend (self, **_options)
 
 
 class HaTcpBackend (HaBackend) :
@@ -742,7 +742,7 @@ class HaTcpBackend (HaBackend) :
 		HaBackend.__init__ (self, _identifier, _parameters, **_options)
 	
 	def _declare_implicit (self, **_options) :
-		default_declares.declare_tcp_backend (self, **_options)
+		declares.declare_tcp_backend (self, **_options)
 
 
 
@@ -767,7 +767,7 @@ class HaHttpFrontend (HaFrontend) :
 				self.acls.path ("$heartbeat_self_path"),
 				enabled_if = statement_and ("$?frontend_monitor_enabled", "$?frontend_monitor_configure"),
 				order = 0)
-		default_declares.declare_http_frontend (self, **_options)
+		declares.declare_http_frontend (self, **_options)
 
 
 class HaHttpBackend (HaBackend) :
@@ -780,7 +780,7 @@ class HaHttpBackend (HaBackend) :
 		self.responses = self.http_response_rule_builder ()
 	
 	def _declare_implicit (self, **_options) :
-		default_declares.declare_http_backend (self, **_options)
+		declares.declare_http_backend (self, **_options)
 
 
 
