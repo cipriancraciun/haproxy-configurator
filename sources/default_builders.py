@@ -207,6 +207,10 @@ class HaHttpAclBuilder (HaBuilder) :
 			_sample = self._samples.variable ("$logging_http_variable_agent", (("wt6", 1), ("mod", _count)))
 		elif _criteria == "ip" :
 			_sample = self._samples.variable ("$logging_http_variable_forwarded_for", (("wt6", 1), ("mod", _count)))
+		elif _criteria == "path" :
+			_sample = self._samples.variable ("$logging_http_variable_path", (("wt6", 1), ("mod", _count)))
+		elif _criteria == "action" :
+			_sample = self._samples.variable ("$logging_http_variable_action", (("wt6", 1), ("mod", _count)))
 		else :
 			raise_error ("34cca11c", _criteria)
 		return self._context.acl_0 (_identifier, _sample, "int", None, "eq", (_expected,))
@@ -1004,9 +1008,11 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		_sample = self._samples.request_header (_header, _transforms, _index)
 		return self.capture (_sample, _acl, **_overrides)
 	
+	
 	def capture_defaults (self, _acl = None, **_overrides) :
 		self.capture_protocol (_acl, **_overrides)
 		self.capture_forwarded (_acl, **_overrides)
+		self.capture_tracking (_acl, **_overrides)
 		self.capture_browsing (_acl, **_overrides)
 		self.capture_caching (_acl, **_overrides)
 		self.capture_cookies (_acl, **_overrides)
@@ -1015,18 +1021,22 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 	def capture_protocol (self, _acl = None, **_overrides) :
 		self.capture_header ("Host", "base64", _acl, **_overrides)
 	
+	def capture_forwarded (self, _acl = None, **_overrides) :
+		self.capture_header ("$logging_http_header_forwarded_host", "base64", _acl, **_overrides)
+		self.capture_header ("$logging_http_header_forwarded_for", "base64", _acl, **_overrides)
+		self.capture_header ("$logging_http_header_forwarded_proto", "base64", _acl, **_overrides)
+		self.capture_header ("$logging_http_header_forwarded_port", "base64", _acl, **_overrides)
+	
+	def capture_tracking (self, _acl = None, **_overrides) :
+		self.capture_header ("$http_tracking_request_header", "base64", _acl, **_overrides)
+		self.capture_header ("$http_tracking_session_header", "base64", _acl, **_overrides)
+	
 	def capture_browsing (self, _acl = None, **_overrides) :
 		self.capture_header ("User-Agent", "base64", _acl, **_overrides)
 		self.capture_header ("Referer", "base64", _acl, **_overrides)
 		self.capture_header ("Accept-Encoding", "base64", _acl, **_overrides)
 		self.capture_header ("Accept-Language", "base64", _acl, **_overrides)
 		self.capture_header ("Accept-Charset", "base64", _acl, **_overrides)
-	
-	def capture_cookies (self, _acl = None, **_overrides) :
-		self.capture_header ("Cookie", "base64", _acl, 1, **_overrides)
-		self.capture_header ("Cookie", "base64", _acl, 2, **_overrides)
-		self.capture_header ("Cookie", "base64", _acl, 3, **_overrides)
-		self.capture_header ("Cookie", "base64", _acl, 4, **_overrides)
 	
 	def capture_caching (self, _acl = None, **_overrides) :
 		self.capture_header ("Cache-Control", "base64", _acl, **_overrides)
@@ -1036,13 +1046,11 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		self.capture_header ("If-Unmodified-Since", "base64", _acl, **_overrides)
 		self.capture_header ("Pragma", "base64", _acl, **_overrides)
 	
-	def capture_forwarded (self, _acl = None, **_overrides) :
-		self.capture_header ("$logging_http_header_forwarded_host", "base64", _acl, **_overrides)
-		self.capture_header ("$logging_http_header_forwarded_for", "base64", _acl, **_overrides)
-		self.capture_header ("$logging_http_header_forwarded_proto", "base64", _acl, **_overrides)
-		self.capture_header ("$logging_http_header_forwarded_port", "base64", _acl, **_overrides)
-		self.capture_header ("$http_tracking_request_header", "base64", _acl, **_overrides)
-		self.capture_header ("$http_tracking_session_header", "base64", _acl, **_overrides)
+	def capture_cookies (self, _acl = None, **_overrides) :
+		self.capture_header ("Cookie", "base64", _acl, 1, **_overrides)
+		self.capture_header ("Cookie", "base64", _acl, 2, **_overrides)
+		self.capture_header ("Cookie", "base64", _acl, 3, **_overrides)
+		self.capture_header ("Cookie", "base64", _acl, 4, **_overrides)
 	
 	def capture_geoip (self, _acl = None, **_overrides) :
 		_geoip_enabled = self._parameters._get_and_expand ("geoip_enabled")
@@ -1050,18 +1058,36 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 			self.capture_header ("X-Country", "base64", _acl, **_overrides)
 	
 	
-	def capture_logging (self, _acl = None, **_overrides) :
-		self.set_variable ("$logging_http_variable_method", self._samples.request_method (), _acl, **_overrides)
-		self.set_variable ("$logging_http_variable_host", self._samples.host (), _acl, **_overrides)
-		self.set_variable ("$logging_http_variable_forwarded_host", self._samples.forwarded_host (), _acl, **_overrides)
-		self.set_variable ("$logging_http_variable_forwarded_for", self._samples.forwarded_for (), _acl, **_overrides)
-		self.set_variable ("$logging_http_variable_forwarded_proto", self._samples.forwarded_proto (), _acl, **_overrides)
-		self.set_variable ("$logging_http_variable_agent", self._samples.request_header ("User-Agent"), _acl, **_overrides)
-		self.set_variable ("$logging_http_variable_referrer", self._samples.request_header ("Referer"), _acl, **_overrides)
-		self.set_variable ("$logging_http_variable_session", self._samples.request_header ("$logging_http_header_session"), _acl, **_overrides)
+	def variables_defaults (self, _acl = None, **_overrides) :
+		self.variables_protocol (_acl, **_overrides)
+		self.variables_forwarded (_acl, **_overrides)
+		self.variables_tracking (_acl, **_overrides)
+		self.variables_browsing (_acl, **_overrides)
+		self.variables_geoip (_acl, **_overrides)
+	
+	def variables_protocol (self, _acl = None, **_overrides) :
 		self.set_header ("$logging_http_header_action", statement_format ("%%[%s]://%%[%s]%%[%s]", self._samples.request_method (), self._samples.host (), self._samples.path ()), False, (_acl, self._acl.query_exists () .negate ()), **_overrides)
 		self.set_header ("$logging_http_header_action", statement_format ("%%[%s]://%%[%s]%%[%s]?%%[%s]", self._samples.request_method (), self._samples.host (), self._samples.path (), self._samples.query ()), False, (_acl, self._acl.query_exists ()), **_overrides)
 		self.set_variable ("$logging_http_variable_action", self._samples.request_header ("$logging_http_header_action"), _acl, **_overrides)
+		self.set_variable ("$logging_http_variable_method", self._samples.request_method (), _acl, **_overrides)
+		self.set_variable ("$logging_http_variable_host", self._samples.host (), _acl, **_overrides)
+		self.set_variable ("$logging_http_variable_path", self._samples.path (), _acl, **_overrides)
+		self.set_variable ("$logging_http_variable_query", self._samples.query (), _acl, **_overrides)
+	
+	def variables_forwarded (self, _acl = None, **_overrides) :
+		self.set_variable ("$logging_http_variable_forwarded_host", self._samples.forwarded_host (), _acl, **_overrides)
+		self.set_variable ("$logging_http_variable_forwarded_for", self._samples.forwarded_for (), _acl, **_overrides)
+		self.set_variable ("$logging_http_variable_forwarded_proto", self._samples.forwarded_proto (), _acl, **_overrides)
+	
+	def variables_tracking (self, _acl = None, **_overrides) :
+		self.set_variable ("$logging_http_variable_request", self._samples.request_header ("$logging_http_header_request"), _acl, **_overrides)
+		self.set_variable ("$logging_http_variable_session", self._samples.request_header ("$logging_http_header_session"), _acl, **_overrides)
+	
+	def variables_browsing (self, _acl = None, **_overrides) :
+		self.set_variable ("$logging_http_variable_agent", self._samples.request_header ("User-Agent"), _acl, **_overrides)
+		self.set_variable ("$logging_http_variable_referrer", self._samples.request_header ("Referer"), _acl, **_overrides)
+	
+	def variables_geoip (self, _acl = None, **_overrides) :
 		_geoip_enabled = self._parameters._get_and_expand ("geoip_enabled")
 		if _geoip_enabled :
 			self.set_variable ("$logging_geoip_country_variable", self._samples.request_header ("X-Country"), _acl, **_overrides)
@@ -1412,6 +1438,7 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		_sample = self._samples.response_header (_header, _transforms, _index)
 		return self.capture (_sample, _acl, **_overrides)
 	
+	
 	def capture_defaults (self, _acl = None, **_overrides) :
 		self.capture_protocol (_acl, **_overrides)
 		self.capture_caching (_acl, **_overrides)
@@ -1441,7 +1468,10 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		self.capture_header ("Set-Cookie", "base64", _acl, 4, **_overrides)
 	
 	
-	def capture_logging (self, _acl = None, **_overrides) :
+	def variables_defaults (self, _acl = None, **_overrides) :
+		self.variables_protocol (_acl, **_overrides)
+	
+	def variables_protocol (self, _acl = None, **_overrides) :
 		self.set_variable ("$logging_http_variable_location", self._samples.response_header ("Location"), _acl, **_overrides)
 		self.set_variable ("$logging_http_variable_content_type", self._samples.response_header ("Content-Type"), _acl, **_overrides)
 		self.set_variable ("$logging_http_variable_content_encoding", self._samples.response_header ("Content-Encoding"), _acl, **_overrides)
