@@ -154,14 +154,18 @@ class HaHttpAclBuilder (HaBuilder) :
 	
 	
 	def ab_in_bucket (self, _expected, _count, _criteria = None, _identifier = None) :
+		if _criteria is None :
+			_criteria = "src"
 		if _criteria == "session" :
 			_sample = self._samples.variable ("$http_tracking_session_variable", (("wt6", 1), ("mod", _count)))
 		elif _criteria == "request" :
 			_sample = self._samples.variable ("$http_tracking_request_variable", (("wt6", 1), ("mod", _count)))
 		elif _criteria == "agent" :
 			_sample = self._samples.variable ("$logging_http_variable_agent", (("wt6", 1), ("mod", _count)))
-		elif _criteria == "ip" :
-			_sample = self._samples.variable ("$logging_http_variable_forwarded_for", (("wt6", 1), ("mod", _count)))
+		elif _criteria == "src" :
+			_sample = self._samples.client_ip ("src", (("wt6", 1), ("mod", _count)))
+		elif _criteria == "X-Forwarded-For" :
+			_sample = self._samples.client_ip ("X-Forwarded-For", (("wt6", 1), ("mod", _count)))
 		elif _criteria == "path" :
 			_sample = self._samples.variable ("$logging_http_variable_path", (("wt6", 1), ("mod", _count)))
 		elif _criteria == "action" :
