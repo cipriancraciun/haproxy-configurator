@@ -16,16 +16,16 @@ class HaHttpFrontendBuilder (HaBuilder) :
 		HaBuilder.__init__ (self, _context, _parameters)
 	
 	
-	def basic (self, identifier = None, tls = None, **_parameters) :
+	def basic (self, _identifier = None, _tls = None, **_parameters) :
 		
-		_identifier = identifier if identifier is not None else "http"
-		_tls = tls if tls is not None else False
+		_identifier = _identifier if _identifier is not None else "http"
+		_tls = _tls if _tls is not None else False
 		
 		_frontend = self._context.http_frontend_create (_identifier, **_parameters)
 		
-		_frontend.declare_bind (**_parameters)
+		_frontend.declare_bind (overrides = _parameters)
 		if _tls :
-			_frontend.declare_bind_tls (**_parameters)
+			_frontend.declare_bind_tls (overrides = _parameters)
 		
 		return _frontend
 

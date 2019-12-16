@@ -16,13 +16,10 @@ class HaHttpBackendBuilder (HaBuilder) :
 		HaBuilder.__init__ (self, _context, _parameters)
 	
 	
-	def basic (self, identifier = None, endpoint = None, frontend = None, acl = None, route_order = None, **_parameters) :
+	def basic (self, _identifier = None, _endpoint = None, _frontend = None, _acl = None, _route_order = None, **_parameters) :
 		
-		_identifier = identifier if identifier is not None else "http-backend"
-		_endpoint = endpoint if endpoint is not None else "ipv4@127.0.0.1:8080"
-		_frontend = frontend
-		_acl = acl
-		_route_order = route_order
+		_identifier = _identifier if _identifier is not None else "http-backend"
+		_endpoint = _endpoint if _endpoint is not None else "ipv4@127.0.0.1:8080"
 		
 		_backend = self._context.http_backend_create (_identifier, **_parameters)
 		if _endpoint is not None :
@@ -35,12 +32,10 @@ class HaHttpBackendBuilder (HaBuilder) :
 		return _backend
 	
 	
-	def for_domain (self, _domain, _endpoint = None, identifier = None, frontend = None, acl = None, **_parameters) :
+	def for_domain (self, _domain, _endpoint = None, _identifier = None, _frontend = None, _acl = None, **_parameters) :
 		
-		_endpoint = endpoint if endpoint is not None else "ipv4@127.0.0.1:8080"
-		_backend_identifier = parameters_coalesce (identifier, _domain)
-		_frontend = frontend
-		_acl = acl
+		_endpoint = _endpoint if _endpoint is not None else "ipv4@127.0.0.1:8080"
+		_backend_identifier = parameters_coalesce (_identifier, _domain)
 		
 		_parameters = parameters_defaults (_parameters, backend_http_check_request_host = _domain)
 		
@@ -53,20 +48,18 @@ class HaHttpBackendBuilder (HaBuilder) :
 		
 		return _backend
 	
-	def for_domains (self, _map, frontend = None, acl = None, **_parameters) :
+	def for_domains (self, _map, _frontend = None, _acl = None, **_parameters) :
 		_backends = list ()
 		for _domain, _endpoint in _map.iteritems () :
-			_backend = self.for_domain (_domain, _endpoint, frontend = frontend, identifier = _domain, acl = acl, **_parameters)
+			_backend = self.for_domain (_domain, _endpoint, _frontend = _frontend, _identifier = _domain, _acl = _acl, **_parameters)
 			_backends.append (_backend)
 		return _backends
 	
 	
-	def letsencrypt (self, identifier = None, endpoint = None, frontend = None, acl = None, **_parameters) :
+	def letsencrypt (self, _identifier = None, _endpoint = None, _frontend = None, _acl = None, **_parameters) :
 		
-		_server_endpoint = statement_coalesce (endpoint, "$letsencrypt_server_endpoint")
-		_backend_identifier = parameters_coalesce (identifier, parameters_get ("letsencrypt_backend_identifier"))
-		_frontend = frontend
-		_acl = acl
+		_server_endpoint = statement_coalesce (_endpoint, "$letsencrypt_server_endpoint")
+		_backend_identifier = parameters_coalesce (_identifier, parameters_get ("letsencrypt_backend_identifier"))
 		
 		_parameters = parameters_overrides (_parameters, backend_check_enabled = False)
 		
@@ -86,13 +79,10 @@ class HaHttpBackendBuilder (HaBuilder) :
 		return _backend
 	
 	
-	def varnish (self, identifier = None, endpoint = None, frontend = None, domain = None, acl = None, **_parameters) :
+	def varnish (self, _identifier = None, _endpoint = None, _frontend = None, _domain = None, _acl = None, **_parameters) :
 		
-		_server_endpoint = statement_coalesce (endpoint, "$varnish_upstream_endpoint")
-		_backend_identifier = parameters_coalesce (identifier, parameters_get ("varnish_backend_identifier"))
-		_frontend = frontend
-		_acl = acl
-		_domain = domain
+		_server_endpoint = statement_coalesce (_endpoint, "$varnish_upstream_endpoint")
+		_backend_identifier = parameters_coalesce (_identifier, parameters_get ("varnish_backend_identifier"))
 		
 		_parameters = parameters_overrides (
 				_parameters,
