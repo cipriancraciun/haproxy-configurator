@@ -69,10 +69,42 @@
 !!
 
 
+
+
+++<<~~ examples / ninja
+	#! {{}}
+	#! <ninja>
+	
+	{{ $_examples := ZRUN ":: examples / list" | json_decode }}
+	{{ $_sources := ZRUN ":: sources / list" | json_decode }}
+	
+	builddir = ./examples/_configs
+	
+	rule generate
+	    command = z-run ':: tools / generate' ${in} ${out}
+	    description = [generate]  ${in}
+	
+	rule touch
+	    command = touch -- ${out}
+	    description = [touch]  ${out}
+	
+	build ./examples/_configs/.sources : touch {{ range $_, $_source := $_sources }} ./sources/{{ $_source }}.py {{ end }}
+	
+	{{ range $_, $_example := $_examples }}
+	build ./examples/_configs/{{ $_example }}.cfg : generate ./examples/{{ $_example }}.py | ./examples/_configs/.sources
+	{{ end }}
+	
+!!
+
+
+
+
 <<== examples / 970dea4688212c2d196b0aa3156e07a3
 	#! {{}}
 	
-	{{ range $_, $_example := ZRUN ":: examples / list" | json_decode }}
+	{{ $_examples := ZRUN ":: examples / list" | json_decode }}
+	
+	{{ range $_, $_example := $_examples }}
 	:: examples / generate / {{ $_example }} :: exec -- "${ZRUN[@]}" ':: examples / generate' '{{ $_example }}' "${@}"
 	:: examples / generate + less / {{ $_example }} :: exec -- "${ZRUN[@]}" ':: examples / generate + less' '{{ $_example }}' "${@}"
 	:: examples / generate + diff-lines / {{ $_example }} :: exec -- "${ZRUN[@]}" ':: examples / generate + diff-lines' '{{ $_example }}' "${@}"
@@ -81,13 +113,13 @@
 	{{ end }}
 	
 	++<< examples / generate / *
-		{{ range $_, $_example := ZRUN ":: examples / list" | json_decode }}
+		{{ range $_, $_example := $_examples }}
 		printf -- '[ii]  processing `%s`...\n' '{{ $_example }}' >&2
 		"${ZRUN[@]}" ':: examples / generate' '{{ $_example }}' "${@}" > /dev/null
 		{{ end }}
 	!!
 	++<< examples / generate + verify / *
-		{{ range $_, $_example := ZRUN ":: examples / list" | json_decode }}
+		{{ range $_, $_example := $_examples }}
 		printf -- '[ii]  processing `%s`...\n' '{{ $_example }}' >&2
 		"${ZRUN[@]}" ':: examples / generate + verify' '{{ $_example }}' "${@}"
 		{{ end }}

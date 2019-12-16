@@ -2,5 +2,6 @@
 
 
 && ./tools.z-run
+&& ./sources.z-run
 && ./examples.z-run
 
