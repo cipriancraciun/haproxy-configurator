@@ -162,7 +162,7 @@ class HaProxy (HaBase) :
 		return _resolvers
 	
 	
-	def credentials_create (self, _identifier, **_overrides) :
+	def credentials_create (self, _identifier, _realm = None, **_overrides) :
 		
 		_parameters = self._parameters._fork (**_overrides)
 		_identifier = enforce_identifier (_parameters, _identifier)
@@ -171,7 +171,7 @@ class HaProxy (HaBase) :
 		if _identifier in self._credentials :
 			raise_error ("0e49fc8e", _identifier)
 		
-		_credentials = HaCredentials (_identifier, _parameters)
+		_credentials = HaCredentials (_identifier, _realm, _parameters)
 		self._credentials[_identifier] = _credentials
 		self._credentials_ordered.append (_credentials)
 		self._credentials_ordered.sort (key = lambda _section : _section._order)
@@ -411,9 +411,10 @@ class HaResolvers (HaSection) :
 
 class HaCredentials (HaSection) :
 	
-	def __init__ (self, _identifier, _parameters) :
+	def __init__ (self, _identifier, _realm, _parameters) :
 		HaSection.__init__ (self, _parameters)
 		self.identifier = enforce_identifier (self._parameters, _identifier)
+		self.realm = enforce_identifier (self._parameters, _realm) if _realm is not None else None
 		self._group_statements = HaStatementGroup (self._parameters, "Groups", order = 5000 + 100)
 		self._user_statements = HaStatementGroup (self._parameters, "Users", order = 5000 + 200)
 	

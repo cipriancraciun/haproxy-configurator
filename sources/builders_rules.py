@@ -747,7 +747,7 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 	def authenticate (self, _credentials, _realm = None, _acl = None, **_overrides) :
 		_acl_authenticated = self._acl.authenticated (_credentials)
 		_rule_condition = self._context._condition_if ((_acl, _acl_authenticated.negate ()))
-		_rule = ("auth", "realm", statement_quote ("\'", statement_coalesce (_realm, "$daemon_identifier")))
+		_rule = ("auth", "realm", statement_quote ("\'", statement_coalesce (_realm, _credentials.realm, "$daemon_identifier")))
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
 	def authenticate_for_path_and_query (self, _path, _query, _credentials, _realm = None, _acl = None, **_overrides) :
