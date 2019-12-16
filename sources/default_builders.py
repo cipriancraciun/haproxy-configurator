@@ -379,7 +379,7 @@ class HaHttpRuleBuilder (HaBuilder) :
 	
 	
 	def allow (self, _acl, **_overrides) :
-		_rule_condition = ("if", _acl, "TRUE")
+		_rule_condition = self._context._condition_if (_acl)
 		_rule = ("allow",)
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
@@ -408,7 +408,7 @@ class HaHttpRuleBuilder (HaBuilder) :
 		# FIXME:  Make this configurable and deferable!
 		if _mark is not None and _mark != 0 :
 			self.set_mark (_mark, _acl, **_overrides)
-		_rule_condition = ("if", _acl, "TRUE")
+		_rule_condition = self._context._condition_if (_acl)
 		_deny_rule = ("deny", statement_choose_if_non_null (_code, ("deny_status", statement_enforce_int (_code))))
 		self._declare_http_rule_0 (_deny_rule, _rule_condition, **_overrides)
 	
@@ -449,17 +449,17 @@ class HaHttpRuleBuilder (HaBuilder) :
 	
 	def set_header (self, _header, _value, _ignore_if_exists = False, _acl = None, **_overrides) :
 		_acl_exists = self._header_acl_exists (_header) if _ignore_if_exists else None
-		_rule_condition = ("if", _acl, _acl_exists, "TRUE")
+		_rule_condition = self._context._condition_if ((_acl, _acl_exists))
 		_rule = ("set-header", statement_quote ("\"", _header), statement_quote ("\"", _value))
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
 	def delete_header (self, _header, _acl = None, **_overrides) :
-		_rule_condition = ("if", _acl, "TRUE")
+		_rule_condition = self._context._condition_if (_acl)
 		_rule = ("del-header", statement_quote ("\"", _header))
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
 	def append_header (self, _header, _value, _acl = None, **_overrides) :
-		_rule_condition = ("if", _acl, "TRUE")
+		_rule_condition = self._context._condition_if (_acl)
 		_rule = ("add-header", statement_quote ("\"", _header), statement_quote ("\"", _value))
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
@@ -491,7 +491,7 @@ class HaHttpRuleBuilder (HaBuilder) :
 	
 	
 	def set_variable (self, _variable, _value, _acl = None, **_overrides) :
-		_rule_condition = ("if", _acl, "TRUE")
+		_rule_condition = self._context._condition_if (_acl)
 		if isinstance (_value, basestring) :
 			_value = "str(%s)" % quote_token ("\'", _value)
 		_rule = (statement_format ("set-var(%s)", _variable), _value)
@@ -547,13 +547,13 @@ class HaHttpRuleBuilder (HaBuilder) :
 	
 	
 	def set_mark (self, _mark, _acl = None, **_overrides) :
-		_rule_condition = ("if", _acl, "TRUE")
+		_rule_condition = self._context._condition_if (_acl)
 		_mark_rule = ("set-mark", statement_format ("0x%08x", statement_enforce_int (_mark)))
 		self._declare_http_rule_0 (_mark_rule, _rule_condition, **_overrides)
 	
 	
 	def redirect (self, _target, _code = 307, _acl = None, **_overrides) :
-		_rule_condition = ("if", _acl, "TRUE")
+		_rule_condition = self._context._condition_if (_acl)
 		_rule = ("redirect", "location", statement_quote ("\"", _target), "code", _code)
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
@@ -575,13 +575,13 @@ class HaHttpRuleBuilder (HaBuilder) :
 		self.redirect_with_path (_path, _code = _code, _acl = _acl, _include_scheme = _include_scheme, _include_host = _include_host, **_overrides)
 	
 	def redirect_prefix (self, _target, _code = 307, _acl = None, **_overrides) :
-		_rule_condition = ("if", _acl, "TRUE")
+		_rule_condition = self._context._condition_if (_acl)
 		_rule = ("redirect", "prefix", statement_quote ("\"", _target), "code", _code)
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
 	def redirect_via_tls (self, _code = 307, _acl = None, **_overrides) :
 		_acl_non_tls = self._acl.via_tls (False)
-		_rule_condition = ("if", _acl, _acl_non_tls, "TRUE")
+		_rule_condition = self._context._condition_if ((_acl, _acl_non_tls))
 		_rule = ("redirect", "scheme", "https", "code", _code)
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
@@ -593,7 +593,7 @@ class HaHttpRuleBuilder (HaBuilder) :
 					("src", "src"),
 					("X-Forwarded-For", statement_format ("req.hdr(%s,1)", "$logging_http_header_forwarded_for")),
 			)
-		_rule_condition = ("if", _acl, "TRUE")
+		_rule_condition = self._context._condition_if (_acl)
 		_rule = ("track-sc0", _source)
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 
@@ -607,32 +607,32 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 	
 	
 	def set_method (self, _method, _acl = None, **_overrides) :
-		_rule_condition = ("if", _acl, "TRUE")
+		_rule_condition = self._context._condition_if (_acl)
 		_rule = ("set-method", statement_quote ("\'", _method))
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
 	def set_path (self, _path, _acl = None, **_overrides) :
-		_rule_condition = ("if", _acl, "TRUE")
+		_rule_condition = self._context._condition_if (_acl)
 		_rule = ("set-path", statement_quote ("\"", _path))
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
 	def set_path_prefix (self, _path_prefix, _acl = None, **_overrides) :
-		_rule_condition = ("if", _acl, "TRUE")
+		_rule_condition = self._context._condition_if (_acl)
 		_rule = ("set-path", statement_quote ("\"", statement_format ("%s%%[%s]", _path_prefix, self._samples.path ())))
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
 	def set_path_suffix (self, _path_suffix, _acl = None, **_overrides) :
-		_rule_condition = ("if", _acl, "TRUE")
+		_rule_condition = self._context._condition_if (_acl)
 		_rule = ("set-path", statement_quote ("\"", statement_format ("%%[%s]%s", self._samples.path (), _path_suffix)))
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
 	def set_query (self, _query, _acl = None, **_overrides) :
-		_rule_condition = ("if", _acl, "TRUE")
+		_rule_condition = self._context._condition_if (_acl)
 		_rule = ("set-query", statement_quote ("\"", _query))
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
 	def set_uri (self, _uri, _acl = None, **_overrides) :
-		_rule_condition = ("if", _acl, "TRUE")
+		_rule_condition = self._context._condition_if (_acl)
 		_rule = ("set-uri", statement_quote ("\"", _uri))
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
@@ -647,7 +647,7 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 			_acl_host = self._acl.host (_domain)
 			_acl_non_tls = self._acl.via_tls (False)
 			_acl_path = self._acl.path ("/") if _only_root else None
-			_rule_condition = ("if", _acl, _acl_host, _acl_path, _acl_non_tls)
+			_rule_condition = self._context._condition_if ((_acl, _acl_host, _acl_path, _acl_non_tls))
 			_rule = ("redirect", "scheme", "https", "code", _code)
 			self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
@@ -661,8 +661,8 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 			_acl_path = self._acl.path ("/") if _only_root else None
 			_acl_non_tls = self._acl.via_tls (False)
 			_acl_tls = self._acl.via_tls (True)
-			_rule_non_tls_condition = ("if", _acl, _acl_host, _acl_path, _acl_non_tls)
-			_rule_tls_condition = ("if", _acl, _acl_host, _acl_path, _acl_tls)
+			_rule_non_tls_condition = self._context._condition_if ((_acl, _acl_host, _acl_path, _acl_non_tls))
+			_rule_tls_condition = self._context._condition_if ((_acl, _acl_host, _acl_path, _acl_tls))
 			_rule_non_tls = ("redirect", "prefix", _redirect_non_tls, "code", _code)
 			_rule_tls = ("redirect", "prefix", _redirect_tls, "code", _code)
 			self._declare_http_rule_0 (_rule_non_tls, _rule_non_tls_condition, **_overrides)
@@ -678,8 +678,8 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 			_acl_path = self._acl.path ("/") if _only_root else None
 			_acl_non_tls = self._acl.via_tls (False)
 			_acl_tls = self._acl.via_tls (True)
-			_rule_non_tls_condition = ("if", _acl, _acl_host, _acl_path, _acl_non_tls)
-			_rule_tls_condition = ("if", _acl, _acl_host, _acl_path, _acl_tls)
+			_rule_non_tls_condition = self._context._condition_if ((_acl, _acl_host, _acl_path, _acl_non_tls))
+			_rule_tls_condition = self._context._condition_if ((_acl, _acl_host, _acl_path, _acl_tls))
 			_rule_non_tls = ("redirect", "prefix", _redirect_non_tls, "code", _code)
 			_rule_tls = ("redirect", "prefix", _redirect_tls, "code", _code)
 			self._declare_http_rule_0 (_rule_non_tls, _rule_non_tls_condition, **_overrides)
@@ -691,8 +691,8 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		_acl_host = self._acl.host (_source)
 		_acl_non_tls = self._acl.via_tls (False)
 		_acl_tls = self._acl.via_tls (True)
-		_rule_non_tls_condition = ("if", _acl, _acl_host, _acl_non_tls)
-		_rule_tls_condition = ("if", _acl, _acl_host, _acl_tls)
+		_rule_non_tls_condition = self._context._condition_if ((_acl, _acl_host, _acl_non_tls))
+		_rule_tls_condition = self._context._condition_if ((_acl, _acl_host, _acl_tls))
 		_rule_non_tls = ("redirect", "prefix", _redirect_non_tls, "code", _redirect_code)
 		_rule_tls = ("redirect", "prefix", _redirect_tls, "code", _redirect_code)
 		self._declare_http_rule_0 (_rule_non_tls, _rule_non_tls_condition, **_overrides)
@@ -739,12 +739,12 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		else :
 			_acl_path = None
 		_acl_non_tls = self._acl.via_tls (False)
-		_rule_non_tls_condition = ("if", _acl, _acl_host, _acl_path, _acl_non_tls)
+		_rule_non_tls_condition = self._context._condition_if ((_acl, _acl_host, _acl_path, _acl_non_tls))
 		_rule_non_tls = ("redirect", _redirect_method, _redirect_non_tls, "code", _redirect_code)
 		self._declare_http_rule_0 (_rule_non_tls, _rule_non_tls_condition, **_overrides)
 		if _redirect_tls is not None :
 			_acl_tls = self._acl.via_tls (True)
-			_rule_tls_condition = ("if", _acl, _acl_host, _acl_path, _acl_tls)
+			_rule_tls_condition = self._context._condition_if ((_acl, _acl_host, _acl_path, _acl_tls))
 			_rule_tls = ("redirect", _redirect_method, _redirect_tls, "code", _redirect_code)
 			self._declare_http_rule_0 (_rule_tls, _rule_tls_condition, **_overrides)
 	
@@ -1001,7 +1001,7 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 	
 	def capture (self, _sample, _acl = None, **_overrides) :
 		_index = self._context._declare_request_capture (**_overrides)
-		_rule_condition = ("if", _acl, "TRUE")
+		_rule_condition = self._context._condition_if (_acl)
 		_rule = ("capture", _sample, "id", _index)
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 		return _index
@@ -1097,7 +1097,7 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 	
 	def authenticate (self, _credentials, _realm = None, _acl = None, **_overrides) :
 		_acl_authenticated = self._acl.authenticated (_credentials)
-		_rule_condition = ("if", _acl, _acl_authenticated.negate (), "TRUE")
+		_rule_condition = self._context._condition_if ((_acl, _acl_authenticated.negate ()))
 		_rule = ("auth", "realm", statement_quote ("\'", statement_coalesce (_realm, "$daemon_identifier")))
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
@@ -1149,7 +1149,7 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 	
 	
 	def set_status (self, _code, _acl = None, **_overrides) :
-		_rule_condition = ("if", _acl, "TRUE")
+		_rule_condition = self._context._condition_if (_acl)
 		_rule = ("set-status", _code)
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
@@ -1431,7 +1431,7 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 	
 	def capture (self, _sample, _acl = None, **_overrides) :
 		_index = self._context._declare_response_capture (**_overrides)
-		_rule_condition = ("if", _acl, "TRUE")
+		_rule_condition = self._context._condition_if (_acl)
 		_rule = ("capture", _sample, "id", _index)
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 		return _index

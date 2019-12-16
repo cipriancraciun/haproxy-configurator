@@ -484,6 +484,12 @@ class HaWorker (HaSection) :
 	def http_acl_builder (self) :
 		return default_builders.HaHttpAclBuilder (self, self._parameters)
 	
+	def _condition_if (self, _acl) :
+		return ("if", _acl) if _acl is not None else None
+	
+	def _condition_unless (self, _acl) :
+		return ("unless", _acl) if _acl is not None else None
+	
 	
 	def sample_1 (self, _method, _arguments) :
 		return self.sample_0 (_method, _arguments, None)
@@ -498,11 +504,11 @@ class HaWorker (HaSection) :
 	
 	
 	def declare_http_request_rule_if (self, _action, _acl, **_overrides) :
-		_condition = ("if", _acl, "TRUE") if _acl is not None else None
+		_condition = self._condition_if (_acl)
 		self.declare_http_request_rule_0 ((_action, _condition), **_overrides)
 	
 	def declare_http_request_rule_unless (self, _action, _acl, **_overrides) :
-		_condition = ("unless", _acl, "TRUE") if _acl is not None else None
+		_condition = self._condition_unless (_acl)
 		self.declare_http_request_rule_0 ((_action, _condition), **_overrides)
 	
 	def declare_http_request_rule_0 (self, _rule, **_overrides) :
@@ -513,11 +519,11 @@ class HaWorker (HaSection) :
 	
 	
 	def declare_http_response_rule_if (self, _action, _acl, **_overrides) :
-		_condition = ("if", _acl, "TRUE") if _acl is not None else None
+		_condition = self._condition_if (_acl)
 		self.declare_http_response_rule_0 ((_action, _condition), **_overrides)
 	
 	def declare_http_response_rule_unless (self, _action, _acl, **_overrides) :
-		_condition = ("unless", _acl, "TRUE") if _acl is not None else None
+		_condition = self._condition_unless (_acl)
 		self.declare_http_response_rule_0 ((_action, _condition), **_overrides)
 	
 	def declare_http_response_rule_0 (self, _rule, **_overrides) :
@@ -528,11 +534,11 @@ class HaWorker (HaSection) :
 	
 	
 	def declare_tcp_request_rule_if (self, _action, _acl, **_overrides) :
-		_condition = ("if", _acl, "TRUE") if _acl is not None else None
+		_condition = self._condition_if (_acl)
 		self.declare_tcp_request_rule_0 ((_action, _condition), **_overrides)
 	
 	def declare_tcp_request_rule_unless (self, _action, _acl, **_overrides) :
-		_condition = ("unless", _acl, "TRUE") if _acl is not None else None
+		_condition = self._condition_unless (_acl)
 		self.declare_tcp_request_rule_0 ((_action, _condition), **_overrides)
 	
 	def declare_tcp_request_rule_0 (self, _rule, **_overrides) :
@@ -540,11 +546,11 @@ class HaWorker (HaSection) :
 	
 	
 	def declare_tcp_response_rule_if (self, _action, _acl, **_overrides) :
-		_condition = ("if", _acl, "TRUE") if _acl is not None else None
+		_condition = self._condition_if (_acl)
 		self.declare_tcp_response_rule_0 ((_action, _condition), **_overrides)
 	
 	def declare_tcp_response_rule_unless (self, _action, _acl, **_overrides) :
-		_condition = ("unless", _acl, "TRUE") if _acl is not None else None
+		_condition = self._condition_unless (_acl)
 		self.declare_tcp_response_rule_0 ((_action, _condition), **_overrides)
 	
 	def declare_tcp_response_rule_0 (self, _rule, **_overrides) :
@@ -625,11 +631,11 @@ class HaFrontend (HaWorker) :
 	
 	
 	def declare_route_if_0 (self, _backend, _acl, **_overrides) :
-		_condition = ("if", _acl, "TRUE") if _acl is not None else None
+		_condition = self._condition_if (_acl)
 		self._route_statements.declare (("use_backend", _backend, _condition), **_overrides)
 	
 	def declare_route_unless_0 (self, _backend, _acl, **_overrides) :
-		_condition = ("unless", _acl, "TRUE") if _acl is not None else None
+		_condition = self._condition_unless (_acl)
 		self._route_statements.declare (("use_backend", _backend, _condition), **_overrides)
 	
 	def http_route_builder (self, **_overrides) :
@@ -692,8 +698,9 @@ class HaBackend (HaWorker) :
 	def declare_server (self, _identifier, _endpoint, _options = "$server_options", _acl = None, **_overrides) :
 		_identifier = enforce_identifier (self._parameters, _identifier)
 		_options = statement_overrides (_options, **_overrides)
-		if _acl is not None :
-			self._server_statements.declare (("use-server", statement_quote ("\'", _identifier), "if", _acl), **_overrides)
+		_condition = self._condition_if (_acl)
+		if _condition is not None :
+			self._server_statements.declare (("use-server", statement_quote ("\'", _identifier), _condition), **_overrides)
 		self._server_statements.declare (("server", statement_quote ("\'", _identifier), statement_quote ("\'", _endpoint), _options), **_overrides)
 	
 	
