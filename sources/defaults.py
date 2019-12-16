@@ -436,11 +436,11 @@ parameters = {
 			),
 		"frontend_bind_mss" : parameters_choose_if_false (parameters_get ("frontend_bind_minimal"), 1400),
 		"frontend_bind_defer_accept" : parameters_not (parameters_get ("frontend_bind_minimal")),
-		"frontend_bind_tls_certificate" : parameters_choose_if_false (parameters_get ("frontend_bind_minimal"),
+		"frontend_bind_tls_certificate" : parameters_choose_if_false (parameters_get ("frontend_bind_tls_minimal"),
 				parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/default.pem")),
-		"frontend_bind_tls_certificate_rules" : parameters_choose_if_false (parameters_get ("frontend_bind_minimal"),
+		"frontend_bind_tls_certificate_rules" : parameters_choose_if_false (parameters_get ("frontend_bind_tls_minimal"),
 				parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/default.conf")),
-		"frontend_bind_tls_options" :  parameters_choose_if_false (parameters_get ("frontend_bind_minimal"), (
+		"frontend_bind_tls_options" :  parameters_choose_if_false (parameters_get ("frontend_bind_tls_minimal"), (
 				parameters_get ("frontend_bind_options"),
 				parameters_get ("frontend_bind_tls_options_actual"),
 			)),
@@ -1139,6 +1139,7 @@ parameters = {
 		
 		"frontend_minimal" : parameters_get ("minimal_configure"),
 		"frontend_bind_minimal" : parameters_get ("frontend_minimal"),
+		"frontend_bind_tls_minimal" : parameters_get ("frontend_bind_minimal"),
 		"frontend_configure" : parameters_not (parameters_get ("frontend_minimal")),
 		"frontend_connections_configure" : parameters_get ("frontend_configure"),
 		"frontend_timeouts_configure" : parameters_get ("frontend_configure"),
