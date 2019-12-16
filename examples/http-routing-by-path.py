@@ -12,18 +12,18 @@ _fe = _ha.http_frontends.basic ()
 
 
 _be_flask = _ha.http_backends.basic (
-		identifier = "http-flask",
-		endpoint = "ipv4@127.0.0.1:9090",
+		_identifier = "http-flask",
+		_endpoint = "ipv4@127.0.0.1:9090",
 	)
 
 _be_static = _ha.http_backends.basic (
-		identifier = "http-static",
-		endpoint = "ipv4@127.0.0.1:9091",
+		_identifier = "http-static",
+		_endpoint = "ipv4@127.0.0.1:9091",
 	)
 
 _be_media = _ha.http_backends.basic (
-		identifier = "http-media",
-		endpoint = "ipv4@127.0.0.1:9092",
+		_identifier = "http-media",
+		_endpoint = "ipv4@127.0.0.1:9092",
 	)
 
 
