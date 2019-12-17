@@ -312,6 +312,7 @@ def _quote_token (_token, _quote, _expand) :
 			_token = _token.replace ("\"", "\\\"")
 			_token = _token.replace ("\r", "\\r")
 			_token = _token.replace ("\n", "\\n")
+			_token = _token.replace ("$", "\\$")
 			_token = "\"" + _token + "\""
 			return _token
 		elif _quote == "\'" or _quote == "\'?" :
