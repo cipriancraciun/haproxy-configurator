@@ -44,6 +44,20 @@ _operators.declare_user ("operator", "zeregigojacuyixu")
 
 
 
+_fe.requests.set_forwarded_headers ()
+
+_fe.requests.variables_defaults ()
+_fe.responses.variables_defaults ()
+
+_fe.requests.capture_defaults ()
+_fe.responses.capture_defaults ()
+
+_fe.requests.set_debug_headers ()
+_fe.responses.set_debug_headers ()
+
+
+
+
 _fe.requests.redirect_via_tls ()
 
 _fe.requests.redirect_domain_with_www ("example.com", _force_tls = True)
