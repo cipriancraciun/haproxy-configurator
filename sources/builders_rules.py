@@ -112,6 +112,11 @@ class HaHttpRuleBuilder (HaBuilder) :
 		_rule = ("add-header", statement_quote ("\"", _header), statement_quote ("\"", _value))
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
+	def replace_header (self, _header, _matcher, _replacement, _acl = None, **_overrides) :
+		_rule_condition = self._context._condition_if (_acl)
+		_rule = ("replace-header", statement_quote ("\"", _header), statement_quote ("\"", _matcher), statement_quote ("\"", _replacement))
+		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
+	
 	def _header_acl_exists (self, _header) :
 		if isinstance (self, HaHttpRequestRuleBuilder) :
 			return self._acl.request_header_exists (_header, False)

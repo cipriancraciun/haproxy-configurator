@@ -66,6 +66,9 @@ class HaHttpSampleBuilder (HaBuilder) :
 	def query (self, _transforms = None) :
 		return self._context.sample_0 ("query", None, _transforms)
 	
+	def query_exists (self, _expected = True) :
+		return self._context.sample_0 ("query", None, (("length", "bool") if _expected else ("length", "bool", "not")))
+	
 	def query_parameter (self, _parameter, _transforms = None) :
 		return self._context.sample_0 ("url_param", (_parameter,), _transforms)
 	
