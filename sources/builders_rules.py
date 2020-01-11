@@ -792,6 +792,12 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		self.set_header ("$http_debug_timestamp_header", "%[date(),http_date()]", False, _acl, **_overrides)
 		self.append_header ("$http_debug_frontend_header", "%f", _acl, **_overrides)
 		self.append_header ("$http_debug_backend_header", "%b", _acl, **_overrides)
+	
+	def delete_debug_headers (self, _acl = None, **_overrides) :
+		self.delete_header ("$logging_http_header_action", _acl, **_overrides)
+		self.delete_header ("$http_debug_timestamp_header", _acl, **_overrides)
+		self.delete_header ("$http_debug_frontend_header", _acl, **_overrides)
+		self.delete_header ("$http_debug_backend_header", _acl, **_overrides)
 
 
 
@@ -1150,6 +1156,12 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		self.set_header ("$http_debug_timestamp_header", "%[date(),http_date()]", False, _acl, **_overrides)
 		self.append_header ("$http_debug_frontend_header", "%f", _acl, **_overrides)
 		self.append_header ("$http_debug_backend_header", "%b", _acl, **_overrides)
+	
+	def delete_debug_headers (self, _acl = None, **_overrides) :
+		self.delete_header ("$logging_http_header_action", _acl, **_overrides)
+		self.delete_header ("$http_debug_timestamp_header", _acl, **_overrides)
+		self.delete_header ("$http_debug_frontend_header", _acl, **_overrides)
+		self.delete_header ("$http_debug_backend_header", _acl, **_overrides)
 
 
 
