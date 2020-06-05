@@ -289,21 +289,28 @@ logging_http_format_json_template = [
 		
 		("h_v", "'%HV"), #!
 		("h_vm", "+@fc_http_major"),
-		("h_m", "'%HM"), #!
-		("h_p", "'%HP"), #!
-		("h_q", "'%HQ"), #!
 		("h_s", "+%ST"),
+		
+		("h_m0", "'%HM"), #!
+		("h_u0", "'%HU"), #!
+		("h_p0", "'%HP"), #!
+		("h_q0", "'%HQ"), #!
+		
+		("h_r_t", "'%trg"), #!
+		("h_r_i", "'%ID"), #!
 		
 		# FIXME:  Make this configurable!
 		("h_h", "'@var(txn.logging_http_host),json()"),
 		
 		# FIXME:  Make this configurable!
+		("h_m", "'@var(txn.logging_http_method),json()"),
+		("h_p", "'@var(txn.logging_http_path),json()"),
+		("h_q", "'@var(txn.logging_http_query),json()"),
+		
+		# FIXME:  Make this configurable!
 		("h_f_h", "'@var(txn.logging_http_forwarded_host),json()"),
 		("h_f_f", "'@var(txn.logging_http_forwarded_for),json()"),
 		("h_f_p", "'@var(txn.logging_http_forwarded_proto),json()"),
-		
-		("h_r_t", "'%trg"), #!
-		("h_r_i", "'%ID"), #!
 		
 		# FIXME:  Make this configurable!
 		("h_r_s", "'@var(txn.logging_http_session),json()"),
