@@ -233,9 +233,12 @@ class HaHttpRuleBuilder (HaBuilder) :
 		_rule = ("redirect", "prefix", statement_quote ("\"", _target), "code", _code)
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
-	def redirect_via_tls (self, _code = 307, _acl = None, **_overrides) :
-		_acl_non_tls = self._acl.via_tls (False)
-		_rule_condition = self._context._condition_if ((_acl, _acl_non_tls))
+	def redirect_via_tls (self, _code = 307, _acl = None, _force = False, **_overrides) :
+		if not _force :
+			_acl_non_tls = self._acl.via_tls (False)
+			_rule_condition = self._context._condition_if ((_acl, _acl_non_tls))
+		else :
+			_rule_condition = None
 		_rule = ("redirect", "scheme", "https", "code", _code)
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
