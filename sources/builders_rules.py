@@ -253,6 +253,12 @@ class HaHttpRuleBuilder (HaBuilder) :
 		_rule_condition = self._context._condition_if (_acl)
 		_rule = ("track-sc0", _source)
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
+	
+	
+	def logging_exclude (self, _acl = None, **_overrides) :
+		_rule_condition = self._context._condition_if (_acl)
+		_rule = ("set-log-level", "silent")
+		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 
 
 
