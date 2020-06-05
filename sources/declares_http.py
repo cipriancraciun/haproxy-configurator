@@ -74,6 +74,14 @@ def declare_http_frontend_connections (_configuration) :
 			enabled_if = "$?frontend_connections_configure",
 			order = 2000 + 100,
 	)
+	_configuration.declare_group (
+			"Compression",
+			("compression", "algo", "gzip"),
+			("compression", "type", "$\'defaults_compression_content_types"),
+			statement_choose_if ("$?defaults_compression_offload",
+				("compression", "offload")),
+			enabled_if = statement_and ("$?defaults_http_configure", "$?defaults_compression_configure"),
+	)
 
 
 def declare_http_frontend_timeouts (_configuration) :
