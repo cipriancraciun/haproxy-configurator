@@ -878,7 +878,7 @@ parameters = {
 		),
 		"logging_http_variable_method" : "txn.logging_http_method",
 		"logging_http_variable_host" : "txn.logging_http_host",
-		"logging_http_variable_path" : "txn.logging_http_method",
+		"logging_http_variable_path" : "txn.logging_http_path",
 		"logging_http_variable_query" : "txn.logging_http_query",
 		"logging_http_variable_forwarded_host" : "txn.logging_http_forwarded_host",
 		"logging_http_variable_forwarded_for" : "txn.logging_http_forwarded_for",
