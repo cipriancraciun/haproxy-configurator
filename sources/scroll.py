@@ -19,15 +19,18 @@ class Scroll (object) :
 		return len (self._contents) == 0
 	
 	def include_normal_line (self, _order, _indent, _contents) :
+		return self.include_normal_line_with_comment (_order, _indent, _contents, None)
+	
+	def include_normal_line_with_comment (self, _order, _indent, _contents, _comment) :
 		if isinstance (_contents, list) :
 			if len (_contents) == 0 :
 				return
 			elif len (_contents) == 1 :
 				_contents = _contents[0]
-		self._contents.append ((_order, _indent, _contents))
+		self._contents.append ((_order, _indent, _contents, _comment))
 	
 	def include_scroll_lines (self, _order, _indent, _scroll, _recurse) :
-		for _line_order, _line_indent, _line_contents in _scroll._contents :
+		for _line_order, _line_indent, _line_contents, _line_comment in _scroll._contents :
 			if _line_order is None :
 				_line_order = _order
 			if _line_indent is not None :
@@ -36,22 +39,24 @@ class Scroll (object) :
 				_line_indent = _indent
 			_line_indent += _scroll._indent
 			if isinstance (_line_contents, basestring) or isinstance (_line_contents, tuple) :
-				self._contents.append ((_line_order, _line_indent, _line_contents))
+				self._contents.append ((_line_order, _line_indent, _line_contents, _line_comment))
 			elif isinstance (_line_contents, ScrollPart) :
-				self._contents.append ((_line_order, _line_indent, _line_contents))
+				self._contents.append ((_line_order, _line_indent, _line_contents, _line_comment))
 			elif isinstance (_line_contents, Scroll) :
+				if _line_comment is not None :
+					raise_error ("f497f272")
 				if _recurse :
 					self.include_scroll_lines (_line_order, _line_indent, _line_contents, True)
 				else :
-					self._contents.append ((_line_order, _line_indent, _line_contents))
+					self._contents.append ((_line_order, _line_indent, _line_contents, None))
 			else :
 				raise_error ("a602a2e8", _line_contents)
 	
 	def include_comment_line (self, _order, _indent, _contents) :
-		self._contents.append ((_order, _indent, ScrollCommentLine (_contents)))
+		self._contents.append ((_order, _indent, ScrollCommentLine (_contents), None))
 	
 	def include_empty_line (self, _order, _indent, _count = 1) :
-		self._contents.append ((_order, _indent, ScrollEmptyLine (_count)))
+		self._contents.append ((_order, _indent, ScrollEmptyLine (_count), None))
 	
 	def output_stdout (self) :
 		self.output (sys.stdout)
@@ -63,28 +68,35 @@ class Scroll (object) :
 		else :
 			_stream_should_be_closed = False
 		_contents = sorted (self._contents, key = lambda _contents : _contents[0] if _contents[0] is not None else 1 << 16)
-		for _order, _indent_0, _contents in _contents :
-			self._output_contents (_order, _indent_0 + _indent + self._indent, _contents, _stream)
+		for _order, _indent_0, _contents, _comment in _contents :
+			self._output_contents (_order, _indent_0 + _indent + self._indent, _contents, _comment, _stream)
 		if _stream_should_be_closed :
 			_stream.output_done ()
 	
-	def _output_contents (self, _order, _indent, _contents, _stream) :
+	def _output_contents (self, _order, _indent, _contents, _comment, _stream) :
 		if isinstance (_contents, basestring) :
 			_stream.output_marker (_indent, 0, "## ~~ %s" % _order)
-			_stream.output_line (_indent, _contents)
+			if _comment is not None :
+				_stream.output_line_with_comment (_indent, _contents, _comment)
+			else :
+				_stream.output_line (_indent, _contents)
 		elif isinstance (_contents, tuple) :
 			_contents = self._format_tokens (_contents)
-			self._output_contents (_order, _indent, _contents, _stream)
+			self._output_contents (_order, _indent, _contents, _comment, _stream)
 		elif isinstance (_contents, ScrollPart) :
+			if _comment is not None :
+				raise_error ("0ab3e07c")
 			_contents.output (_stream, _indent)
 		elif isinstance (_contents, Scroll) :
+			if _comment is not None :
+				raise_error ("0ab3e07c")
 			_stream.output_marker (_indent, +1, "## >> Scroll %s" % _order)
 			_contents.output (_stream, _indent)
 			_stream.output_marker (_indent, -1, "## <<")
 		elif isinstance (_contents, list) :
 			_stream.output_marker (_indent, +1, "## >> List %s" % _order)
 			for _contents in _contents :
-				self._output_contents (_order, _indent, _contents, _stream)
+				self._output_contents (_order, _indent, _contents, _comment, _stream)
 			_stream.output_marker (_indent, -1, "## <<")
 		else :
 			raise_error ("1fe1b0e1", _contents)
@@ -121,7 +133,7 @@ class ScrollCommentLine (ScrollPart) :
 		self._contents = _contents
 	
 	def output (self, _stream, _indent) :
-		_stream.output_line (_indent, self._contents)
+		_stream.output_comment (_indent, self._contents)
 
 
 class ScrollEmptyLine (ScrollPart) :
@@ -144,11 +156,29 @@ class ScrollOutputer (object) :
 		self._pending_empty = 1
 		self._opened = True
 		self._adjust_indent = 0
+		self._last_line_comment = None
 	
 	def output_empty (self, _count = 1) :
 		if not self._opened :
 			raise_error ("f75bc7b0")
+		self._last_line_comment = None
 		self._pending_empty = max (self._pending_empty, _count)
+	
+	def output_comment (self, _indent, _comment) :
+		if not isinstance (_comment, basestring) :
+			raise_error ("1cc717b6", _comment)
+		if not _comment.startswith ("#") :
+			_comment = "# " + _comment
+		self._last_line_comment = None
+		self.output_empty ()
+		self.output_line (_indent, _comment)
+	
+	def output_line_with_comment (self, _indent, _line, _comment) :
+		if _comment != self._last_line_comment :
+			if _comment is not None :
+				self.output_comment (_indent, _comment)
+			self._last_line_comment = _comment
+		self.output_line (_indent, _line)
 	
 	def output_line (self, _indent, _line) :
 		if not isinstance (_line, basestring) :

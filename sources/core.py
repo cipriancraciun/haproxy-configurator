@@ -1124,14 +1124,18 @@ class HaStatement (HaBase) :
 
 class HaGenericStatement (HaStatement) :
 	
-	def __init__ (self, _parameters, _tokens, **_options) :
+	def __init__ (self, _parameters, _tokens, _comment, **_options) :
 		HaStatement.__init__ (self, _parameters, **_options)
 		self._tokens = _tokens
+		self._comment = _comment
 	
 	def _generate (self, _scroll) :
 		_contents = self._expand_token (self._tokens)
 		if _contents is not None :
-			_scroll.include_normal_line (self._order, 0, _contents)
+			if self._comment is not None :
+				_scroll.include_normal_line_with_comment (self._order, 0, _contents, self._comment)
+			else :
+				_scroll.include_normal_line (self._order, 0, _contents)
 		#if isinstance (self._tokens, list) :
 		#	_contents = self._tokens
 		#else :
@@ -1157,29 +1161,17 @@ class HaStatementGroup (HaStatement) :
 		else :
 			raise_error ("7f294bbf", _heading)
 		self._statements = list ()
-		self._substatements_comment = None
-		self._substatements_for_comment = None
 	
 	def declare (self, *_tokens, **_options) :
 		while isinstance (_tokens, tuple) and len (_tokens) == 1 and isinstance (_tokens[0], tuple) :
 			_tokens = _tokens[0]
 		_comment = _options.get ("comment", None)
+		_statement_comment = None
 		if _comment is not None :
 			_options = dict (_options)
 			del _options["comment"]
-			if "order" in _options :
-				raise_error ("b01caf2b", _options)
-		_statement = HaGenericStatement (self._parameters, _tokens, **_options)
-		if _comment is not None :
-			if _comment != self._substatements_comment :
-				self._substatements_comment = _comment
-				self._substatements_for_comment = HaStatementGroup (self._parameters, tuple (list (self._heading) + [_comment]))
-				self._statements.append (self._substatements_for_comment)
-			self._substatements_for_comment._statements.append (_statement)
-		else :
-			self._substatements_comment = None
-			self._substatements_for_comment = None
-			self._statements.append (_statement)
+		_statement = HaGenericStatement (self._parameters, _tokens, _comment, **_options)
+		self._statements.append (_statement)
 		return _statement
 	
 	def declare_group (self, _heading, *_statements, **_options) :
