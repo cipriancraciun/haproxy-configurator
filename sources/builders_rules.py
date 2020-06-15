@@ -616,8 +616,8 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 	
 	
 	def force_cors (self, _acl = None, _force = False, **_overrides) :
-		self.force_cors_prepare ()
-		self.force_cors_unset ()
+		self.force_cors_prepare (**_overrides)
+		self.force_cors_unset (**_overrides)
 	
 	def force_cors_prepare (self, _acl = None, _force = False, **_overrides) :
 		_acl_enabled = self._acl.variable_bool ("$http_force_cors_enabled_variable", True) if not _force else None
