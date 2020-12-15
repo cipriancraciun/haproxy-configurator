@@ -835,7 +835,7 @@ parameters = {
 		"daemon_paths_configurations" : "/etc/haproxy",
 		"daemon_paths_configurations_tls" : parameters_format ("%s%s", parameters_get ("daemon_paths_configurations"), "/tls"),
 		"daemon_paths_configurations_maps" : parameters_format ("%s%s", parameters_get ("daemon_paths_configurations"), "/maps"),
-		"daemon_paths_runtime" : "/var/run",
+		"daemon_paths_runtime" : "/run",
 		
 		"daemon_paths_states_prefix" : parameters_format ("%s%s", parameters_get ("daemon_paths_runtime"), "/haproxy-state--"),
 		"daemon_paths_state_global" : parameters_format ("%s%s", parameters_get ("daemon_paths_runtime"), "/haproxy.state"),
