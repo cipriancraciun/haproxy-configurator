@@ -211,6 +211,10 @@ class HaHttpRuleBuilder (HaBuilder) :
 		_rule = ("redirect", "location", statement_quote ("\"", _target), "code", _code)
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
+	def redirect_root (self, _target, _code = 307, _acl = None, **_overrides) :
+		_acl_root = self._acl.path ("/")
+		self.redirect (_target, _code = _code, _acl = (_acl_root, _acl), **_overrides)
+	
 	def redirect_with_path (self, _path, _code = 307, _acl = None, _include_scheme = True, _include_host = True, **_overrides) :
 		if _include_scheme and _include_host :
 			_target = statement_format ("%%[%s]://%%[%s]%s", self._samples.forwarded_proto (), self._samples.forwarded_host (), _path)
