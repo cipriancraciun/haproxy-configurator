@@ -100,11 +100,30 @@ class HaHttpAclBuilder (HaBuilder) :
 	def request_header_exists (self, _header, _expected = True, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.request_header_exists (_header, _expected), "bool", None, None, None)
 	
+	def request_header_prefix (self, _name, _prefix, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.request_header (_name), "beg", None, None, _prefix)
+	
+	def request_header_suffix (self, _name, _suffix, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.request_header (_name), "end", None, None, _suffix)
+	
+	def request_header_regex (self, _name, _regex, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.request_header (_name), "reg", None, None, _regex)
+	
+	
 	def response_header (self, _name, _value, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.response_header (_name), "str", None, "eq", (_value,))
 	
 	def response_header_exists (self, _header, _expected = True, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.response_header_exists (_header, _expected), "bool", None, None, None)
+	
+	def response_header_prefix (self, _name, _prefix, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.response_header (_name), "beg", None, None, _prefix)
+	
+	def response_header_suffix (self, _name, _suffix, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.response_header (_name), "end", None, None, _suffix)
+	
+	def response_header_regex (self, _name, _regex, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.response_header (_name), "reg", None, None, _regex)
 	
 	
 	def request_cookie_exists (self, _cookie, _expected = True, _identifier = None) :
