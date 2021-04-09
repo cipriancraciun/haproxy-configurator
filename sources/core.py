@@ -817,6 +817,10 @@ class HaAcl (HaBase) :
 		self.generate ()
 		return self._generated_identifier
 	
+	def force_include (self) :
+		self.generate ()
+		self._expanded = True
+	
 	
 	def negate (self) :
 		return HaAclNegation (self)
