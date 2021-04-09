@@ -678,6 +678,8 @@ parameters = {
 		"server_check_interval_failed" : None,
 		
 		"server_resolvers" : parameters_get ("defaults_server_resolvers"),
+		"server_resolvers_prefer" : parameters_get ("defaults_server_resolvers_prefer"),
+		"server_resolvers_options" : parameters_get ("defaults_server_resolvers_options"),
 		
 		"server_options" : (
 				parameters_choose_match (
@@ -689,6 +691,8 @@ parameters = {
 				parameters_choose_if_non_null (parameters_get ("server_check_interval_rising"), ("fastinter", parameters_get ("server_check_interval_rising"))),
 				parameters_choose_if_non_null (parameters_get ("server_check_interval_failed"), ("downinter", parameters_get ("server_check_interval_failed"))),
 				parameters_choose_if_non_null (parameters_get ("server_resolvers"), ("resolvers", parameters_get ("server_resolvers"))),
+				parameters_choose_if_non_null (parameters_get ("server_resolvers_prefer"), ("resolve-prefer", parameters_get ("server_resolvers_prefer"))),
+				parameters_choose_if_non_null (parameters_get ("server_resolvers_options"), ("resolve-opts", parameters_join (",", parameters_get ("server_resolvers_options")))),
 			),
 		
 		
@@ -714,6 +718,8 @@ parameters = {
 		"defaults_server_check_count_errors" : parameters_get ("defaults_server_check_count_failed"),
 		
 		"defaults_server_resolvers" : None,
+		"defaults_server_resolvers_prefer" : None,
+		"defaults_server_resolvers_options" : None,
 		
 		"defaults_timeout_activity" : 30,
 		"defaults_timeout_activity_server" : parameters_math ("*", parameters_get ("defaults_timeout_activity"), 2),
