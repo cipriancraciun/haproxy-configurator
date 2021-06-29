@@ -75,8 +75,8 @@
 	#! {{}}
 	#! <ninja>
 	
-	{{ $_examples := ZRUN ":: examples / list" | json_decode }}
-	{{ $_sources := ZRUN ":: sources / list" | json_decode }}
+	{{ $_examples := Z_zspawn_capture ":: examples / list" | json_decode }}
+	{{ $_sources := Z_zspawn_capture ":: sources / list" | json_decode }}
 	
 	builddir = ./examples/_configs
 	
@@ -102,7 +102,7 @@
 <<== examples / 970dea4688212c2d196b0aa3156e07a3
 	#! {{}}
 	
-	{{ $_examples := ZRUN ":: examples / list" | json_decode }}
+	{{ $_examples := Z_zspawn_capture ":: examples / list" | json_decode }}
 	
 	{{ range $_, $_example := $_examples }}
 	:: examples / generate / {{ $_example }} :: exec -- "${ZRUN[@]}" ':: examples / generate' '{{ $_example }}' "${@}"
@@ -127,5 +127,5 @@
 !!
 
 
-&&__ ../examples
+&&__ ./examples
 
