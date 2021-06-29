@@ -500,7 +500,8 @@ parameters = {
 		"frontend_monitor_enabled" : True,
 		"frontend_monitor_path" : parameters_get ("heartbeat_proxy_path"),
 		"frontend_monitor_fail_acl" : "FALSE",
-		"frontend_monitor_network" : "0.0.0.0/0",
+		# FIXME:  `monitor-net` was removed!
+		# "frontend_monitor_network" : "0.0.0.0/0",
 		
 		"frontend_stats_enabled" : True,
 		"frontend_stats_token" : "beb36ad8a85568b7e89e314b2e03244f",

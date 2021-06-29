@@ -97,7 +97,8 @@ def declare_http_frontend_monitor (_configuration) :
 	_configuration.declare_group (
 			"Monitoring",
 			("monitor-uri", "$\'frontend_monitor_path"),
-			("monitor-net", "$\'frontend_monitor_network"),
+			# FIXME:  `monitor-net` was removed!
+			# ("monitor-net", "$\'frontend_monitor_network"),
 			("monitor", "fail", "if", "$~frontend_monitor_fail_acl"),
 			enabled_if = statement_and ("$?frontend_monitor_enabled", "$?frontend_monitor_configure"),
 			order = 7000 + 100,
