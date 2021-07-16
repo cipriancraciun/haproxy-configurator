@@ -598,8 +598,9 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		_acl_included = self._acl.variable_bool ("$http_drop_caching_excluded_variable", True) .negate () if not _force else None
 		self.delete_header ("Cache-Control", (_acl, _acl_enabled, _acl_included), **_overrides)
 		if _keep_etag_acl is None or _keep_etag_acl is not True :
-			self.delete_header ("If-None-Match", (_acl, _acl_enabled, _acl_included), **_overrides)
-			self.delete_header ("If-Match", (_acl, _acl_enabled, _acl_included), **_overrides)
+			_keep_etag_acl_0 = _keep_etag_acl.negate () if _keep_etag_acl is not None else None
+			self.delete_header ("If-None-Match", (_acl, _acl_enabled, _acl_included, _keep_etag_acl_0), **_overrides)
+			self.delete_header ("If-Match", (_acl, _acl_enabled, _acl_included, _keep_etag_acl_0), **_overrides)
 		self.delete_header ("If-Modified-Since", (_acl, _acl_enabled, _acl_included), **_overrides)
 		self.delete_header ("If-Unmodified-Since", (_acl, _acl_enabled, _acl_included), **_overrides)
 		self.delete_header ("Pragma", (_acl, _acl_enabled, _acl_included), **_overrides)
@@ -982,16 +983,21 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 			self.set_mark (_mark_allowed, (_acl_enabled, _acl_included, _acl_handled, _acl), **_overrides)
 	
 	
-	def drop_caching (self, _acl = None, _force = False, _keep_etag_acl = None, **_overrides) :
+	def drop_caching (self, _acl = None, _force = False, _keep_cache_control_acl = None, _keep_etag_acl = None, _keep_vary_acl = None, **_overrides) :
 		_acl_enabled = self._acl.variable_bool ("$http_drop_caching_enabled_variable", True) if not _force else None
 		_acl_included = self._acl.variable_bool ("$http_drop_caching_excluded_variable", True) .negate () if not _force else None
-		self.delete_header ("Cache-Control", (_acl, _acl_enabled, _acl_included), **_overrides)
+		if _keep_cache_control_acl is None or _keep_cache_control_acl is not True :
+			_keep_cache_control_acl_0 = _keep_cache_control_acl.negate () if _keep_cache_control_acl is not None else None
+			self.delete_header ("Cache-Control", (_acl, _acl_enabled, _acl_included, _keep_cache_control_acl_0), **_overrides)
 		self.delete_header ("Last-Modified", (_acl, _acl_enabled, _acl_included), **_overrides)
 		self.delete_header ("Expires", (_acl, _acl_enabled, _acl_included), **_overrides)
 		self.delete_header ("Date", (_acl, _acl_enabled, _acl_included), **_overrides)
 		if _keep_etag_acl is None or _keep_etag_acl is not True :
-			self.delete_header ("ETag", (_acl, _acl_enabled, _acl_included), **_overrides)
-	#!	self.delete_header ("Vary", (_acl, _acl_enabled, _acl_included), **_overrides)
+			_keep_etag_acl_0 = _keep_etag_acl.negate () if _keep_etag_acl is not None else None
+			self.delete_header ("ETag", (_acl, _acl_enabled, _acl_included, _keep_etag_acl_0), **_overrides)
+		if _keep_vary_acl is None or _keep_vary_acl is not True :
+			_keep_vary_acl_0 = _keep_vary_acl.negate () if _keep_vary_acl is not None else None
+			self.delete_header ("Vary", (_acl, _acl_enabled, _acl_included, _keep_vary_acl_0), **_overrides)
 		self.delete_header ("Age", (_acl, _acl_enabled, _acl_included), **_overrides)
 		self.delete_header ("Pragma", (_acl, _acl_enabled, _acl_included), **_overrides)
 	
