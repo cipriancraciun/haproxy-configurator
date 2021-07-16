@@ -510,13 +510,13 @@ parameters = {
 		"frontend_stats_auth_credentials" : None,
 		"frontend_stats_admin_acl" : None,
 		"frontend_stats_version" : True,
+		"frontend_stats_modules" : False,
 		"frontend_stats_refresh" : 6,
 		
 		"frontend_accept_proxy_enabled" : False,
 		"frontend_capture_length" : 1024,
 		
 		"frontend_http_keep_alive_mode" : "keep-alive",
-		"frontend_http_keep_alive_reuse" : "safe",
 		"frontend_http_keep_alive_timeout" : None,
 		
 		"frontend_http_stick_source" : parameters_get ("samples_client_ip_method"),
@@ -573,6 +573,7 @@ parameters = {
 		"backend_http_keep_alive_mode" : "server-close",
 		"backend_http_keep_alive_reuse" : "never",
 		"backend_http_keep_alive_timeout" : None,
+		"backend_http_keep_alive_pool" : None,
 		
 		"backend_balance" : None,
 		
@@ -581,9 +582,9 @@ parameters = {
 		
 		"server_enabled" : True,
 		
-		"server_min_connections_active_count" : None, # parameters_get ("defaults_server_min_connections_active_count"),
-		"server_max_connections_active_count" : None, # parameters_get ("defaults_server_max_connections_active_count"),
-		"server_max_connections_queue_count" : None, # parameters_get ("defaults_server_max_connections_queue_count"),
+		"server_min_connections_active_count" : parameters_math ("//", parameters_get ("backend_server_max_connections_active_count"), 4, True),
+		"server_max_connections_active_count" : parameters_get ("backend_server_max_connections_active_count"),
+		"server_max_connections_queue_count" : parameters_math ("*", parameters_get ("backend_server_max_connections_active_count"), 4, True),
 		"server_check_enabled" : parameters_get ("backend_check_enabled"),
 		"server_send_proxy_enabled" : False,
 		"server_send_proxy_version" : "v1",
@@ -1129,12 +1130,31 @@ parameters = {
 		"global_compression_configure" : parameters_get ("global_configure"),
 		"global_tls_configure" : parameters_get ("global_configure"),
 		"global_tune_configure" : parameters_get ("global_configure"),
+		"global_tune_buffers_configure" : parameters_get ("global_tune_configure"),
 		"global_tune_sockets_configure" : parameters_get ("global_tune_configure"),
 		"global_tune_tls_configure" : parameters_get ("global_tune_configure"),
+		"global_tune_http_configure" : parameters_get ("global_tune_configure"),
 		"global_tune_http2_configure" : parameters_get ("global_tune_configure"),
 		"global_stats_configure" : parameters_get ("global_configure"),
 		"global_logging_configure" : parameters_get ("global_configure"),
 		"global_state_configure" : parameters_and (parameters_get ("global_configure"), parameters_get ("state_configure")),
+		"global_experimental_configure" : parameters_get ("global_configure"),
+		"global_experimental_enabled" : False,
+		"global_http_uri_length_max" : 4 * 1024,
+		"global_http_headers_count_max" : 64,
+		"global_http2_headers_table_size" : 16 * 1024,
+		"global_http2_window_initial_size" : 128 * 1024,
+		"global_http2_streams_count_max" : 128,
+		"global_compression_rate_max" : 0,
+		"global_compression_cpu_max" : 25,
+		"global_compression_mem_max" : 128,
+		"global_compression_level_max" : 9,
+		"global_buffers_size" : 128 * 1024,
+		"global_buffers_rewrite" : 16 * 1024,
+		"global_buffers_count_max" : 4096,
+		"global_buffers_count_reserved" : 16,
+		
+		
 		
 		
 		"defaults_configure" : parameters_and (

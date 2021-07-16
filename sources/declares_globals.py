@@ -42,6 +42,11 @@ def declare_globals_daemon (_configuration) :
 			("server-state-file", "$\'daemon_paths_state_global"),
 			enabled_if = "$?global_state_configure",
 	)
+	_configuration.declare_group (
+			"Experimental",
+			statement_choose_if ("$?global_experimental_enabled", ("expose-experimental-directives",)),
+			enabled_if = "$?global_experimental_configure",
+	)
 
 
 def declare_globals_network (_configuration) :
@@ -62,34 +67,46 @@ def declare_globals_network (_configuration) :
 			enabled_if = "$?global_checks_configure",
 	)
 	_configuration.declare_group (
+			"HTTP",
+			("tune.http.logurilen", "$+global_http_uri_length_max"),
+			("tune.http.maxhdr", "$+global_http_headers_count_max"),
+			enabled_if = "$?global_tune_http_configure",
+	)
+	_configuration.declare_group (
+			"HTTP/2",
+			("tune.h2.header-table-size", "$+global_http2_headers_table_size"),
+			("tune.h2.initial-window-size", "$+global_http2_window_initial_size"),
+			("tune.h2.max-concurrent-streams", "$+global_http2_streams_count_max"),
+			enabled_if = "$?global_tune_http2_configure",
+	)
+	_configuration.declare_group (
 			"Compression",
-			("maxcomprate", 0),
-			("maxcompcpuusage", 25),
-			("maxzlibmem", 512),
-			("tune.comp.maxlevel", 9),
-			("tune.zlib.memlevel", 9),
-			("tune.zlib.windowsize", 15),
+			("maxcomprate", "$+global_compression_rate_max"),
+			("maxcompcpuusage", "$+global_compression_cpu_max"),
+			("maxzlibmem", "$+global_compression_mem_max"),
+			("tune.comp.maxlevel", "$+global_compression_level_max"),
+			# FIXME:  On some HAProxy builds this is disabled!
+			# ("tune.zlib.memlevel", 9),
+			# ("tune.zlib.windowsize", 15),
 			enabled_if = "$?global_compression_configure",
 	)
 	_configuration.declare_group (
+			"Buffers",
+			("tune.bufsize", "$+global_buffers_size"),
+			("tune.buffers.limit", "$+global_buffers_count_max"),
+			("tune.buffers.reserve", "$+global_buffers_count_reserved"),
+			("tune.maxrewrite", "$+global_buffers_rewrite"),
+			enabled_if = "$?global_tune_buffers_configure",
+	)
+	_configuration.declare_group (
 			"Sockets",
-			("tune.bufsize", 128 * 1024),
-			("tune.maxrewrite", 16 * 1024),
 			#("tune.rcvbuf.client", 128 * 1024),
-			# FIXME:  Why do this break the dowload speed?
-			##("tune.sndbuf.client", 16 * 1024),
+			#("tune.sndbuf.client", 16 * 1024),
 			#("tune.rcvbuf.server", 128 * 1024),
 			#("tune.sndbuf.server", 128 * 1024),
 			#("tune.pipesize", 128 * 1024),
 			#("tune.idletimer", 1000),
 			enabled_if = "$?global_tune_sockets_configure",
-	)
-	_configuration.declare_group (
-			"HTTP/2",
-			("tune.h2.header-table-size", 16 * 1024),
-			("tune.h2.initial-window-size", 128 * 1024),
-			("tune.h2.max-concurrent-streams", "128"),
-			enabled_if = "$?global_tune_http2_configure",
 	)
 
 
