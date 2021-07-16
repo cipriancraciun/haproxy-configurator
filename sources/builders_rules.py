@@ -263,6 +263,17 @@ class HaHttpRuleBuilder (HaBuilder) :
 		_rule_condition = self._context._condition_if (_acl)
 		_rule = ("set-log-level", "silent")
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
+	
+	
+	def set_nice (self, _nice, _acl = None, **_overrides) :
+		_rule_condition = self._context._condition_if (_acl)
+		_rule = ("set-nice", "int(%d)" % _nice)
+		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
+	
+	def set_priority (self, _priority, _acl = None, **_overrides) :
+		_rule_condition = self._context._condition_if (_acl)
+		_rule = ("set-priority-class", "int(%d)" % _priority)
+		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 
 
 
