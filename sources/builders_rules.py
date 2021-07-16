@@ -823,6 +823,17 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		self.delete_header ("$http_debug_timestamp_header", _acl, **_overrides)
 		self.delete_header ("$http_debug_frontend_header", _acl, **_overrides)
 		self.delete_header ("$http_debug_backend_header", _acl, **_overrides)
+	
+	
+	def normalize (self, _acl = None, **_overrides) :
+		_rule_condition = self._context._condition_if (_acl)
+		self._declare_http_rule_0 (("normalize-uri", "fragment-strip"), _rule_condition, **_overrides)
+		self._declare_http_rule_0 (("normalize-uri", "path-strip-dot"), _rule_condition, **_overrides)
+		self._declare_http_rule_0 (("normalize-uri", "path-strip-dotdot", "full"), _rule_condition, **_overrides)
+		self._declare_http_rule_0 (("normalize-uri", "path-merge-slashes"), _rule_condition, **_overrides)
+		self._declare_http_rule_0 (("normalize-uri", "percent-decode-unreserved", "strict"), _rule_condition, **_overrides)
+		self._declare_http_rule_0 (("normalize-uri", "percent-to-uppercase", "strict"), _rule_condition, **_overrides)
+		self._declare_http_rule_0 (("normalize-uri", "query-sort-by-name"), _rule_condition, **_overrides)
 
 
 
