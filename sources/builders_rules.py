@@ -1050,7 +1050,8 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 	def force_caching_no (self, _acl = None, _force = False, **_overrides) :
 		_acl_enabled = self._acl.variable_bool ("$http_force_caching_enabled_variable", True) .negate () if not _force else None
 		_acl_included = self._acl.variable_bool ("$http_force_caching_excluded_variable", True) .negate () if not _force else None
-		self.set_header ("Cache-Control", "no-cache, no-store, must-revalidate", False, (_acl, _acl_enabled, _acl_included), **_overrides)
+#!		self.set_header ("Cache-Control", "no-cache, no-store, must-revalidate", False, (_acl, _acl_enabled, _acl_included), **_overrides)
+		self.set_header ("Cache-Control", "no-store, max-age=0", False, (_acl, _acl_enabled, _acl_included), **_overrides)
 #!		self.force_caching_maxage (0, (_acl, _acl_enabled, _acl_included), **_overrides)
 	
 	def force_caching_maxage (self, _max_age, _acl, **_overrides) :
