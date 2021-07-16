@@ -486,9 +486,13 @@ class HaWorker (HaSection) :
 		return builders.HaHttpAclBuilder (self, self._parameters)
 	
 	def _condition_if (self, _acl) :
+		if _acl is True : return None
+		if _acl is False : return ("if", "FALSE")
 		return self._condition_0 ("if", _acl) if _acl is not None else None
 	
 	def _condition_unless (self, _acl) :
+		if _acl is False : return None
+		if _acl is True : return ("unless", "TRUE")
 		return self._condition_0 ("unless", _acl) if _acl is not None else None
 	
 	def _condition_0 (self, _method, _acl) :
