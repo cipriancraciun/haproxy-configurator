@@ -1204,6 +1204,22 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		self.delete_header ("$http_debug_timestamp_header", _acl, **_overrides)
 		self.delete_header ("$http_debug_frontend_header", _acl, **_overrides)
 		self.delete_header ("$http_debug_backend_header", _acl, **_overrides)
+	
+	
+	def set_content_security_policy (self, _directives, _report_only = False, _acl = None, **_overrides) :
+		_policy = []
+		for _directive in _directives :
+			if isinstance (_directive, tuple) or isinstance (_directive, list) :
+				_directive = statement_join (" ", _directive)
+			_policy.append (_directive)
+		_policy = statement_join ("; ", tuple (_policy))
+		if _report_only :
+			self.set_header ("Content-Security-Policy-Report-Only", _policy, _acl = _acl, **_overrides)
+		else :
+			self.set_header ("Content-Security-Policy", _policy, _acl = _acl, **_overrides)
+	
+	def set_referrer_policy (self, _policy, _acl = None, **_overrides) :
+		self.set_header ("Referrer-Policy", _policy, _acl = _acl, **_overrides)
 
 
 
