@@ -538,14 +538,6 @@ parameters = {
 		"backend_http_check_request_uri" : parameters_get ("heartbeat_server_path"),
 		"backend_http_check_request_version" : "HTTP/1.1",
 		"backend_http_check_request_host" : parameters_get ("backend_http_host"),
-		"backend_http_check_request_extra" : parameters_join (
-				"\r\n",
-				(
-						parameters_get ("backend_http_check_request_version"),
-						parameters_choose_if_non_null (parameters_get ("backend_http_check_request_host"), parameters_format ("Host: %s", parameters_get ("backend_http_check_request_host"))),
-						"Connection: close",
-				)
-			),
 		"backend_http_check_expect_matcher" : "status",
 		"backend_http_check_expect_pattern" : "200",
 		

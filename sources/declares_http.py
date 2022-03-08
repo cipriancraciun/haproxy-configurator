@@ -201,7 +201,14 @@ def declare_http_backend_connections (_configuration) :
 def declare_http_backend_check (_configuration) :
 	_configuration.declare_group (
 			"Check",
-			("option", "httpchk", "$\'backend_http_check_request_method", "$\'backend_http_check_request_uri", "$\'backend_http_check_request_extra"),
+			("option", "httpchk"),
+			("http-check", "connect", "default", "linger"),
+			("http-check", "send",
+					"meth", "$\'backend_http_check_request_method",
+					"uri", "$\'backend_http_check_request_uri",
+					"ver", "$\'backend_http_check_request_version",
+					statement_choose_if_non_null ("$backend_http_check_request_host", ("hdr", "Host", "$\'backend_http_check_request_host")),
+				),
 			("http-check", "expect", "$~backend_http_check_expect_matcher", "$\'backend_http_check_expect_pattern"),
 			enabled_if = statement_and ("$?backend_http_check_enabled", "$?backend_check_configure"),
 	)
