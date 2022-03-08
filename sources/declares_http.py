@@ -45,8 +45,9 @@ def declare_defaults_http (_configuration) :
 			"HTTP compression",
 			("compression", "algo", "gzip"),
 			("compression", "type", "$\'defaults_compression_content_types"),
-			statement_choose_if ("$?defaults_compression_offload",
-				("compression", "offload")),
+			#! FIXME:  Offload is ignored in defaults section...
+		#	statement_choose_if ("$?defaults_compression_offload",
+		#		("compression", "offload")),
 			enabled_if = statement_and ("$?defaults_http_configure", "$?defaults_compression_configure"),
 	)
 
