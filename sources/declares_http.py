@@ -64,7 +64,7 @@ def declare_http_frontend_connections (_configuration) :
 			("backlog", "$+frontend_max_connections_backlog_count"),
 			statement_choose_match ("$frontend_http_keep_alive_mode",
 					("keep-alive", ("option", "http-keep-alive")),
-					("close", ("option", "forceclose"))),
+					("close", ("option", "httpclose"))),
 			enabled_if = "$?frontend_connections_configure",
 			order = 2000 + 100,
 	)
@@ -188,7 +188,7 @@ def declare_http_backend_connections (_configuration) :
 			statement_choose_match ("$backend_http_keep_alive_mode",
 					("keep-alive", ("option", "http-keep-alive")),
 					("server-close", ("option", "http-server-close")),
-					("close", ("option", "forceclose"))),
+					("close", ("option", "httpclose"))),
 			statement_choose_if_non_null ("$backend_http_keep_alive_pool",
 					("max-keep-alive-queue", "$+backend_http_keep_alive_pool")),
 			# FIXME:  Make this configurable!
