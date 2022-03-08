@@ -26,9 +26,8 @@ def declare_globals_daemon (_configuration) :
 	)
 	_configuration.declare_group (
 			"Daemon",
-			("nbproc", "$+daemon_processes_count"),
 			("nbthread", "$+daemon_threads_count"),
-			statement_choose_if_non_null ("$~daemon_processes_affinity", ("cpu-map", "$~daemon_processes_affinity")),
+			statement_choose_if_non_null ("$~daemon_threads_affinity", ("cpu-map", "$~daemon_threads_affinity")),
 			statement_choose_if_non_null ("$+daemon_ulimit", ("ulimit-n", "$+daemon_ulimit")),
 			("user", "$\'daemon_user"),
 			("group", "$\'daemon_group"),
