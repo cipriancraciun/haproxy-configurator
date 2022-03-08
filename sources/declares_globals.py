@@ -154,7 +154,6 @@ def declare_globals_stats (_configuration) :
 	_configuration.declare_group (
 			"Statistics",
 			statement_choose_if_non_null ("$daemon_socket", ("stats", "socket", "$\'daemon_socket", "user", "$\'daemon_user", "group", "$\'daemon_group", "mode", "0600", "level", "admin")),
-			("stats", "bind-process", "all"),
 			("stats", "maxconn", 4),
 			("stats", "timeout", statement_seconds (60)),
 			enabled_if = "$?global_stats_configure",

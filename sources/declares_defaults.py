@@ -32,7 +32,6 @@ def declare_defaults_network (_configuration) :
 		)
 	_configuration.declare_group (
 			"Connections",
-			("bind-process", "all"),
 			("maxconn", "$+defaults_frontend_max_connections_active_count"),
 			("backlog", "$+defaults_frontend_max_connections_backlog_count"),
 			("rate-limit", "sessions", "$+defaults_frontend_max_sessions_rate"),
