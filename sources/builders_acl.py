@@ -152,6 +152,12 @@ class HaHttpAclBuilder (HaBuilder) :
 	def tls_client_certificate (self, _fingerprint, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.tls_client_certificate (), "str", ("-i",), "eq", (_fingerprint,))
 	
+	def tls_client_certificate_issuer_cn (self, _expected_cn, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.tls_client_certificate_issuer_cn (), "str", ("-i",), "eq", (_expected_cn,))
+	
+	def tls_client_certificate_subject_cn (self, _expected_cn, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.tls_client_certificate_subject_cn (), "str", ("-i",), "eq", (_expected_cn,))
+	
 	
 	def authenticated (self, _credentials, _expected = True, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.authenticated (_credentials, _expected), "bool", None, None, None)

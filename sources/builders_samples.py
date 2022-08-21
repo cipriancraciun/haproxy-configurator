@@ -136,6 +136,12 @@ class HaHttpSampleBuilder (HaBuilder) :
 	def tls_client_certificate (self) :
 		return self._context.sample_0 ("ssl_c_sha1", None, "hex")
 	
+	def tls_client_certificate_issuer_cn (self) :
+		return self._context.sample_0 ("ssl_c_i_dn", ("CN",), None)
+	
+	def tls_client_certificate_subject_cn (self) :
+		return self._context.sample_0 ("ssl_c_s_dn", ("CN",), None)
+	
 	
 	def authenticated (self, _credentials, _expected = True) :
 		return self._context.sample_0 ("http_auth", (_credentials,), ("bool" if _expected else ("bool", "not")))
