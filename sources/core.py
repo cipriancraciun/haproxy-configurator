@@ -371,13 +371,16 @@ class HaResolvers (HaSection) :
 		self._nameserver_statements = HaStatementGroup (self._parameters, "Nameservers", order = 5000 + 100)
 		
 		self._parameter_statements = HaStatementGroup (self._parameters, "Parameters", order = 5000 + 200)
-		self._parameter_statements.declare (("hold", "valid", statement_seconds (360)))
-		self._parameter_statements.declare (("hold", "nx", statement_seconds (60)))
-		self._parameter_statements.declare (("hold", "refused", statement_seconds (60)))
-		self._parameter_statements.declare (("hold", "timeout", statement_seconds (60)))
-		self._parameter_statements.declare (("hold", "other", statement_seconds (60)))
+		self._parameter_statements.declare (("hold", "valid", statement_seconds (60)))
+		self._parameter_statements.declare (("hold", "obsolete", statement_seconds (3600)))
+		self._parameter_statements.declare (("hold", "nx", statement_seconds (6)))
+		self._parameter_statements.declare (("hold", "refused", statement_seconds (6)))
+		self._parameter_statements.declare (("hold", "timeout", statement_seconds (6)))
+		self._parameter_statements.declare (("hold", "other", statement_seconds (6)))
+		self._parameter_statements.declare (("timeout", "resolve", statement_seconds (1)))
 		self._parameter_statements.declare (("timeout", "retry", statement_seconds (1)))
 		self._parameter_statements.declare (("resolve_retries", 4))
+		self._parameter_statements.declare (("accepted_payload_size", 8192))
 	
 	
 	def declare_nameserver (self, _nameserver, _ip, _port) :
