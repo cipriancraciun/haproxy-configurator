@@ -958,9 +958,12 @@ parameters = {
 		"http_authenticated_variable" : "txn.http_authenticated",
 		"http_authenticated_netfilter_mark" : None,
 		
+		"http_debug_enabled_variable" : "txn.http_debugging_enabled",
+		"http_debug_excluded_variable" : "txn.http_debugging_excluded",
 		"http_debug_timestamp_header" : "X-HA-Timestamp",
 		"http_debug_frontend_header" : "X-HA-Frontend",
 		"http_debug_backend_header" : "X-HA-Backend",
+		"http_debug_counters_header" : "X-HA-Counters",
 		
 		"http_errors_marker" : "X-Ha-Error-Proxy",
 		"http_errors_method" : "X-HA-Error-Method",

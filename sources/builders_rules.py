@@ -165,6 +165,13 @@ class HaHttpRuleBuilder (HaBuilder) :
 		self.set_enabled ("$http_tracking_excluded_variable", _acl, **_overrides)
 	
 	
+	def debug_enable (self, _acl = None, **_overrides) :
+		self.set_enabled ("$http_debug_enabled_variable", _acl, **_overrides)
+	
+	def debug_exclude (self, _acl = None, **_overrides) :
+		self.set_enabled ("$http_debug_excluded_variable", _acl, **_overrides)
+	
+	
 	def harden_enable (self, _acl = None, **_overrides) :
 		self.set_enabled ("$http_harden_enabled_variable", _acl, **_overrides)
 	
@@ -812,17 +819,22 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		return _acl_variable
 	
 	
-	def set_debug_headers (self, _acl = None, **_overrides) :
-		self.set_header ("$logging_http_header_action", statement_format ("%%[%s]", self._samples.variable ("$logging_http_variable_action")), False, _acl, **_overrides)
-		self.set_header ("$http_debug_timestamp_header", "%[date(),http_date()]", False, _acl, **_overrides)
-		self.append_header ("$http_debug_frontend_header", "%f", _acl, **_overrides)
-		self.append_header ("$http_debug_backend_header", "%b", _acl, **_overrides)
+	def set_debug_headers (self, _counters = False, _acl = None, _force = False, **_overrides) :
+		_acl_enabled = self._acl.variable_bool ("$http_debug_enabled_variable", True) if not _force else None
+		_acl_included = self._acl.variable_bool ("$http_debug_excluded_variable", True) .negate () if not _force else None
+		self.set_header ("$logging_http_header_action", statement_format ("%%[%s]", self._samples.variable ("$logging_http_variable_action")), False, (_acl, _acl_enabled, _acl_included), **_overrides)
+		self.set_header ("$http_debug_timestamp_header", "%[date(),http_date()]", False, (_acl, _acl_enabled, _acl_included), **_overrides)
+		self.append_header ("$http_debug_frontend_header", "%f", (_acl, _acl_enabled, _acl_included), **_overrides)
+		self.append_header ("$http_debug_backend_header", "%b", (_acl, _acl_enabled, _acl_included), **_overrides)
+		if _counters :
+			self.append_header ("$http_debug_counters_header", "conn-cur=%[sc0_conn_cur()], conn-cnt=%[sc0_conn_cnt()], conn-rate=%[sc0_conn_rate()], sess-cnt=%[sc0_sess_cnt()], sess-rate=%[sc0_sess_rate()], req-cnt=%[sc0_http_req_cnt()], req-rate=%[sc0_http_req_rate()], err-cnt=%[sc0_http_err_cnt()], err-rate=%[sc0_http_err_rate()], in-total-kb=%[sc0_kbytes_in()], in-rate-b=%[sc0_bytes_in_rate()], out-total-kb=%[sc0_kbytes_out()], out-rate-b=%[sc0_bytes_out_rate()]", (_acl, _acl_enabled, _acl_included), **_overrides)
 	
 	def delete_debug_headers (self, _acl = None, **_overrides) :
 		self.delete_header ("$logging_http_header_action", _acl, **_overrides)
 		self.delete_header ("$http_debug_timestamp_header", _acl, **_overrides)
 		self.delete_header ("$http_debug_frontend_header", _acl, **_overrides)
 		self.delete_header ("$http_debug_backend_header", _acl, **_overrides)
+		self.delete_header ("$http_debug_counters_header", _acl, **_overrides)
 	
 	
 	def normalize (self, _acl = None, **_overrides) :
@@ -1193,17 +1205,22 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 			self.set_header ("$http_authenticated_header", statement_format ("%%[%s]", self._samples.variable ("$http_authenticated_variable")), False, (_acl, _acl_authenticated), **_overrides)
 	
 	
-	def set_debug_headers (self, _acl = None, **_overrides) :
-		self.set_header ("$logging_http_header_action", statement_format ("%%[%s]", self._samples.variable ("$logging_http_variable_action")), False, _acl, **_overrides)
-		self.set_header ("$http_debug_timestamp_header", "%[date(),http_date()]", False, _acl, **_overrides)
-		self.append_header ("$http_debug_frontend_header", "%f", _acl, **_overrides)
-		self.append_header ("$http_debug_backend_header", "%b", _acl, **_overrides)
+	def set_debug_headers (self, _counters = False, _acl = None, _force = False, **_overrides) :
+		_acl_enabled = self._acl.variable_bool ("$http_debug_enabled_variable", True) if not _force else None
+		_acl_included = self._acl.variable_bool ("$http_debug_excluded_variable", True) .negate () if not _force else None
+		self.set_header ("$logging_http_header_action", statement_format ("%%[%s]", self._samples.variable ("$logging_http_variable_action")), False, (_acl, _acl_enabled, _acl_included), **_overrides)
+		self.set_header ("$http_debug_timestamp_header", "%[date(),http_date()]", False, (_acl, _acl_enabled, _acl_included), **_overrides)
+		self.append_header ("$http_debug_frontend_header", "%f", (_acl, _acl_enabled, _acl_included), **_overrides)
+		self.append_header ("$http_debug_backend_header", "%b", (_acl, _acl_enabled, _acl_included), **_overrides)
+		if _counters :
+			self.append_header ("$http_debug_counters_header", "conn-cur=%[sc0_conn_cur()], conn-cnt=%[sc0_conn_cnt()], conn-rate=%[sc0_conn_rate()], sess-cnt=%[sc0_sess_cnt()], sess-rate=%[sc0_sess_rate()], req-cnt=%[sc0_http_req_cnt()], req-rate=%[sc0_http_req_rate()], err-cnt=%[sc0_http_err_cnt()], err-rate=%[sc0_http_err_rate()], in-total-kb=%[sc0_kbytes_in()], in-rate-b=%[sc0_bytes_in_rate()], out-total-kb=%[sc0_kbytes_out()], out-rate-b=%[sc0_bytes_out_rate()]", (_acl, _acl_enabled, _acl_included), **_overrides)
 	
 	def delete_debug_headers (self, _acl = None, **_overrides) :
 		self.delete_header ("$logging_http_header_action", _acl, **_overrides)
 		self.delete_header ("$http_debug_timestamp_header", _acl, **_overrides)
 		self.delete_header ("$http_debug_frontend_header", _acl, **_overrides)
 		self.delete_header ("$http_debug_backend_header", _acl, **_overrides)
+		self.delete_header ("$http_debug_counters_header", _acl, **_overrides)
 	
 	
 	def set_content_security_policy (self, _directives, _report_only = False, _acl = None, **_overrides) :
