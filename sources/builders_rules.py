@@ -178,6 +178,9 @@ class HaHttpRuleBuilder (HaBuilder) :
 	def harden_exclude (self, _acl = None, **_overrides) :
 		self.set_enabled ("$http_harden_excluded_variable", _acl, **_overrides)
 	
+	def harden_ranges_allow (self, _acl = None, **_overrides) :
+		self.set_enabled ("$http_ranges_allowed_variable", _acl, **_overrides)
+	
 	
 	def drop_caching_enable (self, _acl = None, **_overrides) :
 		self.set_enabled ("$http_drop_caching_enabled_variable", _acl, **_overrides)
@@ -989,6 +992,8 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		_mark_allowed = self._value_or_parameters_get_and_expand (_mark_denied, "http_harden_netfilter_mark_allowed")
 		self.harden_http (_acl, _acl_deny, _force, _mark_denied, **_overrides)
 		self.harden_headers (_acl, _force, **_overrides)
+		if self._context._resolve_token ("$http_harden_headers_extended") :
+			self.harden_headers_extended (_acl, _force, **_overrides)
 		self.harden_via (_acl, _force, **_overrides)
 		self.harden_ranges (_acl, _force, **_overrides)
 		# FIXME:  Make this configurable!
