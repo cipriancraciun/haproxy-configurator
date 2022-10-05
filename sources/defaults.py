@@ -654,16 +654,30 @@ parameters = {
 			),
 		
 		"server_tls_enabled" : False,
+		"server_tls_sni" : parameters_get ("backend_http_host"),
+		"server_tls_verify" : True,
+		"server_tls_ca_file" : None,
 		"server_tls_options" :
 				parameters_choose_if (
 						parameters_get ("server_tls_enabled"),
 						(
 								"ssl",
-								# FIXME:  Make the following options configurable!
-								("verify", "none"),
+								parameters_choose_if_non_null (
+										parameters_get ("server_tls_ca_file"),
+										("ca-file", parameters_get ("server_tls_ca_file"))),
+								parameters_choose_if_non_null (
+										parameters_get ("server_tls_sni"),
+										("sni", parameters_get ("server_tls_sni"))),
 								parameters_choose_if (
 										parameters_get ("server_check_enabled"),
 										"check-ssl"),
+								parameters_choose_if_non_null (
+										parameters_get ("server_tls_sni"),
+										("check-sni", parameters_get ("server_tls_sni"))),
+								parameters_choose_if (
+										parameters_get ("server_tls_verify"),
+										("verify", "required"),
+										("verify", "none")),
 						)
 				),
 		
