@@ -948,11 +948,21 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		_acl_handled = self._acl.response_header_exists ("$http_hardened_header", False) if not _force else None
 		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
 		_acl_included = self._acl.variable_bool ("$http_harden_excluded_variable", True) .negate () if not _force else None
-		self.set_header ("Content-Security-Policy", "$http_harden_csp_descriptor", True, (_acl, _acl_enabled, _acl_included, _acl_handled, _acl_tls), **_overrides)
-		self.set_header ("Referrer-Policy", "$http_harden_referrer_descriptor", True, (_acl, _acl_enabled, _acl_included, _acl_handled), **_overrides)
-		self.set_header ("X-Frame-Options", "$http_harden_frames_descriptor", True, (_acl, _acl_enabled, _acl_included, _acl_handled), **_overrides)
-		self.set_header ("X-Content-Type-Options", "$http_harden_cto_descriptor", True, (_acl, _acl_enabled, _acl_included, _acl_handled), **_overrides)
-		self.set_header ("X-XSS-Protection", "$http_harden_xss_descriptor", True, (_acl, _acl_enabled, _acl_included, _acl_handled), **_overrides)
+		self.set_header ("Content-Security-Policy", "$http_harden_csp_descriptor", False, (_acl, _acl_enabled, _acl_included, _acl_handled, _acl_tls), **_overrides)
+		self.set_header ("Referrer-Policy", "$http_harden_referrer_descriptor", False, (_acl, _acl_enabled, _acl_included, _acl_handled), **_overrides)
+		self.set_header ("X-Frame-Options", "$http_harden_frames_descriptor", False, (_acl, _acl_enabled, _acl_included, _acl_handled), **_overrides)
+		self.set_header ("X-Content-Type-Options", "$http_harden_cto_descriptor", False, (_acl, _acl_enabled, _acl_included, _acl_handled), **_overrides)
+		self.set_header ("X-XSS-Protection", "$http_harden_xss_descriptor", False, (_acl, _acl_enabled, _acl_included, _acl_handled), **_overrides)
+	
+	def harden_headers_extended (self, _acl = None, _force = False, **_overrides) :
+		_acl_tls = self._acl.via_tls ()
+		_acl_handled = self._acl.response_header_exists ("$http_hardened_header", False) if not _force else None
+		_acl_enabled = self._acl.variable_bool ("$http_harden_enabled_variable", True) if not _force else None
+		_acl_included = self._acl.variable_bool ("$http_harden_excluded_variable", True) .negate () if not _force else None
+		self.set_header ("Feature-Policy", "$http_harden_fp_descriptor", False, (_acl, _acl_enabled, _acl_included, _acl_handled, _acl_tls), **_overrides)
+		self.set_header ("Cross-Origin-Opener-Policy", "$http_harden_coop_descriptor", False, (_acl, _acl_enabled, _acl_included, _acl_handled), **_overrides)
+		self.set_header ("Cross-Origin-Resource-Policy", "$http_harden_corp_descriptor", False, (_acl, _acl_enabled, _acl_included, _acl_handled), **_overrides)
+		self.set_header ("Cross-Origin-Embedder-Policy", "$http_harden_coep_descriptor", False, (_acl, _acl_enabled, _acl_included, _acl_handled), **_overrides)
 	
 	def harden_via (self, _acl = None, _force = False, **_overrides) :
 		_acl_handled = self._acl.response_header_exists ("$http_hardened_header", False) if not _force else None
