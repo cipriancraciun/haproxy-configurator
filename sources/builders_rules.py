@@ -1054,7 +1054,7 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 			for _vary in _vary :
 				self.set_header ("Vary", _vary, False, (_acl, _acl_enabled, _acl_included), **_overrides)
 	
-	def force_caching_control (self, _max_age = 3600, _public = True, _no_cache = False, _must_revalidate = False, _immutable = None, _acl = None, _force = False, _store_max_age = None, **_overrides) :
+	def force_caching_control (self, _max_age = 3600, _public = True, _no_cache = False, _must_revalidate = False, _immutable = None, _acl = None, _force = False, _store_max_age = None, _header = None, **_overrides) :
 		_private = not _public
 		if _immutable is None :
 			_immutable = not _no_cache and not _must_revalidate
@@ -1069,7 +1069,7 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 		_immutable = statement_enforce_bool (_immutable)
 		_acl_enabled = self._acl.variable_bool ("$http_force_caching_enabled_variable", True) if not _force else None
 		_acl_included = self._acl.variable_bool ("$http_force_caching_excluded_variable", True) .negate () if not _force else None
-		self.set_header ("Cache-Control",
+		self.set_header ("Cache-Control" if _header is None else _header,
 				statement_join (", ", (
 						statement_choose_if (_public, "public"),
 						statement_choose_if (_private, "private"),
@@ -1080,16 +1080,17 @@ class HaHttpResponseRuleBuilder (HaHttpRuleBuilder) :
 						statement_choose_if (_store_max_age, statement_format ("s-maxage=%d", _store_max_age)),
 						# statement_choose_if (_store_max_age, statement_choose_if (_must_revalidate, statement_format ("proxy-revalidate"))),
 				)), False, (_acl, _acl_enabled, _acl_included), **_overrides)
-		_expire_age = _max_age
-		if _store_max_age is not None :
-			_expire_age = statement_choose_max (_expire_age, _store_max_age)
-		self.force_caching_maxage (_expire_age, (_acl, _acl_enabled, _acl_included), **_overrides)
+		if _header is None :
+			_expire_age = _max_age
+			if _store_max_age is not None :
+				_expire_age = statement_choose_max (_expire_age, _store_max_age)
+			self.force_caching_maxage (_expire_age, (_acl, _acl_enabled, _acl_included), **_overrides)
 	
-	def force_caching_no (self, _acl = None, _force = False, **_overrides) :
+	def force_caching_no (self, _acl = None, _force = False, _header = None, **_overrides) :
 		_acl_enabled = self._acl.variable_bool ("$http_force_caching_enabled_variable", True) .negate () if not _force else None
 		_acl_included = self._acl.variable_bool ("$http_force_caching_excluded_variable", True) .negate () if not _force else None
-#!		self.set_header ("Cache-Control", "no-cache, no-store, must-revalidate", False, (_acl, _acl_enabled, _acl_included), **_overrides)
-		self.set_header ("Cache-Control", "no-store, max-age=0", False, (_acl, _acl_enabled, _acl_included), **_overrides)
+#!		self.set_header ("Cache-Control" if _header is None else _header, "no-cache, no-store, must-revalidate", False, (_acl, _acl_enabled, _acl_included), **_overrides)
+		self.set_header ("Cache-Control" if _header is None else _header, "no-store, max-age=0", False, (_acl, _acl_enabled, _acl_included), **_overrides)
 #!		self.force_caching_maxage (0, (_acl, _acl_enabled, _acl_included), **_overrides)
 	
 	def force_caching_maxage (self, _max_age, _acl, **_overrides) :
