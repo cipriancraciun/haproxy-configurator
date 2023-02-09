@@ -75,7 +75,7 @@ def declare_http_frontend_connections (_configuration) :
 			("compression", "type", "$\'defaults_compression_content_types"),
 			statement_choose_if ("$?defaults_compression_offload",
 				("compression", "offload")),
-			enabled_if = statement_and ("$?defaults_http_configure", "$?defaults_compression_configure"),
+			enabled_if = "$?frontend_http_configure",
 	)
 
 

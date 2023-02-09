@@ -28,7 +28,7 @@ def declare_defaults_network (_configuration) :
 	_configuration.declare_group (
 			"Protocol",
 			("mode", "tcp"),
-			statement_choose_if_false ("$?minimal_configure", "disabled"),
+			statement_choose_if_false ("$?minimal_defaults_configure", "disabled"),
 		)
 	_configuration.declare_group (
 			"Connections",
