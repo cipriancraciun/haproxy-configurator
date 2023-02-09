@@ -1065,7 +1065,7 @@ parameters = {
 		"http_harden_csp_descriptor" : "upgrade-insecure-requests",
 		"http_harden_fp_descriptor" : "accelerometer 'none'; ambient-light-sensor 'none'; autoplay 'none'; camera 'none'; display-capture 'none'; document-domain 'none'; encrypted-media 'none'; fullscreen 'none'; geolocation 'none'; gyroscope 'none'; magnetometer 'none'; microphone 'none'; midi 'none'; payment 'none'; picture-in-picture 'none'; publickey-credentials-get 'none'; sync-xhr 'none'; usb 'none'; xr-spatial-tracking 'none'",
 		"http_harden_referrer_descriptor" : "strict-origin-when-cross-origin",
-		"http_harden_frames_descriptor" : "sameorigin",
+		"http_harden_frames_descriptor" : "SAMEORIGIN",
 		"http_harden_cto_descriptor" : "nosniff",
 		"http_harden_xss_descriptor" : "1; mode=block",
 		"http_harden_coop_descriptor" : "same-origin",
