@@ -211,6 +211,16 @@ class HaHttpAclBuilder (HaBuilder) :
 		return self._context.acl_0 (_identifier, self._samples.tls_client_certificate_subject_cn (), "str", ("-i",), "eq", (_expected_cn,))
 	
 	
+	def tls_session_sni_exists (self, _expected = True, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.tls_session_sni_exists (_expected), "bool", None, None, None)
+	
+	def tls_session_sni_equals (self, _value, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.tls_session_sni (), "str", None, "eq", (_value,))
+	
+	def tls_session_sni_equals_variable (self, _variable, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.tls_session_sni ((("strcmp", _variable),)), "int", None, "eq", (0,))
+	
+	
 	def authenticated (self, _credentials, _expected = True, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.authenticated (_credentials, _expected), "bool", None, None, None)
 	
@@ -219,11 +229,27 @@ class HaHttpAclBuilder (HaBuilder) :
 		return self._context.acl_0 (_identifier, self._samples.backend_active (_backend, _expected), "bool", None, None, None)
 	
 	
-	def geoip_country_extracted (self, _country, _expected = True, _identifier = None) :
-		return self._context.acl_0 (_identifier, self._samples.geoip_country_extracted (), "str", None, "eq", _country)
+	def geoip_country_extracted (self, _country, _method = None, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.geoip_country_extracted (_method), "str", ("-i",), "eq", _country)
 	
-	def geoip_country_captured (self, _country, _expected = True, _identifier = None) :
-		return self._context.acl_0 (_identifier, self._samples.geoip_country_captured (), "str", None, "eq", _country)
+	def geoip_country_captured (self, _country, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.geoip_country_captured (), "str", ("-i",), "eq", _country)
+	
+	
+	def bogon (self, _method = None, _identifier = None) :
+		return self.bogon_sample (self._samples.client_ip (_method), _identifier)
+	
+	def bogon_from_variable (self, _variable, _identifier = None) :
+		return self.bogon_sample (self._samples.variable (_variable), _identifier)
+	
+	def bogon_from_request_header (self, _header, _identifier = None) :
+		return self.bogon_sample (self._samples.request_header (_header), _identifier)
+	
+	def bogon_from_response_header (self, _header, _identifier = None) :
+		return self.bogon_sample (self._samples.response_header (_header), _identifier)
+	
+	def bogon_sample (self, _sample, _identifier = None) :
+		return self.sample_ip_in_map (_sample, "$'bogons_map", _identifier)
 	
 	
 	def bot (self, _identifier = None) :

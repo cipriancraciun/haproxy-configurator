@@ -143,6 +143,13 @@ class HaHttpSampleBuilder (HaBuilder) :
 		return self._context.sample_0 ("ssl_c_s_dn", ("CN",), None)
 	
 	
+	def tls_session_sni_exists (self, _expected = True) :
+		return self._context.sample_0 ("ssl_fc_has_sni", None, (None if _expected else "not"))
+	
+	def tls_session_sni (self, _transforms = None) :
+		return self._context.sample_0 ("ssl_fc_sni", None, _transforms)
+	
+	
 	def authenticated (self, _credentials, _expected = True) :
 		return self._context.sample_0 ("http_auth", (_credentials,), ("bool" if _expected else ("bool", "not")))
 	
@@ -176,6 +183,16 @@ class HaHttpSampleBuilder (HaBuilder) :
 	def variable_map_ip_to_integer (self, _variable, _map, _transforms = None) :
 		if _transforms is None : _transforms = ()
 		return self._context.sample_0 ("var", (_variable,), (("map_ip_int", _map),) + _transforms)
+	
+	
+	def uuid_v4 (self, _transforms = None) :
+		return self._context.sample_0 ("uuid", ("4",), _transforms)
+	
+	def client_ip_hash (self, _method = None) :
+		return self.client_ip (_method, (("digest", "md5"), "hex", "lower"))
+	
+	def agent_hash (self) :
+		return self.request_header ("User-Agent", (("digest", "md5"), "hex", "lower"))
 
 
 
