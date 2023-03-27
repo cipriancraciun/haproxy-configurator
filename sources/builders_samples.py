@@ -57,7 +57,7 @@ class HaHttpSampleBuilder (HaBuilder) :
 	
 	def host (self, _transforms = None) :
 		if _transforms is None :
-			_transforms = ("lower",)
+			_transforms = ("host_only", ("ltrim", "."), ("rtrim", "."))
 		return self._context.sample_0 ("req.fhdr", ("Host", -1), _transforms)
 	
 	def path (self, _transforms = None) :
