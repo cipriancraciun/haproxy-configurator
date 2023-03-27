@@ -159,6 +159,23 @@ class HaHttpSampleBuilder (HaBuilder) :
 	
 	def geoip_country_captured (self) :
 		return self.variable ("$logging_geoip_country_variable")
+	
+	
+	def variable_map_string_to_string (self, _variable, _map, _transforms = None) :
+		if _transforms is None : _transforms = ()
+		return self._context.sample_0 ("var", (_variable,), (("map", _map),) + _transforms)
+	
+	def variable_map_string_to_integer (self, _variable, _map, _transforms = None) :
+		if _transforms is None : _transforms = ()
+		return self._context.sample_0 ("var", (_variable,), (("map_int", _map),) + _transforms)
+	
+	def variable_map_ip_to_string (self, _variable, _map, _transforms = None) :
+		if _transforms is None : _transforms = ()
+		return self._context.sample_0 ("var", (_variable,), (("map_ip", _map),) + _transforms)
+	
+	def variable_map_ip_to_integer (self, _variable, _map, _transforms = None) :
+		if _transforms is None : _transforms = ()
+		return self._context.sample_0 ("var", (_variable,), (("map_ip_int", _map),) + _transforms)
 
 
 

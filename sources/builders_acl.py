@@ -21,6 +21,39 @@ class HaHttpAclBuilder (HaBuilder) :
 	def client_ip (self, _ip, _method = None, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.client_ip (_method), "ip", None, None, _ip)
 	
+	def ip_from_variable (self, _variable, _ip, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.variable (_variable), "ip", None, None, _ip)
+	
+	def ip_from_request_header (self, _header, _ip, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.request_header (_header), "ip", None, None, _ip)
+	
+	def ip_from_response_header (self, _header, _ip, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.response_header (_header), "ip", None, None, _ip)
+	
+	
+	def client_ip_in_map (self, _map, _method = None, _identifier = None) :
+		return self.sample_ip_in_map (self._samples.client_ip (_method), _map, _identifier)
+	
+	def ip_from_variable_in_map (self, _variable, _map, _identifier = None) :
+		return self.sample_ip_in_map (self._samples.variable (_variable), _map, _identifier)
+	
+	def ip_from_request_header_in_map (self, _header, _map, _identifier = None) :
+		return self.sample_ip_in_map (self._samples.request_header (_header), _map, _identifier)
+	
+	def ip_from_response_header_in_map (self, _header, _map, _identifier = None) :
+		return self.sample_ip_in_map (self._samples.response_header (_header), _map, _identifier)
+	
+	
+	def string_from_variable_in_map (self, _variable, _map, _identifier = None) :
+		return self.sample_string_in_map (self._samples.variable (_variable), _map, _identifier)
+	
+	def string_from_request_header_in_map (self, _header, _map, _identifier = None) :
+		return self.sample_string_in_map (self._samples.request_header (_header), _map, _identifier)
+	
+	def string_from_response_header_in_map (self, _header, _map, _identifier = None) :
+		return self.sample_string_in_map (self._samples.response_header (_header), _map, _identifier)
+	
+	
 	def frontend_port (self, _port, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.frontend_port (), "int", None, "eq", (_port,))
 	
@@ -175,7 +208,20 @@ class HaHttpAclBuilder (HaBuilder) :
 	
 	
 	def bot (self, _identifier = None) :
-		return self._context.acl_0 (_identifier, self._samples.request_header ("User-Agent", ("lower",)), "str", ("-i", "-f"), "sub", "$'bots_acl")
+		return self.bot_sample (self._samples.request_header ("User-Agent", ("lower",)), _identifier)
+	
+	def bot_sample (self, _sample, _identifier = None) :
+		return self.sample_substring_in_map (_sample, "$'bots_map", _identifier)
+	
+	
+	def sample_ip_in_map (self, _sample, _map, _identifier = None) :
+		return self._context.acl_0 (_identifier, _sample, "ip", ("-n", "-f"), None, _map)
+	
+	def sample_string_in_map (self, _sample, _map, _identifier = None) :
+		return self._context.acl_0 (_identifier, _sample, "str", ("-i", "-f"), None, _map)
+	
+	def sample_substring_in_map (self, _sample, _map, _identifier = None) :
+		return self._context.acl_0 (_identifier, _sample, "sub", ("-i", "-f"), None, _map)
 	
 	
 	def ab_in_bucket (self, _expected, _count, _criteria = None, _identifier = None) :
