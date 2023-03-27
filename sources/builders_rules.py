@@ -262,7 +262,8 @@ class HaHttpRuleBuilder (HaBuilder) :
 			_source = "$frontend_http_stick_source"
 		_source = statement_choose_match (_source,
 					("src", "src"),
-					("X-Forwarded-For", statement_format ("req.hdr(%s,1)", "$logging_http_header_forwarded_for")),
+					("X-Forwarded-For", statement_format ("req.hdr(%s,1),digest(md5),hex,lower", "$logging_http_header_forwarded_for")),
+					("User-Agent", statement_format ("req.fhdr(User-Agent,-1),digest(md5)")),
 			)
 		_rule_condition = self._context._condition_if (_acl)
 		_rule = ("track-sc0", _source)

@@ -133,7 +133,11 @@ def declare_http_frontend_stick (_configuration) :
 	_configuration.declare_group (
 			"Stick tables",
 			("stick-table",
-					"type", "ip",
+					"type", statement_choose_match ("$frontend_http_stick_source",
+							("src", "ip"),
+							("X-Forwarded-For", "ip"),
+							("User-Agent", ("binary", "len", "16")),
+						),
 					"size", 1024 * 1024,
 					"expire", "3600s",
 					"store", ",".join ((
@@ -156,8 +160,9 @@ def declare_http_frontend_stick (_configuration) :
 				("http-request", "track-sc0",
 						statement_choose_match ("$frontend_http_stick_source",
 								("src", "src"),
-								("X-Forwarded-For", statement_format ("req.hdr(%s,1)", "$logging_http_header_forwarded_for")),
-						)
+								("X-Forwarded-For", statement_format ("req.hdr(%s,1),digest(md5),hex,lower", "$logging_http_header_forwarded_for")),
+								("User-Agent", statement_format ("req.fhdr(User-Agent,-1),digest(md5)")),
+							)
 				),
 			),
 			enabled_if = "$?frontend_stick_configure",
