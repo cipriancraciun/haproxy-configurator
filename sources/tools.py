@@ -304,6 +304,8 @@ def resolve_token_0 (_token, _parameters, _recurse) :
 
 
 def _quote_token (_token, _quote, _expand) :
+	if _quote is True :
+		_quote = "\'"
 	if _quote != "\"" and _quote != "\'" and _quote != "\"?" and _quote != "\'?" :
 		raise_error ("9f90118a", _quote)
 	if isinstance (_token, basestring) :
@@ -339,6 +341,8 @@ def _quote_token (_token, _quote, _expand) :
 
 
 def quote_token (_quote, _token) :
+	if _quote is None or _quote is False :
+		return _token
 	return _quote_token (_token, _quote, None)
 
 
@@ -369,7 +373,7 @@ def hash_token_update (_hasher, _token) :
 
 
 
-def statement_quote (_quote = "\'", *_token) :
+def statement_quote (_quote = True, *_token) :
 	return lambda _expand : _quote_token (_expand (_token), _quote, _expand)
 
 def statement_seconds (_value) :
@@ -404,6 +408,7 @@ def statement_enforce_keyword (_value) :
 
 
 
+
 def statement_format (_format, *_arguments) :
 	return lambda _expand : _expand (_format) % tuple ([_expand (_argument) for _argument in _arguments])
 
@@ -416,7 +421,7 @@ def statement_coalesce (*_values) :
 		return None
 	return _function
 
-def statement_join (_separator, _arguments, non_null = True, null_if_empty = True) :
+def statement_join (_separator, _arguments, non_null = True, null_if_empty = True, quote = None) :
 	def _function (_expand) :
 		_separator_actual = _expand (_separator)
 		_arguments_actual = _expand (_arguments)
@@ -428,8 +433,11 @@ def statement_join (_separator, _arguments, non_null = True, null_if_empty = Tru
 			if null_if_empty and len (_arguments_actual) == 0 :
 				return None
 			else :
-				return _separator_actual.join (_arguments_actual)
+				return quote_token (quote, _separator_actual.join (_arguments_actual))
 	return _function
+
+def statement_path_join (_arguments, non_null = True, null_if_empty = True, quote = None) :
+	return statement_join ("/", _arguments, non_null, null_if_empty, quote)
 
 
 
@@ -555,6 +563,9 @@ def parameters_math (_operator, _argument_1, _argument_2, _null_if_any_null = Fa
 
 def parameters_format (_format, *_arguments) :
 	return lambda _parameters : _parameters._expand (_format) % _parameters._expand (_arguments)
+
+def parameters_path_base_join (_base_path, *_elements) :
+	return lambda _parameters : "/".join ([_parameters._expand (parameters_get (_base_path))] + list (_elements))
 
 def parameters_coalesce (*_values) :
 	def _function (_parameters) :
