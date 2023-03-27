@@ -291,7 +291,7 @@ logging_tcp_format_json = None
 
 logging_http_format_json_template = [
 		
-		("s", "''20190405:01"),
+		("s", "''20230324:01"),
 		("ss", "'$logging_http_format_subschema"),
 		("t", "=%Ts.%ms"),
 		
@@ -305,11 +305,11 @@ logging_http_format_json_template = [
 		
 		("h_m0", "'%HM"), #!
 		("h_u0", "'%HU"), #!
-		("h_p0", "'%HP"), #!
+		("h_p0", "'%HPO"), #!
 		("h_q0", "'%HQ"), #!
 		
-		("h_r_t", "'%trg"), #!
-		("h_r_i", "'%ID"), #!
+		("h_i0", "'%ID"), #!
+		("h_t0", "'%trg"), #!
 		
 		# FIXME:  Make this configurable!
 		("h_h", "'@var(txn.logging_http_host),json()"),
@@ -320,12 +320,15 @@ logging_http_format_json_template = [
 		("h_q", "'@var(txn.logging_http_query),json()"),
 		
 		# FIXME:  Make this configurable!
+		("h_r_i", "'@var(txn.logging_http_request),json()"),
+		("h_r_s", "'@var(txn.logging_http_session),json()"),
+		
+		# FIXME:  Make this configurable!
 		("h_f_h", "'@var(txn.logging_http_forwarded_host),json()"),
 		("h_f_f", "'@var(txn.logging_http_forwarded_for),json()"),
 		("h_f_p", "'@var(txn.logging_http_forwarded_proto),json()"),
 		
 		# FIXME:  Make this configurable!
-		("h_r_s", "'@var(txn.logging_http_session),json()"),
 		("h_h_a", "'@var(txn.logging_http_agent),json()"),
 		("h_h_r", "'@var(txn.logging_http_referrer),json()"),
 		("h_h_l", "'@var(txn.logging_http_location),json()"),
@@ -341,12 +344,16 @@ logging_http_format_json_template = [
 		("h_i_ck", "'%CC"), #!
 		("h_o_ck", "'%CS"), #!
 		
-		("h_o_comp", ["+@res.comp", "'@res.comp_algo"]),
+		("h_o_comp", ["'@res.comp", "'@res.comp_algo"]),
 		
 		("c_sck", ["'%ci", "'%cp"]),
 		("f_sck", ["'%fi", "'%fp"]),
 		("b_sck", ["'%bi", "'%bp"]),
 		("s_sck", ["'%si", "'%sp"]),
+		
+		("ts", "'%tsc"),
+		("f_err", "'@fc_err"),
+		("b_err", "'@bc_err"),
 		
 		("i_sz", "+%U"),
 		("o_sz", "+%B"),
@@ -354,40 +361,53 @@ logging_http_format_json_template = [
 		("w", ["+%Tt", "+%Tq", "+%Ta"]),
 		("w_x", ["+%Th", "+%Ti", "+%TR", "+%Tw", "+%Tc", "+%Tr", "+%Td"]),
 		
-		("f_ld", ["+%ac", "+%fc", "+%bc", "+%bq", "+%sc", "+%sq", "+%rc"]),
-		("f_st", "'%tsc"),
-		("g_cnt", ["+%lc", "+%rt"]),
+		("cnt", ["+%ac", "+%fc", "+%bc", "+%bq", "+%sc", "+%sq", "+%rc", "+%rt", "+%lc"]),
 		
 		("ssl", ["'%sslv", "'%sslc"]),
-		("ssl_x", [
-				"+@ssl_fc",
+		("ssl_f", [
+				"'@ssl_fc,json()",
+				"'@ssl_fc_err,json()",
 				"'@ssl_fc_protocol,json()",
 				"'@ssl_fc_cipher,json()",
-				"'@ssl_fc_unique_id,hex",
-				"'@ssl_fc_session_id,hex",
-				"+@ssl_fc_is_resumed",
-				"+@ssl_fc_has_sni",
-				"'@ssl_fc_sni,json()",
+				"'@ssl_fc_unique_id,hex()",
+				"'@ssl_fc_session_id,hex()",
+				"'@ssl_fc_is_resumed,json()",
 				"'@ssl_fc_alpn,json()",
 				"'@ssl_fc_npn,json()",
+				"'@ssl_fc_sni,json()",
+		]),
+		("ssl_b", [
+				"'@ssl_bc,json()",
+				"'@ssl_bc_err,json()",
+				"'@ssl_bc_protocol,json()",
+				"'@ssl_bc_cipher,json()",
+				"'@ssl_bc_unique_id,hex()",
+				"'@ssl_bc_session_id,hex()",
+				"'@ssl_bc_is_resumed,json()",
+				"'@ssl_bc_alpn,json()",
+				"'@ssl_bc_npn,json()",
 		]),
 		("ssl_xf", [
-				"+@ssl_fc",
+				"'@ssl_fc,json()",
 				"'@ssl_f_version,json()",
+				"'@ssl_f_key_alg,json()",
+				"'@ssl_f_sig_alg,json()",
 				"'@ssl_f_sha1,hex",
 				"'@ssl_f_s_dn,json()",
+				"'@ssl_f_i_dn,json()",
 		]),
 		("ssl_xc", [
-				"'@ssl_c_used",
+				"'@ssl_c_used,json()",
 				"'@ssl_c_version,json()",
+				"'@ssl_c_key_alg,json()",
+				"'@ssl_c_sig_alg,json()",
 				"'@ssl_c_sha1,hex",
+				"'@ssl_c_s_dn,json()",
+				"'@ssl_c_i_dn,json()",
 				"'@ssl_c_verify,json()",
 				"'@ssl_c_err,json()",
 				"'@ssl_c_ca_err,json()",
 				"'@ssl_c_ca_err_depth,json()",
-				"'@ssl_c_s_dn,json()",
-				"'@ssl_c_i_dn,json()",
-				
 		]),
 		
 		("stick", [
