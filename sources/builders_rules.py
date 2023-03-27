@@ -27,6 +27,11 @@ class HaHttpRuleBuilder (HaBuilder) :
 			raise_error ("508829d5", self)
 	
 	
+	def declare_rule (self, _rule, _acl = None, **_overrides) :
+		_rule_condition = self._context._condition_if (_acl) if _acl is not None else None
+		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
+	
+	
 	def allow (self, _acl, **_overrides) :
 		_rule_condition = self._context._condition_if (_acl)
 		_rule = ("allow",)
@@ -53,13 +58,17 @@ class HaHttpRuleBuilder (HaBuilder) :
 		self.allow ((_acl, _acl_path), **_overrides)
 	
 	
-	def deny (self, _code, _acl = None, _mark = None, **_overrides) :
+	def deny (self, _code, _acl = None, _mark = None, _return = False, **_overrides) :
 		# FIXME:  Make this configurable and deferable!
 		if _mark is not None and _mark != 0 :
 			self.set_mark (_mark, _acl, **_overrides)
 		_rule_condition = self._context._condition_if (_acl)
-		_deny_rule = ("deny", statement_choose_if_non_null (_code, ("deny_status", statement_enforce_int (_code))))
+		if _return :
+			_deny_rule = ("deny", statement_choose_if_non_null (_code, ("status", statement_enforce_int (_code))))
+		else :
+			_deny_rule = ("deny", statement_choose_if_non_null (_code, ("deny_status", statement_enforce_int (_code))))
 		self._declare_http_rule_0 (_deny_rule, _rule_condition, **_overrides)
+	
 	
 	def deny_host (self, _host, _acl = None, _code = None, _mark = None, **_overrides) :
 		_acl_host = self._acl.host (_host)

@@ -49,6 +49,35 @@ class HaHttpRouteBuilder (HaBuilder) :
 	def route_subpath (self, _backend, _path, _acl = None, **_overrides) :
 		_acl_path = self._acl.subpath (_path)
 		self.route (_backend, (_acl_path, _acl), **_overrides)
+	
+	def route_folder (self, _backend, _path, _acl = None, **_overrides) :
+		self.route_path (_backend, _path, _acl, **_overrides)
+		self.route_path_prefix (_backend, _path + "/", _acl, **_overrides)
+	
+	
+	def route_host_path (self, _backend, _host, _path, _acl = None, **_overrides) :
+		_acl_host = self._acl.host (_host)
+		_acl_path = self._acl.path (_path)
+		self.route (_backend, (_acl_host, _acl_path, _acl), **_overrides)
+	
+	def route_host_path_prefix (self, _backend, _host, _path, _acl = None, **_overrides) :
+		_acl_host = self._acl.host (_host)
+		_acl_path = self._acl.path_prefix (_path)
+		self.route (_backend, (_acl_host, _acl_path, _acl), **_overrides)
+	
+	def route_host_path_suffix (self, _backend, _host, _path, _acl = None, **_overrides) :
+		_acl_host = self._acl.host (_host)
+		_acl_path = self._acl.path_suffix (_path)
+		self.route (_backend, (_acl_host, _acl_path, _acl), **_overrides)
+	
+	def route_host_subpath (self, _backend, _host, _path, _acl = None, **_overrides) :
+		_acl_host = self._acl.host (_host)
+		_acl_path = self._acl.subpath (_path)
+		self.route (_backend, (_acl_host, _acl_path, _acl), **_overrides)
+	
+	def route_host_folder (self, _backend, _host, _path, _acl = None, **_overrides) :
+		self.route_host_path (_backend, _host, _path, _acl, **_overrides)
+		self.route_host_path_prefix (_backend, _host, _path + "/", _acl, **_overrides)
 
 
 

@@ -521,6 +521,9 @@ class HaWorker (HaSection) :
 		return builders.HaHttpSampleBuilder (self, self._parameters)
 	
 	
+	def declare_http_request_rule (self, _action, **_overrides) :
+		self.declare_http_request_rule_0 ((_action, None), **_overrides)
+	
 	def declare_http_request_rule_if (self, _action, _acl, **_overrides) :
 		_condition = self._condition_if (_acl)
 		self.declare_http_request_rule_0 ((_action, _condition), **_overrides)
@@ -535,6 +538,9 @@ class HaWorker (HaSection) :
 	def http_request_rule_builder (self) :
 		return builders.HaHttpRequestRuleBuilder (self, self._parameters)
 	
+	
+	def declare_http_response_rule_if (self, _action, **_overrides) :
+		self.declare_http_response_rule_0 ((_action, None), **_overrides)
 	
 	def declare_http_response_rule_if (self, _action, _acl, **_overrides) :
 		_condition = self._condition_if (_acl)
@@ -551,6 +557,9 @@ class HaWorker (HaSection) :
 		return builders.HaHttpResponseRuleBuilder (self, self._parameters)
 	
 	
+	def declare_tcp_request_rule (self, _action, **_overrides) :
+		self.declare_tcp_request_rule_0 ((_action, None), **_overrides)
+	
 	def declare_tcp_request_rule_if (self, _action, _acl, **_overrides) :
 		_condition = self._condition_if (_acl)
 		self.declare_tcp_request_rule_0 ((_action, _condition), **_overrides)
@@ -562,6 +571,9 @@ class HaWorker (HaSection) :
 	def declare_tcp_request_rule_0 (self, _rule, **_overrides) :
 		self._tcp_request_rule_statements.declare (("tcp-request", _rule), **_overrides)
 	
+	
+	def declare_tcp_response_rule (self, _action,  **_overrides) :
+		self.declare_tcp_response_rule_0 ((_action, None), **_overrides)
 	
 	def declare_tcp_response_rule_if (self, _action, _acl, **_overrides) :
 		_condition = self._condition_if (_acl)
