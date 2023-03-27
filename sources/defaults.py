@@ -10,7 +10,7 @@ from tools import *
 
 tls_mode = "normal"
 
-tls_ciphers_paranoid = (
+tls_ciphers_v12_paranoid = (
 	
 		"ECDHE-RSA-CHACHA20-POLY1305",
 		"ECDHE-RSA-AES256-GCM-SHA384",
@@ -19,7 +19,7 @@ tls_ciphers_paranoid = (
 		"ECDHE-RSA-AES128-SHA256",
 	)
 
-tls_ciphers_normal = (
+tls_ciphers_v12_normal = (
 		
 		"ECDHE-RSA-CHACHA20-POLY1305",
 		
@@ -57,7 +57,7 @@ tls_ciphers_normal = (
 		
 	)
 
-tls_ciphers_backdoor = (
+tls_ciphers_v12_backdoor = (
 		
 		# "AES256-GCM-SHA384",
 		"AES256-SHA256",
@@ -73,21 +73,32 @@ tls_ciphers_backdoor = (
 )
 
 
+tls_ciphers_v13_all = (
+		"TLS_CHACHA20_POLY1305_SHA256",
+		"TLS_AES_256_GCM_SHA384",
+		"TLS_AES_128_GCM_SHA256",
+)
+
+tls_ciphers_v13_paranoid = tls_ciphers_v13_all
+tls_ciphers_v13_normal = tls_ciphers_v13_all
+tls_ciphers_v13_backdoor = tls_ciphers_v13_all
+
+
 tls_options_paranoid = (
+		"no-tlsv12",
 		"no-tlsv11",
 		"no-tlsv10",
 		"no-sslv3",
 		"no-tls-tickets",
+		"no-ssl-reuse",
 		"strict-sni",
-		# FIXME:  ???
-		# ("ecdhe", "prime256v1"),
 	)
 
 tls_options_normal = (
+		"no-tlsv11",
+		"no-tlsv10",
 		"no-sslv3",
 		"no-tls-tickets",
-		# FIXME:  ???
-		# ("ecdhe", "prime256v1"),
 	)
 
 tls_options_backdoor = tls_options_normal
@@ -445,9 +456,9 @@ parameters = {
 		"frontend_bind_mss" : parameters_choose_if_false (parameters_get ("frontend_bind_minimal"), 1400),
 		"frontend_bind_defer_accept" : parameters_not (parameters_get ("frontend_bind_minimal")),
 		"frontend_bind_tls_certificate" : parameters_choose_if_false (parameters_get ("frontend_bind_tls_minimal"),
-				parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/default.pem")),
+				parameters_path_base_join ("daemon_paths_configurations_tls", "default.pem")),
 		"frontend_bind_tls_certificate_rules" : parameters_choose_if_false (parameters_get ("frontend_bind_tls_minimal"),
-				parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/default.conf")),
+				parameters_path_base_join ("daemon_paths_configurations_tls", "default.conf")),
 		"frontend_bind_tls_options" :  parameters_choose_if_false (parameters_get ("frontend_bind_tls_minimal"), (
 				parameters_get ("frontend_bind_options"),
 				parameters_get ("frontend_bind_tls_options_actual"),
@@ -464,38 +475,56 @@ parameters = {
 						("optional", ("verify", "optional")),
 						("required", ("verify", "required"))),
 				parameters_choose_if_non_null (
-						parameters_get ("frontend_tls_ciphers_descriptor"),
-						("ciphers", parameters_get ("frontend_tls_ciphers_descriptor"))),
+						parameters_get ("frontend_tls_ciphers_v12_descriptor"),
+						("ciphers", parameters_get ("frontend_tls_ciphers_v12_descriptor"))),
+				parameters_choose_if_non_null (
+						parameters_get ("frontend_tls_ciphers_v13_descriptor"),
+						("ciphersuites", parameters_get ("frontend_tls_ciphers_v13_descriptor"))),
 			),
 		
 		"frontend_tls_mode" : None,
-		"frontend_tls_ciphers" : parameters_choose_match (
+		"frontend_tls_ciphers_v12" : parameters_choose_match (
 				parameters_get ("frontend_tls_mode"),
 				(None, None),
-				("normal", parameters_get ("tls_ciphers_normal")),
-				("paranoid", parameters_get ("tls_ciphers_paranoid")),
-				("backdoor", parameters_get ("tls_ciphers_backdoor")),
+				("normal", parameters_get ("tls_ciphers_v12_normal")),
+				("paranoid", parameters_get ("tls_ciphers_v12_paranoid")),
+				("backdoor", parameters_get ("tls_ciphers_v12_backdoor")),
 			),
-		"frontend_tls_ciphers_descriptor" : parameters_choose_if_non_null ("frontend_tls_ciphers", parameters_join (":", parameters_get ("frontend_tls_ciphers"))),
+		"frontend_tls_ciphers_v13" : parameters_choose_match (
+				parameters_get ("frontend_tls_mode"),
+				(None, None),
+				("normal", parameters_get ("tls_ciphers_v13_normal")),
+				("paranoid", parameters_get ("tls_ciphers_v13_paranoid")),
+				("backdoor", parameters_get ("tls_ciphers_v13_backdoor")),
+			),
+		"frontend_tls_ciphers_v12_descriptor" : parameters_choose_if_non_null ("frontend_tls_ciphers_v12", parameters_join (":", parameters_get ("frontend_tls_ciphers_v12"))),
+		"frontend_tls_ciphers_v13_descriptor" : parameters_choose_if_non_null ("frontend_tls_ciphers_v13", parameters_join (":", parameters_get ("frontend_tls_ciphers_v13"))),
 		"frontend_tls_options" : parameters_choose_match (
 				parameters_get ("frontend_tls_mode"),
 				(None, (
-						parameters_get ("tls_options"))),
+					#	parameters_get ("tls_options"),
+						parameters_get ("tls_pem_descriptor"),
+						parameters_get ("tls_alpn_descriptor"),
+						parameters_get ("tls_npn_descriptor"),
+						parameters_get ("tls_options_extra"))),
 				("normal", (
-						parameters_get ("tls_options_normal"),
+					#	parameters_get ("tls_options_normal"),
 						parameters_get ("tls_pem_descriptor"),
 						parameters_get ("tls_alpn_descriptor"),
-						parameters_get ("tls_npn_descriptor"))),
+						parameters_get ("tls_npn_descriptor"),
+						parameters_get ("tls_options_extra"))),
 				("paranoid", (
-						parameters_get ("tls_options_paranoid"),
+					#	parameters_get ("tls_options_paranoid"),
 						parameters_get ("tls_pem_descriptor"),
 						parameters_get ("tls_alpn_descriptor"),
-						parameters_get ("tls_npn_descriptor"))),
+						parameters_get ("tls_npn_descriptor"),
+						parameters_get ("tls_options_extra"))),
 				("backdoor", (
-						parameters_get ("tls_options_backdoor"),
+					#	parameters_get ("tls_options_backdoor"),
 						parameters_get ("tls_pem_descriptor"),
 						parameters_get ("tls_alpn_descriptor"),
-						parameters_get ("tls_npn_descriptor"))),
+						parameters_get ("tls_npn_descriptor"),
+						parameters_get ("tls_options_extra"))),
 			),
 		
 		"frontend_monitor_enabled" : True,
@@ -655,13 +684,17 @@ parameters = {
 			),
 		
 		"server_tls_enabled" : False,
-		"server_tls_sni" : parameters_get ("backend_http_host"),
+		"server_tls_sni" : None,
+		"server_tls_alpn" : None,
 		"server_tls_verify" : True,
 		"server_tls_ca_file" : None,
+		"server_check_tls_sni" : None,
+		"server_check_tls_alpn" : None,
 		"server_tls_options" :
 				parameters_choose_if (
 						parameters_get ("server_tls_enabled"),
 						(
+								
 								"ssl",
 								parameters_choose_if_non_null (
 										parameters_get ("server_tls_ca_file"),
@@ -669,16 +702,29 @@ parameters = {
 								parameters_choose_if_non_null (
 										parameters_get ("server_tls_sni"),
 										("sni", parameters_get ("server_tls_sni"))),
+								parameters_choose_if_non_null (
+										parameters_get ("server_tls_alpn"),
+										("alpn", parameters_get ("server_tls_alpn"))),
+								
 								parameters_choose_if (
 										parameters_get ("server_check_enabled"),
 										"check-ssl"),
 								parameters_choose_if_non_null (
-										parameters_get ("server_tls_sni"),
-										("check-sni", parameters_get ("server_tls_sni"))),
+										parameters_get ("server_check_tls_sni"),
+										parameters_choose_if (
+												parameters_get ("server_check_enabled"),
+												("check-sni", parameters_get ("server_check_tls_sni")))),
+								parameters_choose_if_non_null (
+										parameters_get ("server_check_tls_alpn"),
+										parameters_choose_if (
+												parameters_get ("server_check_enabled"),
+												("check-alpn", parameters_get ("server_check_tls_alpn")))),
+								
 								parameters_choose_if (
 										parameters_get ("server_tls_verify"),
 										("verify", "required"),
 										("verify", "none")),
+								
 						)
 				),
 		
@@ -759,49 +805,71 @@ parameters = {
 		
 		
 		"tls_enabled" : True,
-		"tls_ca_base" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (parameters_get ("tls_ca_base_enabled"), parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/ca"))),
-		"tls_ca_file" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (parameters_get ("tls_ca_file_enabled"), parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/ca.pem"))),
-		"tls_crt_base" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (parameters_get ("tls_crt_base_enabled"), parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/certificates"))),
-		"tls_crt_file" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (parameters_get ("tls_crt_file_enabled"), parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/certificates.pem"))),
-		"tls_dh_params" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (parameters_get ("tls_dh_params_enabled"), parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_tls"), "/dh-params.pem"))),
+		"tls_ca_base" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (parameters_get ("tls_ca_base_enabled"), parameters_path_base_join ("daemon_paths_configurations_tls", "ca"))),
+		"tls_ca_file" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (parameters_get ("tls_ca_file_enabled"), parameters_path_base_join ("daemon_paths_configurations_tls", "ca.pem"))),
+		"tls_ca_verify_file" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (parameters_get ("tls_ca_verify_file_enabled"), parameters_path_base_join ("daemon_paths_configurations_tls", "ca-verify.pem"))),
+		"tls_ca_sign_file" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (parameters_get ("tls_ca_sign_file_enabled"), parameters_path_base_join ("daemon_paths_configurations_tls", "ca-sign.pem"))),
+		"tls_crt_base" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (parameters_get ("tls_crt_base_enabled"), parameters_path_base_join ("daemon_paths_configurations_tls", "certificates"))),
+		"tls_crt_file" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (parameters_get ("tls_crt_file_enabled"), parameters_path_base_join ("daemon_paths_configurations_tls", "certificates.pem"))),
+		"tls_dh_params" : parameters_choose_if (parameters_get ("tls_enabled"), parameters_choose_if (parameters_get ("tls_dh_params_enabled"), parameters_path_base_join ("daemon_paths_configurations_tls", "dh-params.pem"))),
 		"tls_ca_base_enabled" : False,
 		"tls_ca_file_enabled" : False,
+		"tls_ca_verify_file_enabled" : False,
+		"tls_ca_sign_file_enabled" : False,
 		"tls_crt_base_enabled" : False,
 		"tls_crt_file_enabled" : False,
 		"tls_dh_params_enabled" : True,
 		
 		"tls_mode" : tls_mode,
-		"tls_ciphers" : parameters_choose_match (
+		"tls_ciphers_v12" : parameters_choose_match (
 				parameters_get ("tls_mode"),
-				("normal", parameters_get ("tls_ciphers_normal")),
-				("paranoid", parameters_get ("tls_ciphers_paranoid")),
-				("backdoor", parameters_get ("tls_ciphers_backdoor")),
+				("normal", parameters_get ("tls_ciphers_v12_normal")),
+				("paranoid", parameters_get ("tls_ciphers_v12_paranoid")),
+				("backdoor", parameters_get ("tls_ciphers_v12_backdoor")),
 			),
-		"tls_ciphers_descriptor" : parameters_join (":", parameters_get ("tls_ciphers")),
-		"tls_ciphers_normal" : tls_ciphers_normal,
-		"tls_ciphers_paranoid" : tls_ciphers_paranoid,
-		"tls_ciphers_backdoor" : tls_ciphers_backdoor,
+		"tls_ciphers_v12_descriptor" : parameters_join (":", parameters_get ("tls_ciphers_v12")),
+		"tls_ciphers_v12_normal" : tls_ciphers_v12_normal,
+		"tls_ciphers_v12_paranoid" : tls_ciphers_v12_paranoid,
+		"tls_ciphers_v12_backdoor" : tls_ciphers_v12_backdoor,
+		"tls_ciphers_v13" : parameters_choose_match (
+				parameters_get ("tls_mode"),
+				("normal", parameters_get ("tls_ciphers_v13_normal")),
+				("paranoid", parameters_get ("tls_ciphers_v13_paranoid")),
+				("backdoor", parameters_get ("tls_ciphers_v13_backdoor")),
+			),
+		"tls_ciphers_v13_descriptor" : parameters_join (":", parameters_get ("tls_ciphers_v13")),
+		"tls_ciphers_v13_normal" : tls_ciphers_v13_normal,
+		"tls_ciphers_v13_paranoid" : tls_ciphers_v13_paranoid,
+		"tls_ciphers_v13_backdoor" : tls_ciphers_v13_backdoor,
 		"tls_options" : parameters_choose_match (
 				parameters_get ("tls_mode"),
 				("normal", (
 						parameters_get ("tls_options_normal"),
 						parameters_get ("tls_pem_descriptor"),
 						parameters_get ("tls_alpn_descriptor"),
-						parameters_get ("tls_npn_descriptor"))),
+						parameters_get ("tls_npn_descriptor"),
+						parameters_get ("tls_options_extra"))),
 				("paranoid", (
 						parameters_get ("tls_options_paranoid"),
 						parameters_get ("tls_pem_descriptor"),
 						parameters_get ("tls_alpn_descriptor"),
-						parameters_get ("tls_npn_descriptor"))),
+						parameters_get ("tls_npn_descriptor"),
+						parameters_get ("tls_options_extra"))),
 				("backdoor", (
 						parameters_get ("tls_options_backdoor"),
 						parameters_get ("tls_pem_descriptor"),
 						parameters_get ("tls_alpn_descriptor"),
-						parameters_get ("tls_npn_descriptor"))),
+						parameters_get ("tls_npn_descriptor"),
+						parameters_get ("tls_options_extra"))),
 			),
 		"tls_options_normal" : tls_options_normal,
 		"tls_options_paranoid" : tls_options_paranoid,
 		"tls_options_backdoor" : tls_options_backdoor,
+		"tls_options_extra" : (
+				parameters_choose_if (parameters_get ("tls_sni_strict"), "strict-sni"),
+				parameters_get ("tls_options_custom"),
+			),
+		"tls_options_custom" : None,
 		"tls_pem_enabled" : True,
 		"tls_pem_descriptor" : parameters_choose_if (
 				parameters_get ("tls_pem_enabled"),
@@ -810,6 +878,7 @@ parameters = {
 					parameters_choose_if_non_null (parameters_get ("tls_crt_base"), ("crt-base", parameters_get ("tls_crt_base"))),
 					parameters_choose_if_non_null (parameters_get ("tls_ca_file"), ("ca-file", parameters_get ("tls_ca_file"))),
 					parameters_choose_if_non_null (parameters_get ("tls_ca_base"), ("ca-base", parameters_get ("tls_ca_base"))),
+					parameters_choose_if_non_null (parameters_get ("tls_ca_sign_file"), ("ca-sign-file", parameters_get ("tls_ca_sign_file"))),
 				)),
 		"tls_alpn_enabled" : False,
 		"tls_alpn_descriptor" : parameters_choose_if (parameters_get ("tls_alpn_enabled"), ("alpn", parameters_join (",", parameters_get ("tls_alpn_protocols")))),
@@ -817,6 +886,8 @@ parameters = {
 		"tls_npn_enabled" : False,
 		"tls_npn_descriptor" : parameters_choose_if (parameters_get ("tls_npn_enabled"), ("npn", parameters_join (",", parameters_get ("tls_npn_protocols")))),
 		"tls_npn_protocols" : ("h2,http/1.1", "http/1.0"),
+		"tls_sni_strict" : False,
+		"tls_curves" : parameters_join (",", ("X25519:P-256",)),
 		"tls_verify_client" : None,
 		
 		

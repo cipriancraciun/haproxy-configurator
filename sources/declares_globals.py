@@ -120,11 +120,15 @@ def declare_globals_tls (_configuration) :
 	)
 	_configuration.declare_group (
 			"TLS default configuration",
-			("ssl-default-bind-ciphers", "$\'tls_ciphers_descriptor"),
+			("ssl-default-bind-ciphers", "$\'tls_ciphers_v12_descriptor"),
+			("ssl-default-bind-ciphersuites", "$\'tls_ciphers_v13_descriptor"),
+			statement_choose_if_non_null ("$tls_curves", ("ssl-default-bind-curves", "$\'tls_curves")),
 			("ssl-default-bind-options", "$~tls_options"),
-			("ssl-default-server-ciphers", "$\'tls_ciphers_descriptor"),
+			("ssl-default-server-ciphers", "$\'tls_ciphers_v12_descriptor"),
+			("ssl-default-server-ciphersuites", "$\'tls_ciphers_v13_descriptor"),
 			("ssl-default-server-options", "$~tls_options"),
 			("ssl-server-verify", "required"),
+			("ssl-skip-self-issued-ca"),
 			statement_choose_if_non_null ("$tls_dh_params", ("ssl-dh-param-file", "$\'tls_dh_params")),
 			enabled_if = "$?global_tls_configure",
 	)
