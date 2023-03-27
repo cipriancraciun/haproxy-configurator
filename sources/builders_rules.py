@@ -135,6 +135,15 @@ class HaHttpRuleBuilder (HaBuilder) :
 			raise_error ("b0203fc6", self)
 	
 	
+	def set_header_from_variable (self, _header, _variable, _ignore_if_exists = False, _acl = None, **_overrides) :
+		_value = self._samples.variable (_variable) .statement_format ()
+		_acl_variable_exists = self._acl.variable_exists (_variable)
+		_acl_exists = self._header_acl_exists (_header) if _ignore_if_exists else None
+		_rule_condition = self._context._condition_if ((_acl, _acl_variable_exists, _acl_exists))
+		_rule = ("set-header", statement_quote ("\"", _header), statement_quote ("\"", _value))
+		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
+	
+	
 	def set_cookie (self, _name, _value, _path, _max_age, _same_site, _secure, _http_only, _acl = None, **_overrides) :
 		# FIXME:  Make `Path` and `Max-Age` configurable!
 		_path = statement_choose_if (_path, statement_format ("Path=%s", statement_enforce_string (_path)))
@@ -153,11 +162,19 @@ class HaHttpRuleBuilder (HaBuilder) :
 		self.append_header ("Set-Cookie", _cookie, _acl, **_overrides)
 	
 	
-	def set_variable (self, _variable, _value, _acl = None, **_overrides) :
+	def set_variable (self, _variable, _value, _acl = None, _format = False, **_overrides) :
 		_rule_condition = self._context._condition_if (_acl)
 		if isinstance (_value, basestring) :
 			_value = "str(%s)" % quote_token ("\'", _value)
-		_rule = (statement_format ("set-var(%s)", _variable), _value)
+		if _format :
+			_rule = (statement_format ("set-var-fmt(%s)", _variable), statement_quote ("\"", _value))
+		else :
+			_rule = (statement_format ("set-var(%s)", _variable), _value)
+		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
+	
+	def unset_variable (self, _variable, _acl = None, **_overrides) :
+		_rule_condition = self._context._condition_if (_acl)
+		_rule = (statement_format ("unset-var(%s)", _variable),)
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
 	def set_enabled (self, _variable, _acl = None, **_overrides) :
@@ -767,9 +784,8 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		self.variables_geoip (_acl, **_overrides)
 	
 	def variables_protocol (self, _acl = None, **_overrides) :
-		self.set_header ("$logging_http_header_action", statement_format ("%%[%s]://%%[%s]%%[%s]", self._samples.request_method (), self._samples.host (), self._samples.path ()), False, (_acl, self._acl.query_exists () .negate ()), **_overrides)
-		self.set_header ("$logging_http_header_action", statement_format ("%%[%s]://%%[%s]%%[%s]?%%[%s]", self._samples.request_method (), self._samples.host (), self._samples.path (), self._samples.query ()), False, (_acl, self._acl.query_exists ()), **_overrides)
-		self.set_variable ("$logging_http_variable_action", self._samples.request_header ("$logging_http_header_action"), _acl, **_overrides)
+		self.set_variable ("$logging_http_variable_action", statement_format ("%%[%s]://%%[%s]%%[%s]", self._samples.request_method (), self._samples.host (), self._samples.path ()), (_acl, self._acl.query_exists () .negate ()), True, **_overrides)
+		self.set_variable ("$logging_http_variable_action", statement_format ("%%[%s]://%%[%s]%%[%s]?%%[%s]", self._samples.request_method (), self._samples.host (), self._samples.path (), self._samples.query ()), (_acl, self._acl.query_exists ()), True, **_overrides)
 		self.set_variable ("$logging_http_variable_method", self._samples.request_method (), _acl, **_overrides)
 		self.set_variable ("$logging_http_variable_host", self._samples.host (), _acl, **_overrides)
 		self.set_variable ("$logging_http_variable_path", self._samples.path (), _acl, **_overrides)
