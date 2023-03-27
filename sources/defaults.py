@@ -605,9 +605,9 @@ parameters = {
 		
 		"server_enabled" : True,
 		
-		"server_min_connections_active_count" : parameters_math ("//", parameters_get ("backend_server_max_connections_active_count"), 4, True),
+		"server_min_connections_active_count" : parameters_math ("//", parameters_get ("server_max_connections_active_count"), 4, True),
 		"server_max_connections_active_count" : parameters_get ("backend_server_max_connections_active_count"),
-		"server_max_connections_queue_count" : parameters_math ("*", parameters_get ("backend_server_max_connections_active_count"), 4, True),
+		"server_max_connections_queue_count" : parameters_math ("*", parameters_get ("server_max_connections_active_count"), 4, True),
 		"server_check_enabled" : parameters_get ("backend_check_enabled"),
 		"server_send_proxy_enabled" : False,
 		"server_send_proxy_version" : "v1",
@@ -654,6 +654,7 @@ parameters = {
 		"server_http_check_enabled" : parameters_get ("server_check_enabled"),
 		"server_http_send_proxy_enabled" : parameters_get ("server_send_proxy_enabled"),
 		"server_http_send_proxy_version" : parameters_get ("server_send_proxy_version"),
+		"server_http_protocol" : None,
 		"server_http_options" : (
 				parameters_choose_if (
 						parameters_get ("server_http_check_enabled"),
@@ -670,6 +671,14 @@ parameters = {
 				parameters_choose_if_non_null (
 						parameters_get ("server_http_max_connections_queue_count"),
 						("maxqueue", parameters_get ("server_http_max_connections_queue_count"))),
+				parameters_choose_if_non_null (
+						parameters_get ("server_http_protocol"),
+						("proto", parameters_get ("server_http_protocol"))),
+				parameters_choose_if_non_null (
+						parameters_get ("server_http_protocol"),
+						parameters_choose_if (
+								parameters_get ("server_http_check_enabled"),
+								("check-proto", parameters_get ("server_http_protocol")))),
 				parameters_choose_if (
 						parameters_get ("server_http_send_proxy_enabled"),
 						(
