@@ -930,8 +930,10 @@ parameters = {
 		
 		
 		"error_pages_enabled" : True,
-		"error_pages_codes" : (400, 401, 403, 404, 405, 408, 429, 500, 502, 503, 504,),
-		"error_pages_store" : parameters_format ("%s%s", parameters_get ("daemon_paths_configurations"), "/errors/http"),
+		"error_pages_codes" : (400, 401, 403, 404, 405, 408, 410, 429, 500, 501, 502, 503, 504,),
+		"error_pages_store" : parameters_path_base_join ("daemon_paths_configurations", "errors"),
+		"error_pages_store_http" : parameters_path_base_join ("error_pages_store", "http"),
+		"error_pages_store_html" : parameters_path_base_join ("error_pages_store", "html"),
 		
 		
 		

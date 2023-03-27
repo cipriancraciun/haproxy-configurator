@@ -115,10 +115,10 @@ def declare_defaults_stats (_configuration) :
 def declare_defaults_error_pages (_configuration) :
 	_configuration.declare_group (
 			"Error pages",
-			("errorfile", 200, statement_quote ("\'", statement_format ("%s/monitor.http", "$error_pages_store"))),
+			("errorfile", 200, statement_quote ("\'", statement_format ("%s/monitor.http", "$error_pages_store_http"))),
 			# FIXME:  Make this deferable!
 			[
-				("errorfile", statement_enforce_int (_code), statement_quote ("\'", statement_format ("%s/%d.http", "$error_pages_store", _code)))
+				("errorfile", statement_enforce_int (_code), statement_quote ("\'", statement_format ("%s/%d.http", "$error_pages_store_http", _code)))
 				for _code in _configuration._resolve_token ("$error_pages_codes")
 			],
 			enabled_if = statement_and ("$?error_pages_enabled", "$?defaults_errors_configure"),
