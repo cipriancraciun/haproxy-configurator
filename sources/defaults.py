@@ -560,6 +560,7 @@ parameters = {
 		
 		"backend_enabled" : True,
 		"backend_check_enabled" : parameters_get ("backend_check_configure"),
+		"backend_forward_enabled" : parameters_get ("backend_forward_configure"),
 		
 		"backend_http_host" : None,
 		
@@ -894,9 +895,10 @@ parameters = {
 		
 		
 		"geoip_enabled" : False,
-		"geoip_map" : parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_maps"), "/geoip.map"),
+		"geoip_map" : parameters_path_base_join ("daemon_paths_configurations_maps", "geoip.txt"),
 		
-		"bots_acl" : parameters_format ("%s%s", parameters_get ("daemon_paths_configurations_maps"), "/bots.acl"),
+		"bogons_map" : parameters_path_base_join ("daemon_paths_configurations_maps", "bogons.txt"),
+		"bots_map" : parameters_path_base_join ("daemon_paths_configurations_maps", "bots.txt"),
 		
 		
 		
@@ -908,21 +910,21 @@ parameters = {
 		
 		"daemon_user" : "haproxy",
 		"daemon_group" : parameters_get ("daemon_user"),
-		"daemon_pid" : parameters_format ("%s%s", parameters_get ("daemon_paths_runtime"), "/haproxy.pid"),
-		"daemon_chroot" : parameters_format ("%s%s", parameters_get ("daemon_paths_runtime"), "/haproxy.chroot"),
+		"daemon_pid" : parameters_path_base_join ("daemon_paths_runtime", "haproxy.pid"),
+		"daemon_chroot" : parameters_path_base_join ("daemon_paths_runtime", "haproxy.chroot"),
 		"daemon_chroot_enabled" : False,
 		"daemon_ulimit" : 65536,
 		"daemon_threads_count" : 1,
 		"daemon_threads_affinity" : None,
-		"daemon_socket" : parameters_choose_if (True, parameters_format ("%s%s", parameters_get ("daemon_paths_runtime"), "/haproxy.sock")),
+		"daemon_socket" : parameters_choose_if (True, parameters_format ("unix@%s", parameters_path_base_join ("daemon_paths_runtime", "haproxy.sock"))),
 		
 		"daemon_paths_configurations" : "/etc/haproxy",
-		"daemon_paths_configurations_tls" : parameters_format ("%s%s", parameters_get ("daemon_paths_configurations"), "/tls"),
-		"daemon_paths_configurations_maps" : parameters_format ("%s%s", parameters_get ("daemon_paths_configurations"), "/maps"),
+		"daemon_paths_configurations_tls" : parameters_path_base_join ("daemon_paths_configurations", "tls"),
+		"daemon_paths_configurations_maps" : parameters_path_base_join ("daemon_paths_configurations", "maps"),
 		"daemon_paths_runtime" : "/run",
 		
-		"daemon_paths_states_prefix" : parameters_format ("%s%s", parameters_get ("daemon_paths_runtime"), "/haproxy-state--"),
-		"daemon_paths_state_global" : parameters_format ("%s%s", parameters_get ("daemon_paths_runtime"), "/haproxy.state"),
+		"daemon_paths_states_prefix" : parameters_path_base_join ("daemon_paths_runtime", "haproxy-states"),
+		"daemon_paths_state_global" : parameters_path_base_join ("daemon_paths_runtime", "haproxy.state"),
 		
 		
 		
@@ -1248,6 +1250,7 @@ parameters = {
 		"global_tune_http2_configure" : parameters_get ("global_tune_configure"),
 		"global_stats_configure" : parameters_not (parameters_get ("minimal_global_configure")),
 		"global_logging_configure" : parameters_not (parameters_get ("minimal_global_configure")),
+		"global_logging_quiet" : True,
 		"global_state_configure" : parameters_and (parameters_not (parameters_get ("minimal_global_configure")), parameters_get ("state_configure")),
 		"global_experimental_configure" : parameters_not (parameters_get ("minimal_global_configure")),
 		"global_experimental_enabled" : False,
@@ -1301,6 +1304,7 @@ parameters = {
 		"backend_timeouts_configure" : parameters_get ("backend_configure"),
 		"backend_servers_configure" : parameters_get ("backend_configure"),
 		"backend_check_configure" : parameters_get ("backend_configure"),
+		"backend_forward_configure" : parameters_get ("backend_configure"),
 		
 		
 		"state_configure" : parameters_not (parameters_get ("minimal_configure")),

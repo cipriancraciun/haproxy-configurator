@@ -17,6 +17,7 @@ def declare_backend_server_defaults (_configuration, _extra_statements = None) :
 			statement_choose_if_non_null ("$backend_server_check_interval_normal", ("default-server", "inter", statement_seconds ("$+backend_server_check_interval_normal"))),
 			statement_choose_if_non_null ("$backend_server_check_interval_rising", ("default-server", "fastinter", statement_seconds ("$+backend_server_check_interval_rising"))),
 			statement_choose_if_non_null ("$backend_server_check_interval_failed", ("default-server", "downinter", statement_seconds ("$+backend_server_check_interval_failed"))),
+			statement_choose_if_false ("$?backend_minimal", ("default-server", "init-addr", "none")),
 			_extra_statements,
 			enabled_if = "$?backend_servers_configure",
 	)
