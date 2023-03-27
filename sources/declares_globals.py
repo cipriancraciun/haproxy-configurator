@@ -29,9 +29,9 @@ def declare_globals_daemon (_configuration) :
 			("nbthread", "$+daemon_threads_count"),
 			statement_choose_if_non_null ("$~daemon_threads_affinity", ("cpu-map", "$~daemon_threads_affinity")),
 			statement_choose_if_non_null ("$+daemon_ulimit", ("ulimit-n", "$+daemon_ulimit")),
-			("user", "$\'daemon_user"),
-			("group", "$\'daemon_group"),
-			("pidfile", "$\'daemon_pid"),
+			statement_choose_if_non_null ("$daemon_user", ("user", "$\'daemon_user")),
+			statement_choose_if_non_null ("$daemon_group", ("group", "$\'daemon_group")),
+			statement_choose_if_non_null ("$daemon_pid", ("pidfile", "$\'daemon_pid")),
 			statement_choose_if ("$?daemon_chroot_enabled", ("chroot", "$\'daemon_chroot")),
 			enabled_if = "$?global_daemon_configure",
 	)
@@ -145,7 +145,7 @@ def declare_globals_logging (_configuration) :
 			statement_choose_if ("$?syslog_2_enabled", ("log", "$\'syslog_2_endpoint", "len", 65535, "format", "$\'syslog_2_protocol", "daemon", "info", "err")),
 			statement_choose_if ("$syslog_source_node", ("log-send-hostname", "$\'syslog_source_node")),
 			("log-tag", "$\'syslog_source_tag"),
-			("quiet"),
+			statement_choose_if ("$?global_logging_quiet", ("quiet")),
 			enabled_if = "$?global_logging_configure",
 	)
 
@@ -153,7 +153,12 @@ def declare_globals_logging (_configuration) :
 def declare_globals_stats (_configuration) :
 	_configuration.declare_group (
 			"Statistics",
-			statement_choose_if_non_null ("$daemon_socket", ("stats", "socket", "$\'daemon_socket", "user", "$\'daemon_user", "group", "$\'daemon_group", "mode", "0600", "level", "admin")),
+			statement_choose_if_non_null ("$daemon_socket", (
+					"stats", "socket", "$\'daemon_socket",
+					statement_choose_if_non_null ("$daemon_user", ("user", "$\'daemon_user")),
+					statement_choose_if_non_null ("$daemon_group", ("group", "$\'daemon_group")),
+					"mode", "0600", "level", "admin",
+				)),
 			("stats", "maxconn", 4),
 			("stats", "timeout", statement_seconds (60)),
 			enabled_if = "$?global_stats_configure",

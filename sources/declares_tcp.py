@@ -60,7 +60,7 @@ def declare_tcp_frontend_logging (_configuration) :
 	_configuration.declare_group (
 			"Logging",
 			("option", "tcplog"),
-			("log-format", "$\"logging_tcp_format"),
+			statement_choose_if_non_null ("$logging_tcp_format", ("log-format", "$\"logging_tcp_format")),
 			enabled_if = "$?frontend_logging_configure",
 			order = 7000 + 400,
 	)

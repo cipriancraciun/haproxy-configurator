@@ -37,8 +37,7 @@ def declare_defaults_http (_configuration) :
 			statement_choose_if_non_null ("$backend_http_keep_alive_pool", ("max-keep-alive-queue", "$+backend_http_keep_alive_pool")),
 			("timeout", "http-request", statement_seconds ("$+defaults_timeout_request")),
 			("timeout", "http-keep-alive", statement_seconds ("$+defaults_timeout_keep_alive")),
-			("unique-id-format", "#\"%[req.hdr(X-HA-Request-Id)]"),
-			("unique-id-header", "#\'X-HA-Request-Id-2"),
+			("unique-id-format", statement_quote ("\"", statement_format ("%%[req.hdr(%s)]", "$http_tracking_request_header"))),
 			enabled_if = "$?defaults_http_configure",
 	)
 	_configuration.declare_group (
@@ -75,7 +74,7 @@ def declare_http_frontend_connections (_configuration) :
 			("compression", "type", "$\'defaults_compression_content_types"),
 			statement_choose_if ("$?defaults_compression_offload",
 				("compression", "offload")),
-			enabled_if = "$?frontend_http_configure",
+			enabled_if = statement_and ("$?frontend_http_configure", "$?frontend_compression_configure"),
 	)
 
 
@@ -123,7 +122,7 @@ def declare_http_frontend_logging (_configuration) :
 	_configuration.declare_group (
 			"Logging",
 			("option", "httplog"),
-			("log-format", "$\"logging_http_format"),
+			statement_choose_if_non_null ("$logging_http_format", ("log-format", "$\"logging_http_format")),
 			enabled_if = "$?frontend_logging_configure",
 			order = 7000 + 400,
 	)
@@ -192,8 +191,8 @@ def declare_http_backend_connections (_configuration) :
 					("close", ("option", "httpclose"))),
 			statement_choose_if_non_null ("$backend_http_keep_alive_pool",
 					("max-keep-alive-queue", "$+backend_http_keep_alive_pool")),
-			# FIXME:  Make this configurable!
-			("option", "forwardfor", "header", "$logging_http_header_forwarded_for", "if-none"),
+			statement_choose_if (statement_and ("$?backend_forward_enabled", "$?backend_forward_configure"),
+					("option", "forwardfor", "header", "$logging_http_header_forwarded_for", "if-none")),
 			enabled_if = "$?backend_connections_configure",
 	)
 
