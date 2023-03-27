@@ -662,11 +662,17 @@ class HaFrontend (HaWorker) :
 	
 	def declare_route_if_0 (self, _backend, _acl, **_overrides) :
 		_condition = self._condition_if (_acl)
-		self._route_statements.declare (("use_backend", _backend, _condition), **_overrides)
+		if isinstance (_backend, int) :
+			self._route_statements.declare (("http-request", "return", "status", _backend, "file", statement_path_join (("$error_pages_store_html", "%d.html" % _backend), quote = True), "content-type", statement_quote ("\'", "text/html"), _condition), **_overrides)
+		else :
+			self._route_statements.declare (("use_backend", _backend, _condition), **_overrides)
 	
 	def declare_route_unless_0 (self, _backend, _acl, **_overrides) :
 		_condition = self._condition_unless (_acl)
-		self._route_statements.declare (("use_backend", _backend, _condition), **_overrides)
+		if isinstance (_backend, int) :
+			self._route_statements.declare (("http-request", "return", "status", _backend, "file", statement_path_join (("$error_pages_store_html", "%d.html" % _backend), quote = True), "content-type", statement_quote ("\'", "text/html"), _condition), **_overrides)
+		else :
+			self._route_statements.declare (("use_backend", _backend, _condition), **_overrides)
 	
 	def http_route_builder (self, **_overrides) :
 		return builders.HaHttpRouteBuilder (self, self._parameters, **_overrides)
