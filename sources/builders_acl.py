@@ -127,11 +127,14 @@ class HaHttpAclBuilder (HaBuilder) :
 		return self._context.acl_0 (_identifier, self._samples.response_status (), "int", None, "eq", (_code,))
 	
 	
-	def request_header (self, _name, _value, _identifier = None) :
-		return self._context.acl_0 (_identifier, self._samples.request_header (_name), "str", None, "eq", (_value,))
-	
 	def request_header_exists (self, _header, _expected = True, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.request_header_exists (_header, _expected), "bool", None, None, None)
+	
+	def request_header_empty (self, _name, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.request_header (_name), "str", None, "eq", ("",))
+	
+	def request_header_equals (self, _name, _value, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.request_header (_name), "str", None, "eq", (_value,))
 	
 	def request_header_prefix (self, _name, _prefix, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.request_header (_name), "beg", None, None, _prefix)
@@ -143,11 +146,14 @@ class HaHttpAclBuilder (HaBuilder) :
 		return self._context.acl_0 (_identifier, self._samples.request_header (_name), "reg", None, None, _regex)
 	
 	
-	def response_header (self, _name, _value, _identifier = None) :
-		return self._context.acl_0 (_identifier, self._samples.response_header (_name), "str", None, "eq", (_value,))
-	
 	def response_header_exists (self, _header, _expected = True, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.response_header_exists (_header, _expected), "bool", None, None, None)
+	
+	def response_header_empty (self, _name, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.response_header (_name), "str", None, "eq", "")
+	
+	def response_header_equals (self, _name, _value, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.response_header (_name), "str", None, "eq", (_value,))
 	
 	def response_header_prefix (self, _name, _prefix, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.response_header (_name), "beg", None, None, _prefix)
@@ -166,17 +172,30 @@ class HaHttpAclBuilder (HaBuilder) :
 		return self._context.acl_0 (_identifier, self._samples.response_cookie_exists (_header, _expected), "bool", None, None, None)
 	
 	
-	def variable_bool (self, _variable, _expected = True, _identifier = None) :
-		return self._context.acl_0 (_identifier, self._samples.variable_bool (_variable, _expected), "bool", None, None, None)
-	
 	def variable_exists (self, _variable, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.variable (_variable), "found", None, None, None)
 	
-	def variable_equals (self, _variable, _value, _identifier = None) :
-		return self._context.acl_0 (_identifier, self._samples.variable (_variable), "str", None, "eq", _value)
+	def variable_empty (self, _variable, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.variable (_variable), "str", None, "eq", "")
 	
-	def variable_prefix (self, _variable, _value, _identifier = None) :
-		return self._context.acl_0 (_identifier, self._samples.variable (_variable), "beg", None, None, _value)
+	def variable_equals (self, _variable, _value, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.variable (_variable), "str", None, "eq", (_value,))
+	
+	def variable_prefix (self, _variable, _prefix, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.variable (_variable), "beg", None, None, _prefix)
+	
+	def variable_suffix (self, _variable, _suffix, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.variable (_variable), "end", None, None, _suffix)
+	
+	def variable_regex (self, _variable, _regex, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.variable (_variable), "reg", None, None, _regex)
+	
+	def variable_bool (self, _variable, _expected = True, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.variable_bool (_variable, _expected), "bool", None, None, None)
+	
+	
+	def variables_equals (self, _variable_a, _variable_b, _expected = True, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.variable (_variable_a, (("strcmp", _variable_b),) + (("bool",) if not _expected else ("bool", "not"))), "bool", None, None, None)
 	
 	
 	def via_tls (self, _expected = True, _method = None, _identifier = None) :
