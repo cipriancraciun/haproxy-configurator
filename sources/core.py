@@ -660,6 +660,9 @@ class HaFrontend (HaWorker) :
 		self._bind_statements.declare (("bind", statement_quote ("\'", _endpoint), _name, _tls_options, _options), order = order, overrides = overrides)
 	
 	
+	def declare_route (self, _backend, **_overrides) :
+		self.declare_route_if_0 (_backend, None, **_overrides)
+	
 	def declare_route_if_0 (self, _backend, _acl, **_overrides) :
 		_condition = self._condition_if (_acl)
 		if isinstance (_backend, int) :
@@ -1037,6 +1040,10 @@ class HaSample (HaBase) :
 	
 	def statement_format (self) :
 		return statement_format ("%%[%s]", self)
+	
+	def parameter_get (self) :
+		return lambda _parameters : self.generate ()
+	
 	
 	def generate (self) :
 		

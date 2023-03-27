@@ -958,7 +958,8 @@ parameters = {
 		"logging_tcp_format" : parameters_choose_match (
 				parameters_get ("logging_tcp_type"),
 				("text", parameters_get ("logging_tcp_format_text")),
-				("json", parameters_get ("logging_tcp_format_json"))
+				("json", parameters_get ("logging_tcp_format_json")),
+				("default", None),
 		),
 		"logging_http_type" : parameters_get ("logging_type"),
 		"logging_http_format_text" : logging_http_format_text,
@@ -967,7 +968,8 @@ parameters = {
 		"logging_http_format" : parameters_choose_match (
 				parameters_get ("logging_http_type"),
 				("text", parameters_get ("logging_http_format_text")),
-				("json", parameters_get ("logging_http_format_json"))
+				("json", parameters_get ("logging_http_format_json")),
+				("default", None),
 		),
 		"logging_http_variable_method" : "txn.logging_http_method",
 		"logging_http_variable_host" : "txn.logging_http_host",
