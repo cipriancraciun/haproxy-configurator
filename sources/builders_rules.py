@@ -136,10 +136,14 @@ class HaHttpRuleBuilder (HaBuilder) :
 	
 	
 	def set_header_from_variable (self, _header, _variable, _ignore_if_exists = False, _acl = None, **_overrides) :
-		_value = self._samples.variable (_variable) .statement_format ()
+		_sample = self._samples.variable (_variable)
 		_acl_variable_exists = self._acl.variable_exists (_variable)
+		self.set_header_from_sample (_header, _sample, _ignore_if_exists, (_acl, _acl_variable_exists), **_overrides)
+	
+	def set_header_from_sample (self, _header, _sample, _ignore_if_exists = False, _acl = None, **_overrides) :
+		_value = _sample.statement_format ()
 		_acl_exists = self._header_acl_exists (_header) if _ignore_if_exists else None
-		_rule_condition = self._context._condition_if ((_acl, _acl_variable_exists, _acl_exists))
+		_rule_condition = self._context._condition_if ((_acl, _acl_exists))
 		_rule = ("set-header", statement_quote ("\"", _header), statement_quote ("\"", _value))
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	

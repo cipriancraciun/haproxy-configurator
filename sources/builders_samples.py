@@ -188,11 +188,17 @@ class HaHttpSampleBuilder (HaBuilder) :
 	def uuid_v4 (self, _transforms = None) :
 		return self._context.sample_0 ("uuid", ("4",), _transforms)
 	
+	def uuid_v4_no_dashes (self) :
+		return self._context.sample_0 ("uuid", ("4",), (("regsub", "-", "", "g"),))
+	
 	def client_ip_hash (self, _method = None) :
 		return self.client_ip (_method, (("digest", "md5"), "hex", "lower"))
 	
 	def agent_hash (self) :
 		return self.request_header ("User-Agent", (("digest", "md5"), "hex", "lower"))
+	
+	def agent_regsub (self, _pattern, _substitutions, _flags = None) :
+		return self.request_header ("User-Agent", (("regsub", _pattern, _substitutions, _flags),))
 
 
 
