@@ -335,9 +335,11 @@ def _quote_token (_token, _quote, _expand) :
 		return _token
 	elif _token is None :
 		raise_error ("f4226423")
-	else :
+	elif _expand is not None :
 		_token = _expand (_token)
 		return _quote_token (_token, _quote, _expand)
+	else :
+		raise_error ("e256e274")
 
 
 def quote_token (_quote, _token) :

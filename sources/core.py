@@ -1058,9 +1058,9 @@ class HaSample (HaBase) :
 		
 		_tokens.append ("(")
 		if _arguments is not None and len (_arguments) > 0 :
-			_tokens.append (_arguments[0])
+			_tokens.append (str (quote_token ("\'?", _arguments[0])))
 			for _argument in _arguments[1:] :
-				_argument = str (_argument)
+				_argument = str (quote_token ("\'?", _argument))
 				_tokens.append (",")
 				_tokens.append (_argument)
 		_tokens.append (")")
@@ -1071,9 +1071,9 @@ class HaSample (HaBase) :
 				_tokens.append (_transform[0])
 				if len (_transform) > 1 :
 					_tokens.append ("(")
-					_tokens.append (str(_transform[1]))
+					_tokens.append (str (quote_token ("\'?", _transform[1])))
 					for _transform_argument in _transform[2:] :
-						_transform_argument = str (_transform_argument)
+						_transform_argument = str (quote_token ("\'?", _transform_argument))
 						_tokens.append (",")
 						_tokens.append (_transform_argument)
 					_tokens.append (")")
