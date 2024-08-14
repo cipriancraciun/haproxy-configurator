@@ -63,6 +63,9 @@ class HaHttpSampleBuilder (HaBuilder) :
 	def path (self, _transforms = None) :
 		return self._context.sample_0 ("path", None, _transforms)
 	
+	def path_regsub (self, _pattern, _substitutions, _flags = None) :
+		return self._context.sample_0 ("path", None, (("regsub", _pattern, _substitutions, _flags),))
+	
 	def query (self, _transforms = None) :
 		return self._context.sample_0 ("query", None, _transforms)
 	
@@ -119,6 +122,9 @@ class HaHttpSampleBuilder (HaBuilder) :
 	
 	def variable_bool (self, _variable, _expected = True) :
 		return self._context.sample_0 ("var", (_variable,), ("bool" if _expected else ("bool", "not")))
+	
+	def variable_xxh3_64 (self, _variable, _seed, _mask) :
+		return self._context.sample_0 ("var", (_variable,), (("xxh3", _seed), ("and", _mask)))
 	
 	
 	def via_tls (self, _expected = True, _method = None) :

@@ -193,6 +193,9 @@ class HaHttpAclBuilder (HaBuilder) :
 	def variable_bool (self, _variable, _expected = True, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.variable_bool (_variable, _expected), "bool", None, None, None)
 	
+	def variable_xxh3_64 (self, _variable, _seed, _mask, _value, _identifier = None) :
+		return self._context.acl_0 (_identifier, self._samples.variable_xxh3_64 (_variable, _seed, _mask), "int", None, "eq", (_value,))
+	
 	
 	def variables_equals (self, _variable_a, _variable_b, _expected = True, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.variable (_variable_a, (("strcmp", _variable_b),) + (("bool",) if not _expected else ("bool", "not"))), "bool", None, None, None)
