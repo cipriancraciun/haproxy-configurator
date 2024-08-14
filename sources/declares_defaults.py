@@ -94,7 +94,7 @@ def declare_defaults_logging (_configuration) :
 			statement_choose_if ("$?syslog_pg_enabled",
 					("log", "global")),
 			statement_choose_if ("$?syslog_p_enabled",
-					("log", "$\'syslog_p_endpoint", "len", 65535, "format", "$\'syslog_p_protocol", "daemon", "info", "err")),
+					("log", "$\'syslog_p_endpoint", "len", 65535, "format", "$\'syslog_p_protocol", "daemon", "$\'syslog_p_min_level", "$\'syslog_p_cap_level")),
 			("option", "log-separate-errors"),
 			("option", "log-health-checks"),
 			("no", "option", "checkcache"),

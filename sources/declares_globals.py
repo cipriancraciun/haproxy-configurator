@@ -145,10 +145,13 @@ def declare_globals_tls (_configuration) :
 def declare_globals_logging (_configuration) :
 	_configuration.declare_group (
 			"Logging",
-			statement_choose_if ("$?syslog_1_enabled", ("log", "$\'syslog_1_endpoint", "len", 65535, "format", "$\'syslog_1_protocol", "daemon", "info", "err")),
-			statement_choose_if ("$?syslog_2_enabled", ("log", "$\'syslog_2_endpoint", "len", 65535, "format", "$\'syslog_2_protocol", "daemon", "info", "err")),
-			statement_choose_if ("$syslog_source_node", ("log-send-hostname", "$\'syslog_source_node")),
-			("log-tag", "$\'syslog_source_tag"),
+			statement_choose_if ("$?syslog_1_enabled", ("log", "$\'syslog_1_endpoint", "len", 65535, "format", "$\'syslog_1_protocol", "daemon", "$\'syslog_1_min_level", "$\'syslog_1_cap_level")),
+			statement_choose_if ("$?syslog_2_enabled", ("log", "$\'syslog_2_endpoint", "len", 65535, "format", "$\'syslog_2_protocol", "daemon", "$\'syslog_2_min_level", "$\'syslog_2_cap_level")),
+			statement_choose_if_true ("$syslog_source_node",
+					("log-send-hostname",),
+					statement_choose_if ("$syslog_source_node", ("log-send-hostname", "$\'syslog_source_node")),
+				),
+			statement_choose_if ("$syslog_source_tag", ("log-tag", "$\'syslog_source_tag")),
 			statement_choose_if ("$?global_logging_quiet", ("quiet")),
 			enabled_if = "$?global_logging_configure",
 	)

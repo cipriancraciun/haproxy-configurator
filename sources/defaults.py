@@ -962,14 +962,20 @@ parameters = {
 		"syslog_1_enabled" : True,
 		"syslog_1_endpoint" : "/dev/log",
 		"syslog_1_protocol" : parameters_get ("syslog_protocol"),
+		"syslog_1_min_level" : "info",
+		"syslog_1_cap_level" : "err",
 		
 		"syslog_2_enabled" : False,
 		"syslog_2_endpoint" : "127.0.0.1:514",
 		"syslog_2_protocol" : parameters_get ("syslog_protocol"),
+		"syslog_2_min_level" : "info",
+		"syslog_2_cap_level" : "err",
 		
 		"syslog_p_enabled" : False,
 		"syslog_p_endpoint" : "127.0.0.1:514",
 		"syslog_p_protocol" : parameters_get ("syslog_protocol"),
+		"syslog_p_min_level" : "info",
+		"syslog_p_cap_level" : "err",
 		"syslog_pg_enabled" : parameters_choose_if (parameters_get ("syslog_p_enabled"), False, True),
 		
 		# NOTE:  Preferred protocol should be `rfc5424`!
