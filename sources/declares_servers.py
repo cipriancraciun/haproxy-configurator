@@ -27,9 +27,9 @@ def declare_backend_server_timeouts (_configuration, _extra_statements = None) :
 	_configuration.declare_group (
 			"Timeouts",
 			statement_choose_if_non_null ("$backend_server_timeout_activity_server", ("timeout", "server", statement_seconds ("$+backend_server_timeout_activity_server"))),
-			statement_choose_if_non_null ("$backend_server_timeout_fin", ("timeout", "server-fin", statement_seconds ("$+backend_server_timeout_fin"))),
+			statement_choose_if_non_null ("$backend_server_timeout_fin_server", ("timeout", "server-fin", statement_seconds ("$+backend_server_timeout_fin_server"))),
 			statement_choose_if_non_null ("$backend_server_timeout_activity_client", ("timeout", "client", statement_seconds ("$+backend_server_timeout_activity_client"))),
-			statement_choose_if_non_null ("$backend_server_timeout_fin", ("timeout", "client-fin", statement_seconds ("$+backend_server_timeout_fin"))),
+			statement_choose_if_non_null ("$backend_server_timeout_fin_client", ("timeout", "client-fin", statement_seconds ("$+backend_server_timeout_fin_client"))),
 			statement_choose_if_non_null ("$backend_server_timeout_activity_tunnel", ("timeout", "tunnel", statement_seconds ("$+backend_server_timeout_activity_tunnel"))),
 			statement_choose_if_non_null ("$backend_server_timeout_connect", ("timeout", "connect", statement_seconds ("$+backend_server_timeout_connect"))),
 			statement_choose_if_non_null ("$backend_server_timeout_queue", ("timeout", "queue", statement_seconds ("$+backend_server_timeout_queue"))),

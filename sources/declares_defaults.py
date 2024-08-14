@@ -58,9 +58,9 @@ def declare_defaults_timeouts (_configuration) :
 	_configuration.declare_group (
 			"Timeouts",
 			("timeout", "server", statement_seconds ("$+defaults_timeout_activity_server")),
-			("timeout", "server-fin", statement_seconds ("$+defaults_timeout_fin")),
+			("timeout", "server-fin", statement_seconds ("$+defaults_timeout_fin_server")),
 			("timeout", "client", statement_seconds ("$+defaults_timeout_activity_client")),
-			("timeout", "client-fin", statement_seconds ("$+defaults_timeout_fin")),
+			("timeout", "client-fin", statement_seconds ("$+defaults_timeout_fin_client")),
 			("timeout", "tunnel", statement_seconds ("$+defaults_timeout_activity_tunnel")),
 			("timeout", "connect", statement_seconds ("$+defaults_timeout_connect")),
 			("timeout", "queue", statement_seconds ("$+defaults_timeout_queue")),
