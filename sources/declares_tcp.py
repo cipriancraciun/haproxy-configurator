@@ -71,7 +71,10 @@ def declare_tcp_frontend_stick (_configuration) :
 	_configuration.declare_group (
 			"Stick tables",
 			("stick-table",
-					"type", "ip",
+					"type", statement_choose_match ("$frontend_tcp_stick_source",
+							("src", "ipv6"),
+							("src/mask", "ipv6"),
+						),
 					"size", 1024 * 1024,
 					"expire", "3600s",
 					"store", ",".join ((
@@ -90,6 +93,7 @@ def declare_tcp_frontend_stick (_configuration) :
 				("tcp-request", "connection", "track-sc0",
 						statement_choose_match ("$frontend_tcp_stick_source",
 								("src", "src"),
+								("src/mask", "src,ipmask(24,56)"),
 						)
 				),
 			),
