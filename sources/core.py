@@ -3,6 +3,7 @@
 
 
 from parameters import Parameters
+from parameters import undefined as parameters_undefined
 from scroll import Scroll
 
 import defaults
@@ -21,6 +22,8 @@ def haproxy (_parameters = None, **_overrides) :
 
 def parameters (_parameters = None, **_overrides) :
 	return Parameters (_parameters, _overrides, defaults.parameters)
+
+parameters.undefined = parameters_undefined
 
 def overrides (**_overrides) :
 	return _overrides

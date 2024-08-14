@@ -12,6 +12,7 @@ from errors import *
 
 fallback = object ()
 no_fallback = object ()
+undefined = object ()
 
 
 
@@ -109,6 +110,8 @@ class Parameters (object) :
 		return self._get (_parameter)
 	
 	def __setattr__ (self, _parameter, _value) :
+		if _value is undefined :
+			return
 		if _parameter.startswith ("_") :
 			raise_error ("8b5c846b", _parameter)
 		if _parameter in self._parameters :
