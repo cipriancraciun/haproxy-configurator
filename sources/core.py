@@ -1059,14 +1059,14 @@ class HaSample (HaBase) :
 		
 		_tokens.append (_method)
 		
-		_tokens.append ("(")
 		if _arguments is not None and len (_arguments) > 0 :
+			_tokens.append ("(")
 			_tokens.append (str (quote_token ("\'?", _arguments[0])))
 			for _argument in _arguments[1:] :
 				_argument = str (quote_token ("\'?", _argument))
 				_tokens.append (",")
 				_tokens.append (_argument)
-		_tokens.append (")")
+			_tokens.append (")")
 		
 		if _transforms is not None and len (_transforms) > 0 :
 			for _transform in _transforms :
