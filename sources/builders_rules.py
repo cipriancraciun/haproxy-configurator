@@ -187,57 +187,80 @@ class HaHttpRuleBuilder (HaBuilder) :
 	def set_disabled (self, _variable, _acl = None, **_overrides) :
 		self.set_variable (_variable, ("bool(false)",), _acl, **_overrides)
 	
-	
-	def track_enable (self, _acl = None, **_overrides) :
-		self.set_enabled ("$http_tracking_enabled_variable", _acl, **_overrides)
-	
-	def track_exclude (self, _acl = None, **_overrides) :
-		self.set_enabled ("$http_tracking_excluded_variable", _acl, **_overrides)
-	
-	
-	def debug_enable (self, _acl = None, **_overrides) :
-		self.set_enabled ("$http_debug_enabled_variable", _acl, **_overrides)
-	
-	def debug_exclude (self, _acl = None, **_overrides) :
-		self.set_enabled ("$http_debug_excluded_variable", _acl, **_overrides)
+	def set_variable_bool (self, _variable, _bool, _acl = None, **_overrides) :
+		if _bool is True :
+			self.set_enabled (_variable, _acl = _acl, **_overrides)
+		elif _bool is False :
+			self.set_disabled (_variable, _acl = _acl, **_overrides)
+		else :
+			raise_error ("640f7c6c", _bool)
 	
 	
-	def harden_enable (self, _acl = None, **_overrides) :
-		self.set_enabled ("$http_harden_enabled_variable", _acl, **_overrides)
+	def track_enable (self, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		_acl_unset = self._acl.variable_exists ("$http_tracking_enabled_variable") .negate () if _if_unset is True else None
+		self.set_variable_bool ("$http_tracking_enabled_variable", _bool, (_acl, _acl_unset), **_overrides)
 	
-	def harden_exclude (self, _acl = None, **_overrides) :
-		self.set_enabled ("$http_harden_excluded_variable", _acl, **_overrides)
-	
-	def harden_ranges_allow (self, _acl = None, **_overrides) :
-		self.set_enabled ("$http_ranges_allowed_variable", _acl, **_overrides)
-	
-	
-	def drop_caching_enable (self, _acl = None, **_overrides) :
-		self.set_enabled ("$http_drop_caching_enabled_variable", _acl, **_overrides)
-	
-	def drop_caching_exclude (self, _acl = None, **_overrides) :
-		self.set_enabled ("$http_drop_caching_excluded_variable", _acl, **_overrides)
+	def track_exclude (self, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		_acl_unset = self._acl.variable_exists ("$http_tracking_excluded_variable") .negate () if _if_unset is True else None
+		self.set_variable_bool ("$http_tracking_excluded_variable", _bool, (_acl, _acl_unset), **_overrides)
 	
 	
-	def force_caching_enable (self, _acl = None, **_overrides) :
-		self.set_enabled ("$http_force_caching_enabled_variable", _acl, **_overrides)
+	def debug_enable (self, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		_acl_unset = self._acl.variable_exists ("$http_debug_enabled_variable") .negate () if _if_unset is True else None
+		self.set_variable_bool ("$http_debug_enabled_variable", _bool, (_acl, _acl_unset), **_overrides)
 	
-	def force_caching_exclude (self, _acl = None, **_overrides) :
-		self.set_enabled ("$http_force_caching_excluded_variable", _acl, **_overrides)
-	
-	
-	def drop_cookies_enable (self, _acl = None, **_overrides) :
-		self.set_enabled ("$http_drop_cookies_enabled_variable", _acl, **_overrides)
-	
-	def drop_cookies_exclude (self, _acl = None, **_overrides) :
-		self.set_enabled ("$http_drop_cookies_excluded_variable", _acl, **_overrides)
+	def debug_exclude (self, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		_acl_unset = self._acl.variable_exists ("$http_debug_excluded_variable") .negate () if _if_unset is True else None
+		self.set_variable_bool ("$http_debug_excluded_variable", _bool, (_acl, _acl_unset), **_overrides)
 	
 	
-	def force_cors_enable (self, _acl = None, **_overrides) :
-		self.set_enabled ("$http_force_cors_enabled_variable", _acl, **_overrides)
+	def harden_enable (self, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		_acl_unset = self._acl.variable_exists ("$http_harden_enabled_variable") .negate () if _if_unset is True else None
+		self.set_variable_bool ("$http_harden_enabled_variable", _bool, (_acl, _acl_unset), **_overrides)
 	
-	def force_cors_exclude (self, _acl = None, **_overrides) :
-		self.set_enabled ("$http_force_cors_excluded_variable", _acl, **_overrides)
+	def harden_exclude (self, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		_acl_unset = self._acl.variable_exists ("$http_harden_excluded_variable") .negate () if _if_unset is True else None
+		self.set_variable_bool ("$http_harden_excluded_variable", _bool, (_acl, _acl_unset), **_overrides)
+	
+	def harden_ranges_allow (self, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		_acl_unset = self._acl.variable_exists ("$http_ranges_allowed_variable") .negate () if _if_unset is True else None
+		self.set_variable_bool ("$http_ranges_allowed_variable", _bool, (_acl, _acl_unset), **_overrides)
+	
+	
+	def drop_caching_enable (self, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		_acl_unset = self._acl.variable_exists ("$http_drop_caching_enabled_variable") .negate () if _if_unset is True else None
+		self.set_variable_bool ("$http_drop_caching_enabled_variable", _bool, (_acl, _acl_unset), **_overrides)
+	
+	def drop_caching_exclude (self, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		_acl_unset = self._acl.variable_exists ("$http_drop_caching_excluded_variable") .negate () if _if_unset is True else None
+		self.set_variable_bool ("$http_drop_caching_excluded_variable", _bool, (_acl, _acl_unset), **_overrides)
+	
+	
+	def force_caching_enable (self, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		_acl_unset = self._acl.variable_exists ("$http_force_caching_enabled_variable") .negate () if _if_unset is True else None
+		self.set_variable_bool ("$http_force_caching_enabled_variable", _bool, (_acl, _acl_unset), **_overrides)
+	
+	def force_caching_exclude (self, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		_acl_unset = self._acl.variable_exists ("$http_force_caching_excluded_variable") .negate () if _if_unset is True else None
+		self.set_variable_bool ("$http_force_caching_excluded_variable", _bool, (_acl, _acl_unset), **_overrides)
+	
+	
+	def drop_cookies_enable (self, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		_acl_unset = self._acl.variable_exists ("$http_drop_cookies_enabled_variable") .negate () if _if_unset is True else None
+		self.set_variable_bool ("$http_drop_cookies_enabled_variable", _bool, (_acl, _acl_unset), **_overrides)
+	
+	def drop_cookies_exclude (self, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		_acl_unset = self._acl.variable_exists ("$http_drop_cookies_excluded_variable") .negate () if _if_unset is True else None
+		self.set_variable_bool ("$http_drop_cookies_excluded_variable", _bool, (_acl, _acl_unset), **_overrides)
+	
+	
+	def force_cors_enable (self, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		_acl_unset = self._acl.variable_exists ("$http_force_cors_enabled_variable") .negate () if _if_unset is True else None
+		self.set_variable_bool ("$http_force_cors_enabled_variable", _bool, (_acl, _acl_unset), **_overrides)
+	
+	def force_cors_exclude (self, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		_acl_unset = self._acl.variable_exists ("$http_force_cors_excluded_variable") .negate () if _if_unset is True else None
+		self.set_variable_bool ("$http_force_cors_excluded_variable", _bool, (_acl, _acl_unset), **_overrides)
 	
 	
 	def set_mark (self, _mark, _acl = None, **_overrides) :
@@ -359,9 +382,10 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
 	
 	
-	def set_enabled_for_domain (self, _variable, _domain, _acl = None, **_overrides) :
+	def set_enabled_for_domain (self, _variable, _domain, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		_acl_unset = self._acl.variable_exists (_variable) .negate () if _if_unset is True else None
 		_acl_host = self._acl.host (_domain)
-		self.set_enabled (_variable, (_acl, _acl_host), **_overrides)
+		self.set_variable_bool (_variable, _bool, (_acl, _acl_host, _acl_unset), **_overrides)
 	
 	
 	def redirect_domain_via_tls (self, _domain, _only_root = False, _code = 307, _acl = None, **_overrides) :
@@ -588,11 +612,11 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		self.set_header ("$http_tracking_session_header", statement_format ("%%[%s]", self._samples.request_cookie ("$http_tracking_session_cookie")), False, (_acl, _acl_tracked_via_header.negate (), _acl_tracked_via_cookie, _acl_enabled, _acl_included), **_overrides)
 		self.set_variable ("$http_tracking_session_variable", self._samples.request_header ("$http_tracking_session_header"), (_acl, _acl_enabled, _acl_included), **_overrides)
 	
-	def track_enable_for_domain (self, _domain, _acl = None, **_overrides) :
-		self.set_enabled_for_domain ("$http_tracking_enabled_variable", _domain, _acl, **_overrides)
+	def track_enable_for_domain (self, _domain, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		self.set_enabled_for_domain ("$http_tracking_enabled_variable", _domain, _acl, _if_unset, _bool, **_overrides)
 	
-	def track_exclude_for_domain (self, _domain, _acl = None, **_overrides) :
-		self.set_enabled_for_domain ("$http_tracking_excluded_variable", _domain, _acl, **_overrides)
+	def track_exclude_for_domain (self, _domain, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		self.set_enabled_for_domain ("$http_tracking_excluded_variable", _domain, _acl, _if_unset, _bool, **_overrides)
 	
 	
 	def harden_http (self, _acl = None, _acl_deny = None, _force = False, _mark_denied = None, **_overrides) :
@@ -630,11 +654,11 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		self.harden_authorization (_acl, _force, **_overrides)
 		self.harden_ranges (_acl, _force, **_overrides)
 	
-	def harden_enable_for_domain (self, _domain, _acl = None, **_overrides) :
-		self.set_enabled_for_domain ("$http_harden_enabled_variable", _domain, _acl, **_overrides)
+	def harden_enable_for_domain (self, _domain, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		self.set_enabled_for_domain ("$http_harden_enabled_variable", _domain, _acl, _if_unset, _bool, **_overrides)
 	
-	def harden_exclude_for_domain (self, _domain, _acl = None, **_overrides) :
-		self.set_enabled_for_domain ("$http_harden_excluded_variable", _domain, _acl, **_overrides)
+	def harden_exclude_for_domain (self, _domain, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		self.set_enabled_for_domain ("$http_harden_excluded_variable", _domain, _acl, _if_unset, _bool, **_overrides)
 	
 	
 	def drop_caching (self, _acl = None, _force = False, _keep_etag_acl = None, **_overrides) :
@@ -649,18 +673,18 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		self.delete_header ("If-Unmodified-Since", (_acl, _acl_enabled, _acl_included), **_overrides)
 		self.delete_header ("Pragma", (_acl, _acl_enabled, _acl_included), **_overrides)
 	
-	def drop_caching_enable_for_domain (self, _domain, _acl = None, **_overrides) :
-		self.set_enabled_for_domain ("$http_drop_caching_enabled_variable", _domain, _acl, **_overrides)
+	def drop_caching_enable_for_domain (self, _domain, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		self.set_enabled_for_domain ("$http_drop_caching_enabled_variable", _domain, _acl, _if_unset, _bool, **_overrides)
 	
-	def drop_caching_exclude_for_domain (self, _domain, _acl = None, **_overrides) :
-		self.set_enabled_for_domain ("$http_drop_caching_excluded_variable", _domain, _acl, **_overrides)
+	def drop_caching_exclude_for_domain (self, _domain, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		self.set_enabled_for_domain ("$http_drop_caching_excluded_variable", _domain, _acl, _if_unset, _bool, **_overrides)
 	
 	
-	def force_caching_enable_for_domain (self, _domain, _acl = None, **_overrides) :
-		self.set_enabled_for_domain ("$http_force_caching_enabled_variable", _domain, _acl, **_overrides)
+	def force_caching_enable_for_domain (self, _domain, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		self.set_enabled_for_domain ("$http_force_caching_enabled_variable", _domain, _acl, _if_unset, _bool, **_overrides)
 	
-	def force_caching_exclude_for_domain (self, _domain, _acl = None, **_overrides) :
-		self.set_enabled_for_domain ("$http_force_caching_excluded_variable", _domain, _acl, **_overrides)
+	def force_caching_exclude_for_domain (self, _domain, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		self.set_enabled_for_domain ("$http_force_caching_excluded_variable", _domain, _acl, _if_unset, _bool, **_overrides)
 	
 	
 	def drop_cookies (self, _acl = None, _force = False, **_overrides) :
@@ -668,11 +692,11 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		_acl_included = self._acl.variable_bool ("$http_drop_cookies_excluded_variable", True) .negate () if not _force else None
 		self.delete_header ("Cookie", (_acl, _acl_enabled, _acl_included), **_overrides)
 	
-	def drop_cookies_enable_for_domain (self, _domain, _acl = None, **_overrides) :
-		self.set_enabled_for_domain ("$http_drop_cookies_enabled_variable", _domain, _acl)
+	def drop_cookies_enable_for_domain (self, _domain, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		self.set_enabled_for_domain ("$http_drop_cookies_enabled_variable", _domain, _acl, _if_unset, _bool, **_overrides)
 	
-	def drop_cookies_exclude_for_domain (self, _domain, _acl = None, **_overrides) :
-		self.set_enabled_for_domain ("$http_drop_cookies_excluded_variable", _domain, _acl)
+	def drop_cookies_exclude_for_domain (self, _domain, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		self.set_enabled_for_domain ("$http_drop_cookies_excluded_variable", _domain, _acl, _if_unset, _bool, **_overrides)
 	
 	
 	def force_cors (self, _acl = None, _force = False, **_overrides) :
@@ -684,8 +708,8 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		_acl_included = self._acl.variable_bool ("$http_force_cors_excluded_variable", True) .negate () if not _force else None
 		_acl_origin_present = self._acl.request_header_exists ("Origin")
 		_acl_options_present = self._acl.request_method ("OPTIONS")
-		self.set_enabled ("$http_force_cors_origin_present_variable", (_acl, _acl_enabled, _acl_included, _acl_origin_present), **_overrides)
-		self.set_enabled ("$http_force_cors_options_present_variable", (_acl, _acl_enabled, _acl_included, _acl_options_present), **_overrides)
+		self.set_variable_bool ("$http_force_cors_origin_present_variable", True, (_acl, _acl_enabled, _acl_included, _acl_origin_present), **_overrides)
+		self.set_variable_bool ("$http_force_cors_options_present_variable", True, (_acl, _acl_enabled, _acl_included, _acl_options_present), **_overrides)
 		self.set_variable ("$http_force_cors_origin_variable", self._samples.request_header ("Origin"), (_acl, _acl_enabled, _acl_included, _acl_origin_present), **_overrides)
 	
 	def force_cors_unset (self, _acl = None, _force = False, **_overrides) :
@@ -699,7 +723,7 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		_acl_enabled = self._acl.variable_bool ("$http_force_cors_enabled_variable", True) if not _force else None
 		_acl_included = self._acl.variable_bool ("$http_force_cors_excluded_variable", True) .negate () if not _force else None
 		_acl_origin = self._acl.variable_bool ("$http_force_cors_origin_present_variable", True) if not _force else None
-		self.set_enabled ("$http_force_cors_allowed_variable", (_acl, _acl_enabled, _acl_included, _acl_origin), **_overrides)
+		self.set_variable_bool ("$http_force_cors_allowed_variable", True, (_acl, _acl_enabled, _acl_included, _acl_origin), **_overrides)
 	
 	def force_cors_allow_origin (self, _origin, _acl = None, _force = False, **_overrides) :
 		_acl_origin = self._acl.variable_equals ("$http_force_cors_origin_variable", _origin)
@@ -715,11 +739,11 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		self.set_path (_path, (_acl, _acl_enabled, _acl_included, _acl_origin, _acl_allowed, _acl_options), **_overrides)
 		self.deny (403, (_acl, _acl_enabled, _acl_included, _acl_origin, _acl_allowed.negate (), _acl_options), **_overrides)
 	
-	def force_cors_enable_for_domain (self, _domain, _acl = None, **_overrides) :
-		self.set_enabled_for_domain ("$http_force_cors_enabled_variable", _domain, _acl)
+	def force_cors_enable_for_domain (self, _domain, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		self.set_enabled_for_domain ("$http_force_cors_enabled_variable", _domain, _acl, _if_unset, _bool, **_overrides)
 	
-	def force_cors_exclude_for_domain (self, _domain, _acl = None, **_overrides) :
-		self.set_enabled_for_domain ("$http_force_cors_excluded_variable", _domain, _acl)
+	def force_cors_exclude_for_domain (self, _domain, _acl = None, _if_unset = None, _bool = True, **_overrides) :
+		self.set_enabled_for_domain ("$http_force_cors_excluded_variable", _domain, _acl, _if_unset, _bool, **_overrides)
 	
 	
 	def capture (self, _sample, _acl = None, **_overrides) :
@@ -849,7 +873,7 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		_variable = _variable if _variable is not None else "txn.authenticated_%s" % (_credentials.identifier,)
 		_acl_authenticated = self._acl.authenticated (_credentials)
 		_acl_variable = self._acl.variable_bool (_variable)
-		self.set_enabled (_variable, (_acl, _acl_authenticated), **_overrides)
+		self.set_variable_bool (_variable, True, (_acl, _acl_authenticated), **_overrides)
 		if _cleanup :
 			self.delete_header ("Authorized", (_acl, _acl_authenticated, _acl_variable), **_overrides)
 		return _acl_variable
