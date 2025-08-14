@@ -123,6 +123,28 @@ class HaHttpAclBuilder (HaBuilder) :
 	def request_method (self, _method, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.request_method (), "str", ("-i",), "eq", (_method,))
 	
+	def request_method_head (self, _identifier = None) :
+		return self.request_method ("head", _identifier)
+	
+	def request_method_get (self, _identifier = None) :
+		return self.request_method ("get", _identifier)
+	
+	def request_method_put (self, _identifier = None) :
+		return self.request_method ("put", _identifier)
+	
+	def request_method_post (self, _identifier = None) :
+		return self.request_method ("post", _identifier)
+	
+	def request_method_patch (self, _identifier = None) :
+		return self.request_method ("patch", _identifier)
+	
+	def request_method_delete (self, _identifier = None) :
+		return self.request_method ("delete", _identifier)
+	
+	def request_method_options (self, _identifier = None) :
+		return self.request_method ("options", _identifier)
+	
+	
 	def response_status (self, _code, _identifier = None) :
 		return self._context.acl_0 (_identifier, self._samples.response_status (), "int", None, "eq", (_code,))
 	
