@@ -632,6 +632,8 @@ parameters = {
 		"server_send_proxy_enabled" : False,
 		"server_send_proxy_version" : "v1",
 		
+		"server_weight" : None,
+		
 		"server_tcp_min_connections_active_count" : parameters_get ("server_min_connections_active_count"),
 		"server_tcp_max_connections_active_count" : parameters_get ("server_max_connections_active_count"),
 		"server_tcp_max_connections_queue_count" : parameters_get ("server_max_connections_queue_count"),
@@ -767,6 +769,7 @@ parameters = {
 		"server_resolvers_options" : parameters_get ("defaults_server_resolvers_options"),
 		
 		"server_options" : (
+				parameters_choose_if_non_null (parameters_get ("server_weight"), ("weight", parameters_get ("server_weight"))),
 				parameters_choose_match (
 						parameters_get ("backend_mode"),
 						("tcp", parameters_get ("server_tcp_options")),
