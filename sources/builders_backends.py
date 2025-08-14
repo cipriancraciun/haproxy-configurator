@@ -19,7 +19,7 @@ class HaHttpBackendBuilder (HaBuilder) :
 	def basic (self, _identifier = None, _endpoint = None, _frontend = None, _acl = None, _route_order = None, **_parameters) :
 		
 		_identifier = _identifier if _identifier is not None else "http-backend"
-		_endpoint = _endpoint if _endpoint is not None else "ipv4@127.0.0.1:8080"
+		_endpoint = _endpoint if _endpoint is not None and _endpoint is not False else ("ipv4@127.0.0.1:8080" if _endpoint is not False else None)
 		
 		_backend = self._context.http_backend_create (_identifier, **_parameters)
 		if _endpoint is not None :
