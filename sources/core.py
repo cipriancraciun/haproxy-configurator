@@ -737,9 +737,9 @@ class HaBackend (HaWorker) :
 		self._server_statements = HaStatementGroup (self._parameters, "Servers", order = 5000 + 800)
 	
 	
-	def declare_server (self, _identifier, _endpoint, _options = "$server_options", _acl = None, **_overrides) :
+	def declare_server (self, _identifier, _endpoint, _options = "$server_options", _acl = None, _options_overrides = {}, **_overrides) :
 		_identifier = enforce_identifier (self._parameters, _identifier)
-		_options = statement_overrides (_options, **_overrides)
+		_options = statement_overrides (_options, **_options_overrides)
 		_condition = self._condition_if (_acl)
 		if _condition is not None :
 			self._server_statements.declare (("use-server", statement_quote ("\'", _identifier), _condition), **_overrides)
