@@ -93,6 +93,12 @@ tls_ciphers_v13_normal = tls_ciphers_v13_all
 tls_ciphers_v13_backdoor = tls_ciphers_v13_all
 
 
+tls_curves = (
+		"X25519",
+	#?	"P-256",
+	)
+
+
 tls_options_paranoid = (
 		"no-tlsv12",
 		"no-tlsv11",
@@ -940,7 +946,7 @@ parameters = {
 		"tls_npn_descriptor" : parameters_choose_if (parameters_get ("tls_npn_enabled"), ("npn", parameters_join (",", parameters_get ("tls_npn_protocols")))),
 		"tls_npn_protocols" : ("h2,http/1.1", "http/1.0"),
 		"tls_sni_strict" : False,
-		"tls_curves" : parameters_join (",", ("X25519:P-256",)),
+		"tls_curves" : parameters_join (":", tls_curves),
 		"tls_verify_client" : None,
 		
 		

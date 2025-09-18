@@ -126,6 +126,7 @@ def declare_globals_tls (_configuration) :
 			("ssl-default-bind-options", "$~tls_options"),
 			("ssl-default-server-ciphers", "$\'tls_ciphers_v12_descriptor"),
 			("ssl-default-server-ciphersuites", "$\'tls_ciphers_v13_descriptor"),
+			statement_choose_if_non_null ("$tls_curves", ("ssl-default-server-curves", "$\'tls_curves")),
 			("ssl-default-server-options", "$~tls_options"),
 			("ssl-server-verify", "required"),
 			("ssl-skip-self-issued-ca"),
