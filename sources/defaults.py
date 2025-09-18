@@ -10,6 +10,11 @@ from tools import *
 
 tls_mode = "normal"
 
+tls_ciphers_v12_ultraparanoid = (
+	
+		"ECDHE-RSA-CHACHA20-POLY1305",
+	)
+
 tls_ciphers_v12_paranoid = (
 	
 		"ECDHE-RSA-CHACHA20-POLY1305",
@@ -79,6 +84,10 @@ tls_ciphers_v13_all = (
 		"TLS_AES_128_GCM_SHA256",
 )
 
+tls_ciphers_v13_ultraparanoid = (
+		"TLS_CHACHA20_POLY1305_SHA256",
+)
+
 tls_ciphers_v13_paranoid = tls_ciphers_v13_all
 tls_ciphers_v13_normal = tls_ciphers_v13_all
 tls_ciphers_v13_backdoor = tls_ciphers_v13_all
@@ -102,6 +111,17 @@ tls_options_normal = (
 	)
 
 tls_options_backdoor = tls_options_normal
+
+tls_options_ultraparanoid = tls_options_paranoid
+
+
+# FIXME:  use these!
+tls_bind_options_paranoid = (
+	)
+
+tls_server_options_paranoid = (
+		"no-ssl-reuse",
+	)
 
 
 
@@ -508,6 +528,7 @@ parameters = {
 				(None, None),
 				("normal", parameters_get ("tls_ciphers_v12_normal")),
 				("paranoid", parameters_get ("tls_ciphers_v12_paranoid")),
+				("ultraparanoid", parameters_get ("tls_ciphers_v12_ultraparanoid")),
 				("backdoor", parameters_get ("tls_ciphers_v12_backdoor")),
 			),
 		"frontend_tls_ciphers_v13" : parameters_choose_match (
@@ -515,6 +536,7 @@ parameters = {
 				(None, None),
 				("normal", parameters_get ("tls_ciphers_v13_normal")),
 				("paranoid", parameters_get ("tls_ciphers_v13_paranoid")),
+				("ultraparanoid", parameters_get ("tls_ciphers_v13_ultraparanoid")),
 				("backdoor", parameters_get ("tls_ciphers_v13_backdoor")),
 			),
 		"frontend_tls_ciphers_v12_descriptor" : parameters_choose_if_non_null ("frontend_tls_ciphers_v12", parameters_join (":", parameters_get ("frontend_tls_ciphers_v12"))),
@@ -859,45 +881,42 @@ parameters = {
 				parameters_get ("tls_mode"),
 				("normal", parameters_get ("tls_ciphers_v12_normal")),
 				("paranoid", parameters_get ("tls_ciphers_v12_paranoid")),
+				("ultraparanoid", parameters_get ("tls_ciphers_v12_ultraparanoid")),
 				("backdoor", parameters_get ("tls_ciphers_v12_backdoor")),
 			),
 		"tls_ciphers_v12_descriptor" : parameters_join (":", parameters_get ("tls_ciphers_v12")),
 		"tls_ciphers_v12_normal" : tls_ciphers_v12_normal,
 		"tls_ciphers_v12_paranoid" : tls_ciphers_v12_paranoid,
+		"tls_ciphers_v12_ultraparanoid" : tls_ciphers_v12_ultraparanoid,
 		"tls_ciphers_v12_backdoor" : tls_ciphers_v12_backdoor,
 		"tls_ciphers_v13" : parameters_choose_match (
 				parameters_get ("tls_mode"),
 				("normal", parameters_get ("tls_ciphers_v13_normal")),
 				("paranoid", parameters_get ("tls_ciphers_v13_paranoid")),
+				("ultraparanoid", parameters_get ("tls_ciphers_v13_ultraparanoid")),
 				("backdoor", parameters_get ("tls_ciphers_v13_backdoor")),
 			),
 		"tls_ciphers_v13_descriptor" : parameters_join (":", parameters_get ("tls_ciphers_v13")),
 		"tls_ciphers_v13_normal" : tls_ciphers_v13_normal,
 		"tls_ciphers_v13_paranoid" : tls_ciphers_v13_paranoid,
+		"tls_ciphers_v13_ultraparanoid" : tls_ciphers_v13_ultraparanoid,
 		"tls_ciphers_v13_backdoor" : tls_ciphers_v13_backdoor,
-		"tls_options" : parameters_choose_match (
-				parameters_get ("tls_mode"),
-				("normal", (
-						parameters_get ("tls_options_normal"),
-						parameters_get ("tls_pem_descriptor"),
-						parameters_get ("tls_alpn_descriptor"),
-						parameters_get ("tls_npn_descriptor"),
-						parameters_get ("tls_options_extra"))),
-				("paranoid", (
-						parameters_get ("tls_options_paranoid"),
-						parameters_get ("tls_pem_descriptor"),
-						parameters_get ("tls_alpn_descriptor"),
-						parameters_get ("tls_npn_descriptor"),
-						parameters_get ("tls_options_extra"))),
-				("backdoor", (
-						parameters_get ("tls_options_backdoor"),
-						parameters_get ("tls_pem_descriptor"),
-						parameters_get ("tls_alpn_descriptor"),
-						parameters_get ("tls_npn_descriptor"),
-						parameters_get ("tls_options_extra"))),
+		"tls_options" : (
+				parameters_choose_match (
+					parameters_get ("tls_mode"),
+					("normal", parameters_get ("tls_options_normal")),
+					("paranoid", parameters_get ("tls_options_paranoid")),
+					("ultraparanoid", parameters_get ("tls_options_ultraparanoid")),
+					("backdoor", parameters_get ("tls_options_backdoor")),
+				),
+				parameters_get ("tls_pem_descriptor"),
+				parameters_get ("tls_alpn_descriptor"),
+				parameters_get ("tls_npn_descriptor"),
+				parameters_get ("tls_options_extra"),
 			),
 		"tls_options_normal" : tls_options_normal,
 		"tls_options_paranoid" : tls_options_paranoid,
+		"tls_options_ultraparanoid" : tls_options_ultraparanoid,
 		"tls_options_backdoor" : tls_options_backdoor,
 		"tls_options_extra" : (
 				parameters_choose_if (parameters_get ("tls_sni_strict"), "strict-sni"),
