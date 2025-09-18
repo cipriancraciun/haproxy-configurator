@@ -46,8 +46,8 @@ tls_ciphers_v12_normal = (
 		"ECDHE-RSA-AES128-SHA",
 		"DHE-RSA-AES128-SHA",
 		
-		"ECDHE-RSA-DES-CBC3-SHA",
-		"EDH-RSA-DES-CBC3-SHA",
+	#-	"ECDHE-RSA-DES-CBC3-SHA",
+	#-	"EDH-RSA-DES-CBC3-SHA",
 		
 		"AES256-GCM-SHA384",
 		"AES256-SHA256",
@@ -58,22 +58,22 @@ tls_ciphers_v12_normal = (
 		"AES256-SHA",
 		"AES128-SHA",
 		
-		"DES-CBC3-SHA",
+	#-	"DES-CBC3-SHA",
 		
 	)
 
 tls_ciphers_v12_backdoor = (
 		
-		# "AES256-GCM-SHA384",
+	#-	"AES256-GCM-SHA384",
 		"AES256-SHA256",
 		
-		# "AES128-GCM-SHA256",
+	#-	"AES128-GCM-SHA256",
 		"AES128-SHA256",
 		
 		"AES256-SHA",
 		"AES128-SHA",
 		
-		# "DES-CBC3-SHA",
+	#-	"DES-CBC3-SHA",
 		
 )
 
