@@ -547,32 +547,19 @@ parameters = {
 			),
 		"frontend_tls_ciphers_v12_descriptor" : parameters_choose_if_non_null ("frontend_tls_ciphers_v12", parameters_join (":", parameters_get ("frontend_tls_ciphers_v12"))),
 		"frontend_tls_ciphers_v13_descriptor" : parameters_choose_if_non_null ("frontend_tls_ciphers_v13", parameters_join (":", parameters_get ("frontend_tls_ciphers_v13"))),
-		"frontend_tls_options" : parameters_choose_match (
+		"frontend_tls_options" : parameters_choose_if_non_null (
 				parameters_get ("frontend_tls_mode"),
-				(None, (
-					#	parameters_get ("tls_options"),
-						parameters_get ("tls_pem_descriptor"),
-						parameters_get ("tls_alpn_descriptor"),
-						parameters_get ("tls_npn_descriptor"),
-						parameters_get ("tls_options_extra"))),
-				("normal", (
-					#	parameters_get ("tls_options_normal"),
-						parameters_get ("tls_pem_descriptor"),
-						parameters_get ("tls_alpn_descriptor"),
-						parameters_get ("tls_npn_descriptor"),
-						parameters_get ("tls_options_extra"))),
-				("paranoid", (
-					#	parameters_get ("tls_options_paranoid"),
-						parameters_get ("tls_pem_descriptor"),
-						parameters_get ("tls_alpn_descriptor"),
-						parameters_get ("tls_npn_descriptor"),
-						parameters_get ("tls_options_extra"))),
-				("backdoor", (
-					#	parameters_get ("tls_options_backdoor"),
-						parameters_get ("tls_pem_descriptor"),
-						parameters_get ("tls_alpn_descriptor"),
-						parameters_get ("tls_npn_descriptor"),
-						parameters_get ("tls_options_extra"))),
+				(
+					parameters_choose_match (
+						parameters_get ("frontend_tls_mode"),
+						("normal", parameters_get ("tls_options_normal")),
+						("paranoid", parameters_get ("tls_options_paranoid")),
+						("ultraparanoid", parameters_get ("tls_options_ultraparanoid")),
+						("backdoor", parameters_get ("tls_options_backdoor")),
+					),
+					parameters_get ("tls_options_common"),
+				),
+				parameters_get ("tls_options"),
 			),
 		
 		"frontend_monitor_enabled" : True,
@@ -915,6 +902,9 @@ parameters = {
 					("ultraparanoid", parameters_get ("tls_options_ultraparanoid")),
 					("backdoor", parameters_get ("tls_options_backdoor")),
 				),
+				parameters_get ("tls_options_common"),
+			),
+		"tls_options_common" : (
 				parameters_get ("tls_pem_descriptor"),
 				parameters_get ("tls_alpn_descriptor"),
 				parameters_get ("tls_npn_descriptor"),
