@@ -922,6 +922,34 @@ class HaHttpRequestRuleBuilder (HaHttpRuleBuilder) :
 		self._declare_http_rule_0 (("normalize-uri", "percent-decode-unreserved", "strict"), _rule_condition, **_overrides)
 		self._declare_http_rule_0 (("normalize-uri", "percent-to-uppercase", "strict"), _rule_condition, **_overrides)
 		self._declare_http_rule_0 (("normalize-uri", "query-sort-by-name"), _rule_condition, **_overrides)
+	
+	
+	def intercept_wellknown_security_txt (self, _lines, _path = None, **_overrides) :
+		_body = "\n".join (_lines) + "\n"
+		if _path is None :
+			_path = "/.well-known/security.txt"
+		_headers = [
+				("Cache-Control", "public, immutable, max-age=3600"),
+			]
+		self.respond_with_200_text (_body, _headers = _headers, _acl = self._acl.path (_path), **_overrides)
+	
+	def intercept_wellknown_robots_txt (self, _lines, _path = None, **_overrides) :
+		_body = "\n".join (_lines) + "\n"
+		if _path is None :
+			_path = "/robots.txt"
+		_headers = [
+				("Cache-Control", "public, immutable, max-age=3600"),
+			]
+		self.respond_with_200_text (_body, _headers = _headers, _acl = self._acl.path (_path), **_overrides)
+	
+	def intercept_wellknown_sitemap_txt (self, _lines, _path = None, **_overrides) :
+		_body = "\n".join (_lines) + "\n"
+		if _path is None :
+			_path = "/sitemap.txt"
+		_headers = [
+				("Cache-Control", "public, immutable, max-age=3600"),
+			]
+		self.respond_with_200_text (_body, _headers = _headers, _acl = self._acl.path (_path), **_overrides)
 
 
 
