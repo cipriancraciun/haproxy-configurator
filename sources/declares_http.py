@@ -204,6 +204,8 @@ def declare_http_backend_connections (_configuration) :
 					("max-keep-alive-queue", "$+backend_http_keep_alive_pool")),
 			statement_choose_if (statement_and ("$?backend_forward_enabled", "$?backend_forward_configure"),
 					("option", "forwardfor", "header", "$logging_http_header_forwarded_for", "if-none")),
+			statement_choose_if ("$?backend_server_persist",
+					("option", "persist")),
 			enabled_if = "$?backend_connections_configure",
 	)
 

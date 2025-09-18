@@ -628,6 +628,8 @@ parameters = {
 		"backend_server_timeout_request" : parameters_math ("*", parameters_get ("backend_server_timeout_activity_client"), 2, True),
 		"backend_server_timeout_keep_alive" : None,
 		
+		"backend_server_persist" : False,
+		
 		"backend_http_keep_alive_mode" : "server-close",
 		"backend_http_keep_alive_reuse" : "never",
 		"backend_http_keep_alive_timeout" : None,
