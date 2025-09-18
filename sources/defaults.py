@@ -488,10 +488,10 @@ parameters = {
 						("mss", parameters_get ("frontend_bind_mss"))),
 				parameters_choose_if_non_null (
 						parameters_get ("frontend_max_connections_active_count"),
-						("maxconn", parameters_get ("frontend_max_connections_active_count"))),
+						parameters_mangle (parameters_get ("frontend_max_connections_active_count"), (lambda _value : ("maxconn", _value) if _value > 0 else None))),
 				parameters_choose_if_non_null (
 						parameters_get ("frontend_max_connections_backlog_count"),
-						("backlog", parameters_get ("frontend_max_connections_backlog_count"))),
+						parameters_mangle (parameters_get ("frontend_max_connections_backlog_count"), (lambda _value : ("backlog", _value) if _value > 0 else None))),
 				parameters_choose_if (
 						parameters_get ("frontend_accept_proxy_enabled"),
 						"accept-proxy"),
@@ -666,13 +666,13 @@ parameters = {
 						("observe", "layer4")),
 				parameters_choose_if_non_null (
 						parameters_get ("server_tcp_min_connections_active_count"),
-						("minconn", parameters_get ("server_tcp_min_connections_active_count"))),
+						parameters_mangle (parameters_get ("server_tcp_min_connections_active_count"), (lambda _value : ("minconn", _value) if _value > 0 else None))),
 				parameters_choose_if_non_null (
 						parameters_get ("server_tcp_max_connections_active_count"),
-						("maxconn", parameters_get ("server_tcp_max_connections_active_count"))),
+						parameters_mangle (parameters_get ("server_tcp_max_connections_active_count"), (lambda _value : ("maxconn", _value) if _value > 0 else None))),
 				parameters_choose_if_non_null (
 						parameters_get ("server_tcp_max_connections_queue_count"),
-						("maxqueue", parameters_get ("server_tcp_max_connections_queue_count"))),
+						parameters_mangle (parameters_get ("server_tcp_max_connections_queue_count"), (lambda _value : ("maxqueue", _value) if _value > 0 else None))),
 				parameters_choose_if (
 						parameters_get ("server_tcp_send_proxy_enabled"),
 						(
@@ -703,13 +703,13 @@ parameters = {
 						("observe", "layer7")),
 				parameters_choose_if_non_null (
 						parameters_get ("server_http_min_connections_active_count"),
-						("minconn", parameters_get ("server_http_min_connections_active_count"))),
+						parameters_mangle (parameters_get ("server_http_min_connections_active_count"), (lambda _value : ("minconn", _value) if _value > 0 else None))),
 				parameters_choose_if_non_null (
 						parameters_get ("server_http_max_connections_active_count"),
-						("maxconn", parameters_get ("server_http_max_connections_active_count"))),
+						parameters_mangle (parameters_get ("server_http_max_connections_active_count"), (lambda _value : ("maxconn", _value) if _value > 0 else None))),
 				parameters_choose_if_non_null (
 						parameters_get ("server_http_max_connections_queue_count"),
-						("maxqueue", parameters_get ("server_http_max_connections_queue_count"))),
+						parameters_mangle (parameters_get ("server_http_max_connections_queue_count"), (lambda _value : ("maxqueue", _value) if _value > 0 else None))),
 				parameters_choose_if_non_null (
 						parameters_get ("server_http_protocol"),
 						("proto", parameters_get ("server_http_protocol"))),
