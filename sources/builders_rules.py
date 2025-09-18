@@ -341,6 +341,22 @@ class HaHttpRuleBuilder (HaBuilder) :
 		_rule_condition = self._context._condition_if (_acl)
 		_rule = ("set-priority-class", "int(%d)" % _priority)
 		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
+	
+	
+	def respond_with (self, _status, _content_type, _body, _headers = None, _acl = None, **_overrides) :
+		_rule_condition = self._context._condition_if (_acl)
+		_rule = ("return",
+				"status", int (_status),
+				"content-type", statement_quote ("\'", _content_type),
+				"string", statement_quote ("\'", _body),
+			) + (tuple ([("hdr", statement_quote ("\'", _header_name), statement_quote ("\'", _header_value)) for (_header_name, _header_value) in _headers]) if _headers is not None else ())
+		self._declare_http_rule_0 (_rule, _rule_condition, **_overrides)
+	
+	def respond_with_200_html (self, _body, _headers = None, _acl = None, **_overrides) :
+		self.respond_with (200, "text/html; charset=UTF-8", _body, _headers, _acl = _acl, **_overrides)
+	
+	def respond_with_200_text (self, _body, _headers = None, _acl = None, **_overrides) :
+		self.respond_with (200, "text/plain; charset=UTF-8", _body, _headers, _acl = _acl, **_overrides)
 
 
 
