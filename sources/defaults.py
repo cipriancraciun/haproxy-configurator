@@ -100,12 +100,12 @@ tls_curves = (
 
 
 tls_options_paranoid = (
+		"force-tlsv13",
 		"no-tlsv12",
 		"no-tlsv11",
 		"no-tlsv10",
 		"no-sslv3",
 		"no-tls-tickets",
-		"no-ssl-reuse",
 		"strict-sni",
 	)
 
