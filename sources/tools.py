@@ -533,7 +533,12 @@ def parameters_get (_parameter) :
 def parameters_get_with_overrides (_parameter, **_overrides) :
 	return lambda _parameters : _parameters._fork (**_overrides) ._get (_parameter)
 
-def parameters_math (_operator, _argument_1, _argument_2, _null_if_any_null = False) :
+def parameters_math (_operator, _argument_1, _argument_2, _null_if_any_null = None) :
+	if _null_if_any_null is None :
+		if _operator == "null-if" :
+			_null_if_any_null = True
+		else :
+			_null_if_any_null = False
 	def _function (_parameters) :
 		_argument_1_actual = _parameters._expand (_argument_1)
 		_argument_2_actual = _parameters._expand (_argument_2)
@@ -560,6 +565,11 @@ def parameters_math (_operator, _argument_1, _argument_2, _null_if_any_null = Fa
 			return min (_argument_1_actual, _argument_2_actual)
 		elif _operator == "max" :
 			return max (_argument_1_actual, _argument_2_actual)
+		elif _operator == "null-if" :
+			if _argument_2_actual == _argument_1_actual :
+				return None
+			else :
+				return _argument_2_actual
 		else :
 			raise_error ("c988cf62", _operator)
 	return _function
