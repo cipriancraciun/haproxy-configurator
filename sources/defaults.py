@@ -635,6 +635,8 @@ parameters = {
 		"backend_http_keep_alive_timeout" : None,
 		"backend_http_keep_alive_pool" : None,
 		
+		"backend_http_abort_on_close" : True,
+		
 		"backend_balance" : None,
 		
 		

@@ -206,6 +206,8 @@ def declare_http_backend_connections (_configuration) :
 					("option", "forwardfor", "header", "$logging_http_header_forwarded_for", "if-none")),
 			statement_choose_if ("$?backend_server_persist",
 					("option", "persist")),
+			statement_choose_if ("$?backend_http_abort_on_close",
+					("option", "abortonclose")),
 			enabled_if = "$?backend_connections_configure",
 	)
 
